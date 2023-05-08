@@ -1,8 +1,10 @@
 # Ignore everything in repository root 
 /*
+.vscode
 
 # Files to not ignore
 !/.gitignore
 
 # Folder to not ignore
 !/SmartFxJournal/
+

@@ -1,0 +1,30 @@
+label {
+    border-bottom: 1px solid lightgrey;
+    text-align: start;
+}
+div.inputRow {
+    display: flex;
+    flex-direction: row;
+    margin-bottom: 5px;
+    margin-top: 5px;
+}
+div.inputRow input[type=checkbox] {
+    width: auto;
+    margin-left: 5px;
+}
+div.inputRow input[type=radio] {
+    width: auto;
+    margin-left: 5px;
+}
+
+div.inputRow label {
+    width: 40%;
+}
+div.inputRow input {
+    width: 60%;
+    margin-left: 5px;
+}
+div.inputRow select {
+    width: 60%;
+    margin-left: 5px;
+}

@@ -1,0 +1,45 @@
+@import './button.css';
+@import './controls.css';
+
+.card {
+  border: 1px solid darkgray;
+  border-radius: 5px;
+  box-shadow: 1px 1px 4px 2px silver;
+}
+.chead {
+  color: darkgray;
+  font-weight: bold;
+  font-size: large;
+  padding: 0.5rem 1rem;
+}
+.chead.active {
+  color: dodgerblue;
+  font-weight: bold;
+  font-size: large;
+  border-bottom: 3px solid dodgerblue;
+}
+.chead.active.titleBar {
+  text-align: start;
+}
+
+.formTitle {
+  top: 0;
+  color: white;
+  font-weight: bold;  
+  background-color: dodgerblue;
+  border-top-right-radius: 5px;
+  border-top-left-radius: 5px;
+  text-align: start;
+  padding-left: 2px;
+  margin-bottom: 10px;
+  padding-bottom: 5px;
+}
+.container {
+  display: flex;
+  flex-direction: column;
+}
+.flow-row {
+  display: flex;
+  flex-direction: row;
+  justify-content: right;
+}

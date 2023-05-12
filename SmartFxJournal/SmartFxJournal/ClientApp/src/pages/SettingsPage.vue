@@ -20,7 +20,7 @@
       <header id="sectionHeader">
         <ul>
           <li :class="selectedView == 'accounts' ? 'chead active' : 'chead'" @click="selectedView = 'accounts'">Registered Accounts</li>
-          <li :class="selectedView == 'cTrader' ? 'chead active' : 'chead'" @click="selectedView = 'cTrader'">CTrader Settings</li>
+          <li :class="selectedView == 'cTrader' ? 'chead active' : 'chead'" @click="selectedView = 'cTrader'">CTrader Import</li>
         </ul>
       </header>
       <AccountsView :class="selectedView == 'accounts' ? 'shown' : 'hidden'" id="accountsView"/>

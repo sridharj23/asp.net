@@ -2,18 +2,28 @@
     import { CTraderAPI } from '@/api/CTraderApi';
 
     const api = new CTraderAPI();
-    const frame : HTMLIFrameElement = document.getElementById("loginForm") as HTMLIFrameElement;
 
     export default {
+        data() {
+            return {
+                ctClientId : "",
+                ctTraderId : ""
+            }
+        },
+        computed :{
+            validInputs() : boolean {
+                return (this.ctClientId != "" && this.ctTraderId != "");
+            }
+        },
         methods: {
-            queryOnboardingStatus(cTraderId : string) : boolean {
-                return api.hasLogin(cTraderId);
+            queryOnboardingStatus() : boolean {
+                return api.hasLogin(this.ctTraderId);
             },
 
-            initiateLogin(cTraderId : string, clientId : string) {
-                if (frame != null) {
-                    frame.src = api.getLoginTarget(cTraderId, clientId);
-                }
+            initiateLogin() {
+                let url = api.getLoginTarget(this.ctTraderId, this.ctClientId);
+                var win = window.open(url, '_blank');
+                win?.focus;
             }
         }
     }
@@ -21,23 +31,24 @@
 
 <template>
     <section class="container" id="cTraderContainer">
-        <div class="inputRow">
-            <label class="labels" for="ctrader_id">CTrader ID</label>
-            <input id="ctrader_id" class="inputControls" type="text" required autocomplete="off">
-            <input type="button" value="Import Accounts" style="width: auto;">
+        <div style="margin: 10px;">
+            <div class="inputRow">
+                <label class="labels" for="ctrader_id">CTrader ID</label>
+                <input id="ctrader_id" class="inputControls" type="text" v-model="ctTraderId" required autocomplete="off">
+            </div>
+            <div class="inputRow">
+                <label class="labels" for="client_id">Client ID</label>
+                <input id="client_id" class="inputControls" type="text" v-model="ctClientId" required autocomplete="off">
+            </div>
+            <div class="flow-row">
+                <button type="button" @click="initiateLogin" :disabled="!validInputs">Import Accounts</button>
+            </div>
         </div>
-        <iframe id="loginForm" title="Login into CTrader"/>
     </section>
 </template>
 
 <style scoped>
     #cTraderContainer {
         flex-grow: 1;
-    }
-    #loginForm {
-        flex-grow: 1;
-        width: 100%;
-        height: 95%;
-        border: 1px solid silver;
     }
 </style>

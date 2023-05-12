@@ -7,12 +7,11 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <PackageReference Include="Npgsql.EntityFrameworkCore.PostgreSQL" Version="7.0.4" />
     <PackageReference Include="System.Configuration.ConfigurationManager" Version="7.0.0" />
   </ItemGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\SmartFxJournal.common\SmartFxJournal.common.csproj" />
+    <ProjectReference Include="..\SmartFxJournal.common\SmartFxJournal.Common.csproj" />
   </ItemGroup>
 
   <ItemGroup>

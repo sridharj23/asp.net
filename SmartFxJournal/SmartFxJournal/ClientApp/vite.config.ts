@@ -16,8 +16,7 @@ export default defineConfig({
         proxy: {
             '/api/': {
                 target: 'https://localhost:5000',
-                secure: false,
-                rewrite: (path) => path.replace(/^\/api/, '')
+                secure: false
             }
         }
     },

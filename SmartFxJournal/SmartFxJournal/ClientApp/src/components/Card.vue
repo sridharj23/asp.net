@@ -3,7 +3,7 @@
     <header>
       <slot name="header"></slot>
     </header>
-    <main>
+    <main class="mainSlot">
       <slot></slot>
     </main>
     <footer>
@@ -13,8 +13,12 @@
 </template>
 
 <style>
+  main {
+    margin: 4px;
+    flex-grow: 1;
+  }
   footer {
-    border-top: 1px solid #ccc;
+    border-top: 2px solid #ccc;
     color: #666;
     font-size: 0.8em;
   }

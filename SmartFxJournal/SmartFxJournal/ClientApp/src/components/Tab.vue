@@ -3,8 +3,8 @@
 </script>
 
 <template>
-  <div class="tab" :class="(active == 'true') ? 'active' : ''" ref="tabs">
-    <slot></slot>
+  <div class="tab container" :class="(active == 'true') ? 'active' : ''" ref="tabs">
+    <slot class="tabSlot"></slot>
   </div>
 </template>
 

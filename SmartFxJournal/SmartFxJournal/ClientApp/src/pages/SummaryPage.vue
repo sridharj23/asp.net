@@ -1,5 +1,5 @@
 <script setup>
-    import AccountsView from '@/views/AccountsView.vue';
+    import SettingsPage from '@/pages/SettingsPage.vue'
     import Card from '@/components/Card.vue';
 </script>
 <template>
@@ -21,11 +21,15 @@
         <div id="MiddleContainer">
             <Card id="MiddleLeft">
                 <template #default>
-                <p>A paragraph for the main content.</p>
-                <p>And another one.</p>
+                    <p>A paragraph for the main content.</p>
+                    <p>And another one.</p>
                 </template>
             </Card>
-            <div class="card" id="MiddleRight"><AccountsView id="accountsView"/></div>
+            <Card id="MiddleRight">
+                <template #default>
+                    <SettingsPage id="SettingsView"/>
+                </template>
+            </Card>
         </div>
     </div>
 </template>
@@ -59,8 +63,9 @@
         display: flex;
         flex-direction: column;
     }
-    #accountsView {
+    #SettingsView {
         flex-grow: 1;
         height: 100%;
+        width: auto;
     }
 </style>

@@ -30,12 +30,11 @@ export default {
     methods: {
         addAccount(ac : Account) {
             this.theAccounts.push(ac);
-            if (ac.default) {
+            if (ac.isDefault) {
                 this.activeAccount = ac;
                 this.selectedAccount = ac;
                 this.selectedAcNo = ac.accountNo;
             }
-            
         },
         loadAccounts() {
             if (this.theAccounts.length > 0) {
@@ -65,7 +64,7 @@ export default {
             this.createMode = true;
             this.selectedAccount = {} as Account;
             let dt = new Date().toISOString();
-            this.selectedAccount.openingDate = dt.substring(0, dt.indexOf('T'));
+            this.selectedAccount.openedOn = dt.substring(0, dt.indexOf('T'));
         },
         saveAccount(e : Event) {
             e.preventDefault();
@@ -104,7 +103,6 @@ export default {
 <template>
     <section id="avContainer">
         <form id="accountForm" class="container" v-on:submit="saveAccount">
-            <div class="chead active titleBar">Registered Accounts</div>
             <div class="inputRow">
                 <label class="labels" for="account_no">Account Number</label>
                 <select :class="createMode ? 'hidden' : 'inputControls visible' " id="account_no" v-model="selectedAcNo" @change="setSelected()" :disabled="editMode">
@@ -123,7 +121,7 @@ export default {
             </div>
             <div class="inputRow">
                 <label class="labels" for="is_default">Is Default</label>
-                <input id="is_default" class="inputControls" type="checkbox" v-model="selectedAccount.default" :disabled="isReadOnly">
+                <input id="is_default" class="inputControls" type="checkbox" v-model="selectedAccount.isDefault" :disabled="isReadOnly">
             </div>
             <div class="inputRow">
                 <label class="labels" for="nick_name">Nick Name</label>
@@ -150,7 +148,7 @@ export default {
             </div>
             <div class="inputRow">
                 <label class="labels" for="opened_on">Opened On</label>
-                <input id="opened_on" class="inputControls" type="date" v-model="selectedAccount.openingDate" :readonly="isReadOnly" required autocomplete="off">
+                <input id="opened_on" class="inputControls" type="date" v-model="selectedAccount.openedOn" :readonly="isReadOnly" required autocomplete="off">
             </div>
             <div class="inputRow">
                 <label class="labels">Import Mode</label>
@@ -161,7 +159,7 @@ export default {
             </div>
             <div class="inputRow">
                 <label class="labels" for="last_imported_on">Last Import on</label>
-                <input id="opened_on" class="inputControls" type="date" v-model="selectedAccount.lastImportedAt" readonly autocomplete="off" style="border: 0px;">
+                <input id="opened_on" class="inputControls" type="date" v-model="selectedAccount.lastImportedOn" readonly autocomplete="off" style="border: 0px;">
             </div>
             <div id="spacer"/>
             <div id="footer" class="flow-row">

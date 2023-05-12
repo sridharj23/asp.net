@@ -1,25 +1,25 @@
-import { JournalApi } from "./ApiBase";
+import { JournalApi } from "./JournalApiBase";
 
 export interface Account {
     accountNo : string,
     accountType: string,
-    default : boolean,
+    isDefault : boolean,
     nickName : string,
     brokerName : string,
     currencyType: string,
     startBalance : number,
     currentBalance : number,
-    openingDate : string,
+    openedOn : string,
     importMode: string,
-    lastImportedAt?: string,
-    createdAt?: string,
-    modifiedAt?: string
+    lastImportedOn?: string,
+    createdOn?: string,
+    modifiedOn?: string
 }
 
 export class AccountsAPI extends JournalApi<Account> {
 
     constructor() {
-        super('accounts');
+        super('Accounts');
     }
     
     protected getKeyOf(input: Account): string {

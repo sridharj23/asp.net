@@ -6,6 +6,7 @@
   let tabHeaders = ref(null);
   let tabs = ref(null);
   let activeTabIndex = ref(0);
+  
   onMounted(() => {
     tabs.value = [ ...tabContainer.value.querySelectorAll('.tab') ];
 		for(let x of tabs.value) {

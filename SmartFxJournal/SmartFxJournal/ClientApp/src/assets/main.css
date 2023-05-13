@@ -6,20 +6,31 @@
   border-radius: 5px;
   box-shadow: 2px 2px 4px 2px silver;
 }
-.chead {
+.tabHead {
   color: darkgray;
   font-weight: bold;
   font-size: large;
   padding: 0.5rem 1rem;
+  border: 3px solid transparent;
+  border-bottom: 3px solid dodgerblue;
 }
-.chead.active {
+.tabHead.active {
+  color: dodgerblue;
+  font-weight: bold;
+  font-size: large;
+  padding: 0.5rem 1rem;
+  border: 3px solid dodgerblue;
+  border-bottom: 3px solid transparent;
+  border-radius: 5px 5px 0 0;
+}
+
+.titleBar {
   color: dodgerblue;
   font-weight: bold;
   font-size: large;
   border-bottom: 3px solid dodgerblue;
-}
-.chead.active.titleBar {
   text-align: start;
+  padding: 0.5rem 1rem;
 }
 
 .formTitle {
@@ -42,4 +53,8 @@
   display: flex;
   flex-direction: row;
   justify-content: right;
+}
+
+.spacer {
+  flex-grow: 1;
 }

@@ -2,7 +2,7 @@
 using System;
 using System.Collections.Generic;
 
-namespace Samples.Shared.Models
+namespace SmartFxJournal.CTrader.Models
 {
     public class PendingOrderModel : OrderModel, IEquatable<PendingOrderModel>
     {

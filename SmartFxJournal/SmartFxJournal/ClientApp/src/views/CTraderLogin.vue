@@ -7,23 +7,41 @@
         data() {
             return {
                 ctClientId : "",
-                ctTraderId : ""
+                ctTraderId : "",
+                ctSecret: ""
             }
         },
         computed :{
             validInputs() : boolean {
-                return (this.ctClientId != "" && this.ctTraderId != "");
+                return (this.ctClientId != "" && this.ctTraderId != "" && this.ctSecret != "");
             }
         },
         methods: {
-            queryOnboardingStatus() : boolean {
+            isTraderOnboarded() : boolean {
                 return api.hasLogin(this.ctTraderId);
             },
 
+            fetchNewAccounts() {
+                if (this.isTraderOnboarded()) {
+                    //directly request backend for any new accounts
+                } else {
+                    //initiate first time login
+                    this.initiateLogin();
+                }
+            },
+
             initiateLogin() {
-                let url = api.getLoginTarget(this.ctTraderId, this.ctClientId);
-                var win = window.open(url, '_blank');
-                win?.focus;
+                if (this.isTraderOnboarded()) {
+                    //directly retrieve any new accounts
+                } else {
+                    // initiate first time login
+                    // loop on 
+                    api.getLoginTarget(this.ctTraderId, this.ctClientId, this.ctSecret).then(url => {
+                        console.log("Login target : " + url);
+                        var win = window.open(url, '_blank');
+                        win?.focus;
+                    });
+                }
             }
         }
     }
@@ -39,6 +57,10 @@
             <div class="inputRow">
                 <label class="labels" for="client_id">Client ID</label>
                 <input id="client_id" class="inputControls" type="text" v-model="ctClientId" required autocomplete="off">
+            </div>
+            <div class="inputRow">
+                <label class="labels" for="client_sec">Client Secret</label>
+                <input id="client_sec" class="inputControls" type="password" v-model="ctSecret" required autocomplete="off">
             </div>
             <div class="flow-row">
                 <button type="button" @click="initiateLogin" :disabled="!validInputs">Import Accounts</button>

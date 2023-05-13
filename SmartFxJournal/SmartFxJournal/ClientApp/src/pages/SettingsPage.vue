@@ -19,8 +19,9 @@
     <div class="container" id="mainContainer">
       <header id="sectionHeader">
         <ul>
-          <li :class="selectedView == 'accounts' ? 'chead active' : 'chead'" @click="selectedView = 'accounts'">Registered Accounts</li>
-          <li :class="selectedView == 'cTrader' ? 'chead active' : 'chead'" @click="selectedView = 'cTrader'">CTrader Import</li>
+          <li :class="selectedView == 'accounts' ? 'tabHead active' : 'tabHead'" @click="selectedView = 'accounts'">Registered Accounts</li>
+          <li :class="selectedView == 'cTrader' ? 'tabHead active' : 'tabHead'" @click="selectedView = 'cTrader'">CTrader Import</li>
+          <li class="tabHead spacer" />
         </ul>
       </header>
       <AccountsView :class="selectedView == 'accounts' ? 'shown' : 'hidden'" id="accountsView"/>

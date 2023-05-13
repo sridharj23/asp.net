@@ -27,10 +27,11 @@
 
 <template>
   <div id="tabs-container" :class="customClass" ref="tabContainer">
-    <div id="tab-headers" class="card">
+    <div id="tab-headers">
       <ul>
         <!-- this shows all of the titles --> 
-        <li v-for="(tab, index) in tabs" :key="index" :class="activeTabIndex == index ? 'chead active' : 'chead'" @click="changeTab(index)" ref="tabHeaders">{{ tab.title }}</li>
+        <li v-for="(tab, index) in tabs" :key="index" :class="activeTabIndex == index ? 'tabHead active' : 'tabHead'" @click="changeTab(index)" ref="tabHeaders">{{ tab.title }}</li>
+        <li class="tabHead spacer"/>
       </ul>
     </div>
     <!-- this is where the tabs go, in this slot -->

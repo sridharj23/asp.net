@@ -9,15 +9,9 @@ export class CTraderAPI extends RestApi {
         return res;
     }
 
-    public getLoginTarget(cTraderId : string, clientId : string) : string {
-        let openApiUrl = "https://openapi.ctrader.com/apps/auth?client_id=" + clientId + "&redirect_uri=https://localhost:5000/api/ctrader/auth" + "" + "&scope=accounts";
-        /*
-        let url = this.resource + '/login?' + 'cTraderId=' + cTraderId + '&client_id=' + clientId;
-        let res : string = "";
-        super.single<string>(url).then(s => res = s as string);
-        console.log("Login URL : " + res);
-        */
-        return openApiUrl;
+    public async getLoginTarget(cTraderId : string, clientId : string, secret: string) : Promise<string> {
+        let url = "/ctrader/login?cTraderId=" + cTraderId + "&client_id=" + clientId + "&client_secret=" + secret;
+        return await super.single<string>(url);
     }
 }
 

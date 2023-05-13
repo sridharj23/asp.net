@@ -1,6 +1,6 @@
 ﻿using System;
 
-namespace Samples.Shared.Models
+namespace SmartFxJournal.CTrader.Models
 {
     public class ModifyPendingOrderRequest
     {

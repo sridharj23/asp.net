@@ -1,7 +1,7 @@
 ﻿using OpenAPI.Net.Helpers;
 using System;
 
-namespace Samples.Shared.Models
+namespace SmartFxJournal.CTrader.Models
 {
     public abstract class OrderModel
     {

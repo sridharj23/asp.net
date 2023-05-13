@@ -159,7 +159,7 @@ export default {
             </div>
             <div class="inputRow">
                 <label class="labels" for="last_imported_on">Last Import on</label>
-                <input id="opened_on" class="inputControls" type="date" v-model="selectedAccount.lastImportedOn" readonly autocomplete="off" style="border: 0px;">
+                <input id="last_imported_on" class="inputControls" type="date" v-model="selectedAccount.lastImportedOn" readonly autocomplete="off" style="border: 0px;">
             </div>
             <div id="spacer"/>
             <div id="footer" class="flow-row">

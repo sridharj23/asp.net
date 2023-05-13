@@ -1,66 +1,37 @@
-﻿using Microsoft.Extensions.Configuration;
-using OpenAPI.Net.Helpers;
+﻿using OpenAPI.Net.Helpers;
 using OpenAPI.Net;
-using Samples.Shared.Models;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+using SmartFxJournal.CTrader.Models;
 using Microsoft.Extensions.DependencyInjection;
-using Samples.Shared.Services;
-using System.Net;
-using System.Net.Http;
 using System.Web;
 using SmartFxJournal.JournalDB.model;
 using OpenAPI.Net.Auth;
+using System.Text.Json;
 
 namespace SmartFxJournal.CTrader.Services
 {
     public class CTraderService
-    {   
-        private readonly IServiceScopeFactory _scopeFactory;
-        private ApiCredentials? _apiCredentials;
-        private Dictionary<String, LoginContext> _loginContexts;
+    {
+        private static readonly HttpClient sharedClient = new();
 
-        private static HttpClient sharedClient = new()
-        {
-            BaseAddress = new Uri("https://openapi.ctrader.com")
-        };
+        private readonly IServiceScopeFactory _scopeFactory;
+        private readonly Dictionary<String, LoginContext> _loginContexts = new Dictionary<string, LoginContext>();
 
         public CTraderService(IServiceScopeFactory scopeFactory) {
             _scopeFactory = scopeFactory;
-
-        }
-
-        public void UseCredentials(String clientId, String clientSecret)
-        {
-            _apiCredentials = new ApiCredentials();
-            _apiCredentials.ClientId = clientId;
-            _apiCredentials.Secret = clientSecret;
-        }
-
-        public static void InitializeAsync(IServiceCollection services, IConfiguration configuration)
-        {
-            /*
-            CTraderService service = new(null);
-            var credentials = service.GetApiCredentials();
-            OpenClient liveClientFactory() => new(ApiInfo.LiveHost, ApiInfo.Port, TimeSpan.FromSeconds(10));
-            OpenClient demoClientFactory() => new(ApiInfo.DemoHost, ApiInfo.Port, TimeSpan.FromSeconds(10));
-
-            services.AddSingleton(credentials);
-
-            var apiService = new OpenApiService(liveClientFactory, demoClientFactory);
-            services.AddSingleton<IOpenApiService>(apiService);
-            services.AddSingleton<ITradingAccountsService>(new TradingAccountsService(apiService));
-            await apiService.Connect(service.GetApiCredentials());
-            */
-            return ;
-        }
-
-        public ApiCredentials GetApiCredentials()
-        {
-            return new ApiCredentials();
+            using (var serviceScope = _scopeFactory.CreateScope())
+            {
+                JournalDbContext dbContext = serviceScope.ServiceProvider.GetService<JournalDbContext>() ?? throw new ArgumentNullException(nameof(serviceScope));
+                if (dbContext.CTraderAccounts != null)
+                {
+                    var accounts = dbContext.CTraderAccounts.ToList<CTraderAccount>();
+                    foreach (var account in accounts)
+                    {
+                        LoginContext ctx = new LoginContext(account);
+                        ctx.OnBoardStatus = OnBoardStatus.Success;
+                        _loginContexts.Add(account.CTraderId, ctx);
+                    }
+                }
+            }
         }
 
         public async Task<bool> HasLogonCredentials(String cTraderId)
@@ -77,75 +48,153 @@ namespace SmartFxJournal.CTrader.Services
                 return false;
         }
 
-        public LoginContext getLoginContext(String cTraderId)
-        {
-            if (this._loginContexts.ContainsKey(cTraderId)) {
-                return this._loginContexts[cTraderId];
+        public Uri PrepareNewCTraderAccountAuthorizationContext(string cTraderId, string client_id, string client_secret, string redirectUrl) {
+            CTraderAccount account;
+            LoginContext ctx;
+            if (!this._loginContexts.ContainsKey(cTraderId))
+            {
+                account = new()
+                {
+                    CTraderId = cTraderId,
+                    ClientId = client_id,
+                    ClientSecret = client_secret
+                };
+
+                ctx = new LoginContext(account)
+                {
+                    RedirectUrl = redirectUrl
+                };
+                _loginContexts.Add(cTraderId, ctx);
+                ctx.OnBoardStatus = OnBoardStatus.Pending;
             }
-            return new LoginContext(cTraderId);
+            else
+            {
+                ctx = _loginContexts[cTraderId];
+            }
+
+            return ctx.OAuthUri;
         }
 
-        public async Task<bool> ConsumeAuthCodeAsync(String code)
+        public async Task<OnBoardingResult> ProcessCTraderAccountAuthorization(string cTraderId, string authorizationCode)
         {
-            var query = HttpUtility.ParseQueryString(string.Empty);
-            query["grant_type"] = "authorization_code";
-            query["code"] = code;
-            query["redirect_uri"] = "https://localhost:5000/api/ctrader/auth";
-            query["client_id"] = _apiCredentials.ClientId;
-            query["client_secret"] = _apiCredentials.Secret;
+            if (!this._loginContexts.ContainsKey(cTraderId))
+            {
+                throw new Exception("No pending authorization flows expected. Not enought information to process the authorization code.");
+            }
+            LoginContext ctx = _loginContexts[cTraderId];
+            CTraderAccount acc = ctx.CTraderAccount;
 
-            var uri = query.ToQueryString();
+            App app = new(acc.ClientId, acc.ClientSecret, ctx.RedirectUrl);
+            Token token = await TokenFactory.GetToken(authorizationCode, app, sharedClient);
+            acc.LastFetchedOn = DateTime.Now;
+            acc.AuthToken = JsonSerializer.Serialize<Token>(token);
+            acc.RefreshToken = token.RefreshToken;
 
-            using HttpResponseMessage response = await sharedClient.GetAsync("apps/token" + uri);
-            response.EnsureSuccessStatusCode();
-            var jsonResponse = await response.Content.ReadAsStringAsync();
+            using (var serviceScope = _scopeFactory.CreateScope())
+            {
+                JournalDbContext dbContext = serviceScope.ServiceProvider.GetService<JournalDbContext>() ?? throw new ArgumentNullException(nameof(serviceScope));
+                if (dbContext.CTraderAccounts != null)
+                {
+                    dbContext.CTraderAccounts.Add(acc);
+                    dbContext.SaveChanges();
+                }
+            }
 
-            
-            Console.WriteLine($"{jsonResponse}\n");
+            ctx.OnBoardStatus = OnBoardStatus.Success;
+            return ctx.OnBoardingResult.Copy;
+        }
+
+        public bool FailCTraderAccountAuthFlow(string cTraderId, string error_code, string error_description)
+        {
+            if (!this._loginContexts.ContainsKey(cTraderId))
+            {
+                throw new Exception("No pending authorization flows expected. Not enought information to process the authorization code.");
+            }
+            LoginContext ctx = _loginContexts[cTraderId];
+            ctx.OnBoardStatus = OnBoardStatus.Failed;
+            ctx.OnBoardingResult.ErrorDescription = error_code + " : " + error_description;
 
             return true;
         }
-    }
 
-    public class LoginContext
-    {
-        static readonly String openApiUrl = "https://openapi.ctrader.com/apps/auth?client_id={0}&redirect_uri={1}&scope=accounts";
-        readonly String cTraderId;
-        String? clientId;
-        String? secret;
-        String? redirectUri;
-
-        public LoginContext(String cTraderId)
+        public OnBoardingResult OnBoardingResult(String cTraderId)
         {
-            this.cTraderId = cTraderId;
-        }
+            LoginContext? ctx = null;
 
-        public LoginContext ClientId(String clientId)
-        {
-            this.clientId = clientId;
-            return this;
-        }
-
-        public LoginContext ClientSecret(String secret)
-        {
-            this.secret = secret;
-            return this;
-        }
-
-        public LoginContext RedirectUri(String uri)
-        {
-            this.redirectUri = uri;
-            return this;
-        }
-
-        public String buildAuthorizationUri()
-        {
-            if (this.clientId == null || this.redirectUri == null) 
+            if (this._loginContexts.ContainsKey(cTraderId))
             {
-                throw new ArgumentNullException("Client Id and Redirect URL are mandatory.");
+                ctx = this._loginContexts[cTraderId];
             }
 
-            return String.Format(openApiUrl, this.clientId, this.redirectUri);
+            OnBoardStatus status = OnBoardStatus.Unknown;
+            if (ctx != null)
+            {
+                status = ctx.OnBoardStatus;
+            }
+
+            return new OnBoardingResult(cTraderId, status);
+            
+        }
+
+        public async Task<List<AccountEntry>> ProcessAccountsDelta (string cTraderId)
+        {
+            if (!this._loginContexts.ContainsKey(cTraderId))
+            {
+                throw new Exception("No pending authorization flows expected. Not enought information to process the authorization code.");
+            }
+
+            List<AccountEntry> accounts = new();
+            LoginContext ctx = _loginContexts[cTraderId];
+            CTraderAccount ctAccount = ctx.CTraderAccount;
+            ApiCredentials creds = new();
+            creds.ClientId = ctAccount.ClientId;
+            creds.Secret = ctAccount.ClientSecret;
+            Token token = TokenFactory.DeserializeToken(ctAccount.AuthToken);
+
+            OpenClient liveClientFactory() => new(ApiInfo.LiveHost, ApiInfo.Port, TimeSpan.FromSeconds(10));
+            OpenClient demoClientFactory() => new(ApiInfo.DemoHost, ApiInfo.Port, TimeSpan.FromSeconds(10));
+            var apiService = new OpenApiService(liveClientFactory, demoClientFactory);
+            await apiService.Connect(creds);
+
+            var tradeService = new TradingAccountsService(apiService);
+            var protoAccounts = await tradeService.GetAccounts(token.AccessToken);
+
+            foreach(var act in protoAccounts)
+            {
+                AccountEntry entry = new();
+                AccountModel model = await tradeService.GetAccountModelById((long)act.CtidTraderAccountId);
+                entry.CTraderId = "";
+                entry.AccountId = Convert.ToString(act.CtidTraderAccountId);
+                entry.IsLive = act.IsLive;
+                entry.BrokerName = model.Trader.BrokerName;
+                entry.Balance = model.Balance;
+            }
+
+            return accounts;
+        }
+    }
+
+    internal class LoginContext
+    {
+        static readonly string openApiUrl = "https://openapi.ctrader.com/apps/auth?client_id={0}&redirect_uri={1}&scope=accounts";
+        private readonly CTraderAccount forAccount;
+
+        public LoginContext(CTraderAccount account)
+        {
+            this.forAccount = account;
+            OnBoardingResult = new(account.CTraderId);
+        }
+
+        public CTraderAccount CTraderAccount { get { return forAccount; } }
+
+        public string? RedirectUrl { get; set; }
+
+        public Uri OAuthUri { get { return new Uri(string.Format(openApiUrl, forAccount.ClientId, RedirectUrl)); } }
+
+        public OnBoardingResult OnBoardingResult { get; private set; }
+        public OnBoardStatus OnBoardStatus { 
+            get { return OnBoardingResult.OnBoardingStatus;  } 
+            set { OnBoardingResult.OnBoardingStatus = value; } 
         }
     }
 }

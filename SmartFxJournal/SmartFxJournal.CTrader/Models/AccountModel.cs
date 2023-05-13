@@ -2,7 +2,7 @@
 using System.Collections.Generic;
 using System.Linq;
 
-namespace Samples.Shared.Models
+namespace SmartFxJournal.CTrader.Models
 {
     public class AccountModel
     {

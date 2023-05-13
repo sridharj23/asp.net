@@ -1,4 +1,4 @@
-﻿using Samples.Shared.Models;
+﻿using SmartFxJournal.CTrader.Models;
 using Google.Protobuf;
 using OpenAPI.Net.Helpers;
 using System;
@@ -10,7 +10,7 @@ using System.Reactive.Linq;
 using System.Threading.Channels;
 using System.Threading.Tasks;
 
-namespace Samples.Shared.Services
+namespace SmartFxJournal.CTrader.Services
 {
     public interface ITradingAccountsService
     {

@@ -1,5 +1,5 @@
 <script lang="ts">
-    import { CTraderAPI } from '@/api/CTraderApi';
+    import { CTraderAPI, type AccountEntry } from '@/api/CTraderApi';
 
     const api = new CTraderAPI();
 
@@ -13,35 +13,34 @@
         },
         computed :{
             validInputs() : boolean {
-                return (this.ctClientId != "" && this.ctTraderId != "" && this.ctSecret != "");
+                return (this.ctTraderId != "");
             }
         },
         methods: {
-            isTraderOnboarded() : boolean {
-                return api.hasLogin(this.ctTraderId);
-            },
-
             fetchNewAccounts() {
-                if (this.isTraderOnboarded()) {
-                    //directly request backend for any new accounts
-                } else {
-                    //initiate first time login
-                    this.initiateLogin();
-                }
+                api.hasLogin(this.ctTraderId).then(has => {
+                    if (has) {
+                        //directly request backend for any new accounts
+                        api.importAccounts(this.ctTraderId).then(a => {
+                            alert(a + " Please refresh your accounts page to see the changes.");
+                        })
+                    } else {
+                        //initiate first time login
+                        this.initiateLogin();
+                    }
+                })
             },
 
             initiateLogin() {
-                if (this.isTraderOnboarded()) {
-                    //directly retrieve any new accounts
-                } else {
-                    // initiate first time login
-                    // loop on 
-                    api.getLoginTarget(this.ctTraderId, this.ctClientId, this.ctSecret).then(url => {
-                        console.log("Login target : " + url);
-                        var win = window.open(url, '_blank');
-                        win?.focus;
-                    });
+                if (this.ctClientId == "" || this.ctSecret == "") {
+                    alert("Ctrader ID seems to be new. Client ID and Client Secret are mandatory to onboard new CTrader IDs.")
+                    return;
                 }
+                api.getLoginTarget(this.ctTraderId, this.ctClientId, this.ctSecret).then(url => {
+                    console.log("Login target : " + url);
+                    var win = window.open(url, '_blank');
+                    win?.focus;
+                });
             }
         }
     }
@@ -63,7 +62,7 @@
                 <input id="client_sec" class="inputControls" type="password" v-model="ctSecret" required autocomplete="off">
             </div>
             <div class="flow-row">
-                <button type="button" @click="initiateLogin" :disabled="!validInputs">Import Accounts</button>
+                <button type="button" @click="fetchNewAccounts" :disabled="!validInputs">Fetch Accounts</button>
             </div>
         </div>
     </section>

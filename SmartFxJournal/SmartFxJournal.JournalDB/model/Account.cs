@@ -2,6 +2,7 @@
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
+using System.Transactions;
 
 namespace SmartFxJournal.JournalDB.model
 {
@@ -48,6 +49,7 @@ namespace SmartFxJournal.JournalDB.model
         // Initialize the table properties
         internal static void OnModelCreate(ModelBuilder builder)
         {
+            Audited.OnModelCreate(builder);
             builder.Entity<Account>(entity =>
             {
                 entity

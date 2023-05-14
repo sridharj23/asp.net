@@ -6,6 +6,7 @@ using System.Web;
 using SmartFxJournal.JournalDB.model;
 using OpenAPI.Net.Auth;
 using System.Text.Json;
+using System.Security.Principal;
 
 namespace SmartFxJournal.CTrader.Services
 {
@@ -89,6 +90,8 @@ namespace SmartFxJournal.CTrader.Services
             acc.LastFetchedOn = DateTime.Now;
             acc.AuthToken = JsonSerializer.Serialize<Token>(token);
             acc.RefreshToken = token.RefreshToken;
+            acc.AccessToken = token.AccessToken;
+            acc.ExpiresIn = token.ExpiresIn.ToUnixTimeMilliseconds();
 
             using (var serviceScope = _scopeFactory.CreateScope())
             {
@@ -101,7 +104,8 @@ namespace SmartFxJournal.CTrader.Services
             }
 
             ctx.OnBoardStatus = OnBoardStatus.Success;
-            return ctx.OnBoardingResult.Copy;
+            await ProcessAccountsDelta(cTraderId, token.AccessToken);
+            return ctx.OnBoardingResult.Copy();
         }
 
         public bool FailCTraderAccountAuthFlow(string cTraderId, string error_code, string error_description)
@@ -136,20 +140,25 @@ namespace SmartFxJournal.CTrader.Services
             
         }
 
-        public async Task<List<AccountEntry>> ProcessAccountsDelta (string cTraderId)
+        public async Task<string> ImportAccounts(string cTraderId)
+        {
+            int p = await ProcessAccountsDelta(cTraderId, null);
+            return (p.ToString() + " accounts have been imported / updated.");
+        }
+
+        private async Task<int> ProcessAccountsDelta(string cTraderId, string? token)
         {
             if (!this._loginContexts.ContainsKey(cTraderId))
             {
-                throw new Exception("No pending authorization flows expected. Not enought information to process the authorization code.");
+                throw new Exception("CTrader ID : " + cTraderId + " is not yet onboarded !. Cannot import information.");
             }
 
-            List<AccountEntry> accounts = new();
             LoginContext ctx = _loginContexts[cTraderId];
             CTraderAccount ctAccount = ctx.CTraderAccount;
+            if (token == null) { token = ctAccount.AccessToken; }
             ApiCredentials creds = new();
             creds.ClientId = ctAccount.ClientId;
             creds.Secret = ctAccount.ClientSecret;
-            Token token = TokenFactory.DeserializeToken(ctAccount.AuthToken);
 
             OpenClient liveClientFactory() => new(ApiInfo.LiveHost, ApiInfo.Port, TimeSpan.FromSeconds(10));
             OpenClient demoClientFactory() => new(ApiInfo.DemoHost, ApiInfo.Port, TimeSpan.FromSeconds(10));
@@ -157,20 +166,52 @@ namespace SmartFxJournal.CTrader.Services
             await apiService.Connect(creds);
 
             var tradeService = new TradingAccountsService(apiService);
-            var protoAccounts = await tradeService.GetAccounts(token.AccessToken);
+            var protoAccounts = await tradeService.GetAccounts(token);
 
-            foreach(var act in protoAccounts)
+            int processedAccounts = 0;
+
+            using (var serviceScope = _scopeFactory.CreateScope())
             {
-                AccountEntry entry = new();
-                AccountModel model = await tradeService.GetAccountModelById((long)act.CtidTraderAccountId);
-                entry.CTraderId = "";
-                entry.AccountId = Convert.ToString(act.CtidTraderAccountId);
-                entry.IsLive = act.IsLive;
-                entry.BrokerName = model.Trader.BrokerName;
-                entry.Balance = model.Balance;
+                JournalDbContext dbContext = serviceScope.ServiceProvider.GetService<JournalDbContext>() ?? throw new ArgumentNullException(nameof(serviceScope));
+                if (dbContext.CTraderAccounts != null)
+                {
+                    CTraderAccount? cta = await dbContext.CTraderAccounts.FindAsync(cTraderId);
+                    if (cta == null)
+                    {
+                        throw new Exception("CTrader ID : " + cTraderId + " is not yet onboarded !. Cannot import information.");
+                    }
+                    List<Account> accounts = cta.Accounts;
+                    foreach (var act in protoAccounts)
+                    {
+                        processedAccounts++;
+                        var trader = await apiService.GetTrader((long)act.CtidTraderAccountId, act.IsLive);
+                        var assets = await apiService.GetAssets((long)act.CtidTraderAccountId, act.IsLive);
+                        DateTimeOffset start = DateTimeOffset.FromUnixTimeMilliseconds(trader.RegistrationTimestamp);
+                        DateTimeOffset end = start.Add(new TimeSpan(2, 0, 0));
+                        string acno = Convert.ToString(act.TraderLogin);
+                        Account? entry = accounts.Find(a => a.AccountNo.Equals(acno));
+                        if (entry == null)
+                        {
+                            entry = new(acno);
+                            entry.ImportMode = "cTrader";
+                            entry.IsDefault = false;
+                            entry.AccountType = act.IsLive ? "Live" : "Demo";
+                            entry.CurrencyType = assets.First(iAsset => iAsset.AssetId == trader.DepositAssetId).Name;
+                            entry.BrokerName = trader.BrokerName;
+                            entry.OpenedOn = DateOnly.FromDateTime(DateTimeOffset.FromUnixTimeMilliseconds(trader.RegistrationTimestamp).DateTime);
+                            var transactions = await apiService.GetTransactions((long)act.CtidTraderAccountId, act.IsLive, start, end);
+                            entry.StartBalance = (decimal)(transactions[0].Balance / 100);
+                            entry.CreatedOn = DateTime.Now;
+                            cta.Accounts.Add(entry);
+                        }
+                        entry.CurrentBalance = (decimal?)MonetaryConverter.FromMonetary(trader.Balance);
+                        entry.LastModifiedOn = DateTime.Now;
+                        
+                    }
+                    dbContext.SaveChanges();
+                }
             }
-
-            return accounts;
+            return processedAccounts;
         }
     }
 

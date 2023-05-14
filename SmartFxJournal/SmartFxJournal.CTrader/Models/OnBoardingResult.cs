@@ -24,7 +24,9 @@ namespace SmartFxJournal.CTrader.Models
         public OnBoardStatus OnBoardingStatus { get; set; }
         public String ErrorDescription { get; set; } = "";
 
-        public OnBoardingResult Copy {  get { return new(this.CTraderID, this.OnBoardingStatus); } }
+        public OnBoardingResult Copy() {
+            return new(this.CTraderID, this.OnBoardingStatus);
+        }
     }
 
     public enum OnBoardStatus

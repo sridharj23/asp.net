@@ -10,7 +10,7 @@ using System.Threading.Tasks;
 namespace SmartFxJournal.JournalDB.model
 {
     [Table("ctraderaccounts")]
-    public sealed class CTraderAccount
+    public sealed class CTraderAccount : Audited
     {
         private string? _authToken;
 
@@ -38,14 +38,22 @@ namespace SmartFxJournal.JournalDB.model
         }
 
         [MaxLength(256)]
+        public string? AccessToken { get; set; }
+
+
+        [MaxLength(256)]
         public string? RefreshToken { get; set; }
 
         public DateTime? LastFetchedOn { get; set; }
+
+        public long? ExpiresIn { get; set; }
 
         public List<Account> Accounts { get; set; } = new List<Account>();
 
         internal static void OnModelCreate(ModelBuilder builder)
         {
+            Audited.OnModelCreate(builder);
+
             builder.Entity<CTraderAccount>().HasIndex(x => x.ClientId).IsUnique();
 
             builder.Entity<CTraderAccount>()

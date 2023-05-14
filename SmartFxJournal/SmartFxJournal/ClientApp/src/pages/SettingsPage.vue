@@ -32,7 +32,6 @@
 <style>
   #mainContainer {
     flex-grow: 1;
-    background-color: aliceblue;
   }
   #accountsView {
     flex-grow: 1;
@@ -44,6 +43,7 @@
     margin-bottom: 10px;
   }
   #sectionHeader ul {
+    margin-top: 0;
     margin-bottom: 2px;
     padding: 0;
     display: flex;

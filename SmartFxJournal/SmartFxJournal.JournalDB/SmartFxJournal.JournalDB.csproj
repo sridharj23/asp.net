@@ -27,4 +27,8 @@
     <ProjectReference Include="..\SmartFxJournal.common\SmartFxJournal.Common.csproj" />
   </ItemGroup>
 
+  <ItemGroup>
+    <Folder Include="helpers\" />
+  </ItemGroup>
+
 </Project>

@@ -11,7 +11,7 @@ namespace SmartFxJournal.Controllers
     {
         private readonly CTraderService _service;
         private readonly String redirectUri = "https://localhost:5000/api/ctrader/auth";
-        private String cTraderId = "";
+        private static String cTraderId = "";
 
         public CtraderController(CTraderService service) {
             _service = service;
@@ -21,7 +21,7 @@ namespace SmartFxJournal.Controllers
         [HttpGet("api/ctrader/auth")]
         public async Task<ActionResult<OnBoardingResult?>> ConsumeAuthCodeAsync(String? code, String error = "", String error_description = "")
         {
-            if (cTraderId == null)
+            if (CtraderController.cTraderId == "")
             {
                 return NotFound("No active authorization flows detected !");
             } else if (code != null)
@@ -29,10 +29,11 @@ namespace SmartFxJournal.Controllers
                 var result = await _service.ProcessCTraderAccountAuthorization(cTraderId, code);
                 result.ErrorDescription = result.OnBoardingStatus == OnBoardStatus.Success ? "You can close this browser window !" : result.ErrorDescription;
                 return result;
-            } else if (error != null)  
+            } else if (error != null)
             {
-                _service.FailCTraderAccountAuthFlow(cTraderId, error, error_description);
-                cTraderId = "";
+                _service.FailCTraderAccountAuthFlow(CtraderController.cTraderId, error, error_description);
+                CtraderController.cTraderId = "";
+                return Ok("Athorization aborted : " + error + " - " + error_description);
             }
             throw new Exception("Authorization flow failed with reason : " + error_description);
         }
@@ -55,9 +56,15 @@ namespace SmartFxJournal.Controllers
         [HttpGet("api/ctrader/login")]
         public ActionResult<string> AttemptLogin(String cTraderId, String client_id, String client_secret)
         {
-            this.cTraderId = cTraderId;
+            CtraderController.cTraderId = cTraderId;
             Uri uri = _service.PrepareNewCTraderAccountAuthorizationContext(cTraderId, client_id, client_secret, redirectUri);
             return uri.ToString();
+        }
+
+        [HttpPost("api/ctrader/import/{ctraderid}")]
+        public async Task<ActionResult<string>> ImportAccounts(string ctraderid)
+        {
+            return await _service.ImportAccounts(ctraderid);
         }
     }
 }

@@ -42,9 +42,16 @@ export default {
                 this.selectedAccount = {} as Account;
             }
             let result = api.getAll();
-            result.then((resp) => resp?.forEach(entry => {
-                this.addAccount(entry);
-            }));
+            result.then((resp) => {
+                resp?.forEach(entry => {
+                  this.addAccount(entry);
+                })
+                if (this.selectedAcNo == "" && resp.length > 0) {
+                    this.selectedAcNo = resp[0].accountNo;
+                    this.setSelected();
+                }
+
+            });
         },
         setSelected: function() {
             console.log("Selected account : " + this.selectedAcNo)
@@ -87,9 +94,6 @@ export default {
             if (confirm("The account and all the associated trades and stored data will be deleted ! Are you sure you want to delte?")) {
                 api.delete(this.selectedAccount).then(() => this.loadAccounts());
             }
-        },
-        importTrades() {
-            console.log("Import called.");
         }
     },
     mounted() {
@@ -159,11 +163,11 @@ export default {
             </div>
             <div class="inputRow">
                 <label class="labels" for="last_imported_on">Last Import on</label>
-                <input id="last_imported_on" class="inputControls" type="date" v-model="selectedAccount.lastImportedOn" readonly autocomplete="off" style="border: 0px;">
+                <input id="last_imported_on" class="inputControls" type="text" v-model="selectedAccount.lastImportedOn" readonly autocomplete="off" style="border: 0px;">
             </div>
             <div id="spacer"/>
             <div id="footer" class="flow-row">
-                <button type="button" @click="importTrades()" :disabled="!isEditable">Import Trades</button>
+                <button type="button" @click="loadAccounts()">Refresh</button>
                 <button type="button" @click="enableEditing()" :disabled="!isEditable">Edit</button>
                 <button type="button" @click="enableCreate()" :disabled="!isReadOnly">Add</button>
                 <button type="submit" :disabled="isReadOnly">Save</button>

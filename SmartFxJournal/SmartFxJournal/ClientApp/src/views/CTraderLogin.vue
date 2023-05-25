@@ -62,7 +62,7 @@
                 <input id="client_sec" class="inputControls" type="password" v-model="ctSecret" required autocomplete="off">
             </div>
             <div class="flow-row">
-                <button type="button" @click="fetchNewAccounts" :disabled="!validInputs">Fetch Accounts</button>
+                <button type="button" @click="fetchNewAccounts" :disabled="!validInputs">Import Accounts</button>
             </div>
         </div>
     </section>

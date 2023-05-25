@@ -17,24 +17,24 @@ namespace SmartFxJournal.Controllers
 
         // GET: api/Accounts
         [HttpGet]
-        public async Task<ActionResult<IEnumerable<Account>>> GetAccounts()
+        public async Task<ActionResult<IEnumerable<FxAccount>>> GetAccounts()
         {
-          if (_context.Accounts == null)
+          if (_context.FxAccounts == null)
           {
               return NotFound();
           }
-            return await _context.Accounts.ToListAsync();
+            return await _context.FxAccounts.ToListAsync();
         }
 
         // GET: api/Accounts/5
         [HttpGet("{id}")]
-        public async Task<ActionResult<Account>> GetAccount(string id)
+        public async Task<ActionResult<FxAccount>> GetAccount(string id)
         {
-          if (_context.Accounts == null)
+          if (_context.FxAccounts == null)
           {
               return NotFound();
           }
-            var account = await _context.Accounts.FindAsync(id);
+            var account = await _context.FxAccounts.FindAsync(id);
 
             if (account == null)
             {
@@ -47,7 +47,7 @@ namespace SmartFxJournal.Controllers
         // PUT: api/Accounts/5
         // To protect from overposting attacks, see https://go.microsoft.com/fwlink/?linkid=2123754
         [HttpPut("{id}")]
-        public async Task<IActionResult> PutAccount(string id, Account account)
+        public async Task<IActionResult> PutAccount(long id, FxAccount account)
         {
             if (id != account.AccountNo)
             {
@@ -78,13 +78,13 @@ namespace SmartFxJournal.Controllers
         // POST: api/Accounts
         // To protect from overposting attacks, see https://go.microsoft.com/fwlink/?linkid=2123754
         [HttpPost]
-        public async Task<ActionResult<Account>> PostAccount(Account account)
+        public async Task<ActionResult<FxAccount>> PostAccount(FxAccount account)
         {
-          if (_context.Accounts == null)
+          if (_context.FxAccounts == null)
           {
               return Problem("Entity set 'JournalDbContext.Accounts'  is null.");
           }
-            _context.Accounts.Add(account);
+            _context.FxAccounts.Add(account);
             try
             {
                 await _context.SaveChangesAsync();
@@ -108,25 +108,25 @@ namespace SmartFxJournal.Controllers
         [HttpDelete("{id}")]
         public async Task<IActionResult> DeleteAccount(string id)
         {
-            if (_context.Accounts == null)
+            if (_context.FxAccounts == null)
             {
                 return NotFound();
             }
-            var account = await _context.Accounts.FindAsync(id);
+            var account = await _context.FxAccounts.FindAsync(id);
             if (account == null)
             {
                 return NotFound();
             }
 
-            _context.Accounts.Remove(account);
+            _context.FxAccounts.Remove(account);
             await _context.SaveChangesAsync();
 
             return NoContent();
         }
 
-        private bool AccountExists(string id)
+        private bool AccountExists(long id)
         {
-            return (_context.Accounts?.Any(e => e.AccountNo == id)).GetValueOrDefault();
+            return (_context.FxAccounts?.Any(e => e.AccountNo == id)).GetValueOrDefault();
         }
     }
 }

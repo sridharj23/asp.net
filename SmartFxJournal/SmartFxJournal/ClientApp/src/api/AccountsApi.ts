@@ -2,11 +2,11 @@ import { JournalApi } from "./JournalApiBase";
 
 export interface Account {
     accountNo : string,
-    accountType: string,
+    isLive: boolean,
     isDefault : boolean,
     nickName : string,
-    brokerName : string,
-    currencyType: string,
+    broker : string,
+    accountCurrency: string,
     startBalance : number,
     currentBalance : number,
     openedOn : string,

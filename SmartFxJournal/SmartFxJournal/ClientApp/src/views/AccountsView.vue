@@ -44,13 +44,14 @@ export default {
             let result = api.getAll();
             result.then((resp) => {
                 resp?.forEach(entry => {
+                  console.log(entry);
                   this.addAccount(entry);
                 })
                 if (this.selectedAcNo == "" && resp.length > 0) {
                     this.selectedAcNo = resp[0].accountNo;
                     this.setSelected();
                 }
-
+                console.log(this.theAccounts);
             });
         },
         setSelected: function() {
@@ -94,6 +95,9 @@ export default {
             if (confirm("The account and all the associated trades and stored data will be deleted ! Are you sure you want to delte?")) {
                 api.delete(this.selectedAccount).then(() => this.loadAccounts());
             }
+        },
+        importTrades() {
+
         }
     },
     mounted() {
@@ -117,27 +121,20 @@ export default {
                 <input id="acc_no" :class="createMode ? 'inputControls visible' : 'hidden'" v-model="selectedAccount.accountNo" type="text" :required="createMode" autocomplete="off">
             </div>
             <div class="inputRow">
-                <label class="labels">Account Type</label>
-                <input class="inputControls" id="live" name="account_type" type="radio" :disabled="isReadOnly" v-model="selectedAccount.accountType" value="Live"/>
-                <label class="labels" for="live" style="width: auto;">Live</label>
-                <input class="inputControls" id="demo" name="account_type" type="radio" :disabled="isReadOnly" v-model="selectedAccount.accountType" value="Demo" style="margin-left: 20px;"/>
-                <label class="labels" for="demo" style="width: auto;">Demo</label>
+                <label class="labels" for="is_live">Is Live Account</label>
+                <input id="is_live" class="inputControls" type="checkbox" v-model="selectedAccount.isLive" :disabled="isReadOnly">
             </div>
             <div class="inputRow">
                 <label class="labels" for="is_default">Is Default</label>
                 <input id="is_default" class="inputControls" type="checkbox" v-model="selectedAccount.isDefault" :disabled="isReadOnly">
             </div>
             <div class="inputRow">
-                <label class="labels" for="nick_name">Nick Name</label>
-                <input id="nick_name" class="inputControls" type="text" v-model="selectedAccount.nickName"  :readonly="isReadOnly" required autocomplete="off">
-            </div>
-            <div class="inputRow">
                 <label class="labels" for="broker_name">Broker Name</label>
-                <input id="broker_name" class="inputControls" type="text" v-model="selectedAccount.brokerName"  :readonly="isReadOnly" required autocomplete="off">
+                <input id="broker_name" class="inputControls" type="text" v-model="selectedAccount.broker"  :readonly="isReadOnly" required autocomplete="off">
             </div>
             <div class="inputRow">
                 <label class="labels" for="currency_type">Account Currency</label>
-                <select class="inputControls" id="currency_type" v-model="selectedAccount.currencyType" :disabled="editMode" required>
+                <select class="inputControls" id="currency_type" v-model="selectedAccount.accountCurrency" :disabled="editMode" required>
                     <option value="EUR">EUR</option>
                     <option value="USD">USD</option>
                 </select>
@@ -167,7 +164,8 @@ export default {
             </div>
             <div id="spacer"/>
             <div id="footer" class="flow-row">
-                <button type="button" @click="loadAccounts()">Refresh</button>
+                <button type="button" @click="importTrades()" :disabled="!isEditable">Import Trades</button>
+                <button type="button" @click="loadAccounts()" :disabled="!isReadOnly">Refresh</button>
                 <button type="button" @click="enableEditing()" :disabled="!isEditable">Edit</button>
                 <button type="button" @click="enableCreate()" :disabled="!isReadOnly">Add</button>
                 <button type="submit" :disabled="isReadOnly">Save</button>

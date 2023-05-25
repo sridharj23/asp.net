@@ -9,14 +9,14 @@ namespace SmartFxJournal.JournalDB.model
 
         }
 
-        public DbSet<Account> Accounts { get; set; }
         public DbSet<CTraderAccount> CTraderAccounts { get; set; }
-
-
+        public DbSet<FxAccount> FxAccounts { get; set; }
+        public DbSet<FxPosition> FxPositions { get; set; }
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
-            Account.OnModelCreate(modelBuilder);
             CTraderAccount.OnModelCreate(modelBuilder);
+            FxAccount.OnModelCreate(modelBuilder);
+            FxPosition.OnModelCreate(modelBuilder);
         }
     }
 }

@@ -18,19 +18,5 @@ namespace SmartFxJournal.JournalDB.model
 
         [Required]
         public DateTime LastModifiedOn { get; set; }
-
-        internal static void OnModelCreate(ModelBuilder builder)
-        {
-            builder.Entity<Account>(entity =>
-            {
-                entity.Property(e => e.CreatedOn)
-                .HasColumnType("timestamp without time zone")
-                .HasDefaultValueSql("now()");
-
-                entity.Property(e => e.LastModifiedOn)
-                .HasColumnType("timestamp without time zone")
-                .HasDefaultValueSql("now()");
-            });
-        }
     }
 }

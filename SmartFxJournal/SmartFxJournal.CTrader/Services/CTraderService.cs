@@ -7,13 +7,17 @@ using SmartFxJournal.JournalDB.model;
 using OpenAPI.Net.Auth;
 using System.Text.Json;
 using System.Security.Principal;
+using static SmartFxJournal.JournalDB.model.GlobalEnums;
+using SmartFxJournal.CTrader.Helpers;
+using Microsoft.EntityFrameworkCore;
+using SmartFxJournal.CTrader.helpers;
+using static SmartFxJournal.CTrader.helpers.OffsetIterator;
 
 namespace SmartFxJournal.CTrader.Services
 {
     public class CTraderService
     {
         private static readonly HttpClient sharedClient = new();
-
         private readonly IServiceScopeFactory _scopeFactory;
         private readonly Dictionary<String, LoginContext> _loginContexts = new Dictionary<string, LoginContext>();
 
@@ -87,11 +91,12 @@ namespace SmartFxJournal.CTrader.Services
 
             App app = new(acc.ClientId, acc.ClientSecret, ctx.RedirectUrl);
             Token token = await TokenFactory.GetToken(authorizationCode, app, sharedClient);
-            acc.LastFetchedOn = DateTime.Now;
+
+            acc.LastFetchedOn = DateTimeOffset.Now;
             acc.AuthToken = JsonSerializer.Serialize<Token>(token);
             acc.RefreshToken = token.RefreshToken;
             acc.AccessToken = token.AccessToken;
-            acc.ExpiresIn = token.ExpiresIn.ToUnixTimeMilliseconds();
+            acc.ExpiresOn = token.ExpiresIn;
 
             using (var serviceScope = _scopeFactory.CreateScope())
             {
@@ -104,7 +109,8 @@ namespace SmartFxJournal.CTrader.Services
             }
 
             ctx.OnBoardStatus = OnBoardStatus.Success;
-            await ProcessAccountsDelta(cTraderId, token.AccessToken);
+
+            await ProcessAccountsDelta(cTraderId);
             return ctx.OnBoardingResult.Copy();
         }
 
@@ -142,11 +148,11 @@ namespace SmartFxJournal.CTrader.Services
 
         public async Task<string> ImportAccounts(string cTraderId)
         {
-            int p = await ProcessAccountsDelta(cTraderId, null);
+            int p = await ProcessAccountsDelta(cTraderId);
             return (p.ToString() + " accounts have been imported / updated.");
         }
 
-        private async Task<int> ProcessAccountsDelta(string cTraderId, string? token)
+        private async Task<int> ProcessAccountsDelta(string cTraderId)
         {
             if (!this._loginContexts.ContainsKey(cTraderId))
             {
@@ -155,18 +161,14 @@ namespace SmartFxJournal.CTrader.Services
 
             LoginContext ctx = _loginContexts[cTraderId];
             CTraderAccount ctAccount = ctx.CTraderAccount;
-            if (token == null) { token = ctAccount.AccessToken; }
-            ApiCredentials creds = new();
-            creds.ClientId = ctAccount.ClientId;
-            creds.Secret = ctAccount.ClientSecret;
+            OpenApiService apiService = await ctx.ConnectAsync();
 
-            OpenClient liveClientFactory() => new(ApiInfo.LiveHost, ApiInfo.Port, TimeSpan.FromSeconds(10));
-            OpenClient demoClientFactory() => new(ApiInfo.DemoHost, ApiInfo.Port, TimeSpan.FromSeconds(10));
-            var apiService = new OpenApiService(liveClientFactory, demoClientFactory);
-            await apiService.Connect(creds);
+            if (ctx.TradingAccountsService == null)
+            {
+                throw new Exception("CTrader ID : " + cTraderId + " is not yet connected !. Cannot import information.");
+            }
 
-            var tradeService = new TradingAccountsService(apiService);
-            var protoAccounts = await tradeService.GetAccounts(token);
+            var protoAccounts = await ctx.TradingAccountsService.GetAccounts(ctAccount.AccessToken);
 
             int processedAccounts = 0;
 
@@ -175,50 +177,44 @@ namespace SmartFxJournal.CTrader.Services
                 JournalDbContext dbContext = serviceScope.ServiceProvider.GetService<JournalDbContext>() ?? throw new ArgumentNullException(nameof(serviceScope));
                 if (dbContext.CTraderAccounts != null)
                 {
-                    CTraderAccount? cta = await dbContext.CTraderAccounts.FindAsync(cTraderId);
-                    if (cta == null)
-                    {
-                        throw new Exception("CTrader ID : " + cTraderId + " is not yet onboarded !. Cannot import information.");
-                    }
-                    List<Account> accounts = cta.Accounts;
+                    CTraderAccount? cta = dbContext.CTraderAccounts.Include(a => a.FxAccounts).First(c => c.CTraderId == cTraderId) ?? 
+                                                throw new Exception("CTrader ID : " + cTraderId + " is not yet onboarded !. Cannot import information.");
+
                     foreach (var act in protoAccounts)
                     {
-                        processedAccounts++;
-                        var trader = await apiService.GetTrader((long)act.CtidTraderAccountId, act.IsLive);
-                        var assets = await apiService.GetAssets((long)act.CtidTraderAccountId, act.IsLive);
-                        DateTimeOffset start = DateTimeOffset.FromUnixTimeMilliseconds(trader.RegistrationTimestamp);
-                        DateTimeOffset end = start.Add(new TimeSpan(2, 0, 0));
-                        string acno = Convert.ToString(act.TraderLogin);
-                        Account? entry = accounts.Find(a => a.AccountNo.Equals(acno));
-                        if (entry == null)
+                        FxAccount account = await OpenApiImporter.ImportAccountAsync(act, ctx.OpenApiService, cta);
+                        dbContext.SaveChanges();
+
+                        FxAccount parent = dbContext.FxAccounts.Include(a => a.Positions).First(a => a.AccountNo == account.AccountNo);
+
+                        var openOrders = await ctx.OpenApiService.GetAccountOrders((long)act.CtidTraderAccountId, act.IsLive);
+
+                        foreach (var position in openOrders.Position)
                         {
-                            entry = new(acno);
-                            entry.ImportMode = "cTrader";
-                            entry.IsDefault = false;
-                            entry.AccountType = act.IsLive ? "Live" : "Demo";
-                            entry.CurrencyType = assets.First(iAsset => iAsset.AssetId == trader.DepositAssetId).Name;
-                            entry.BrokerName = trader.BrokerName;
-                            entry.OpenedOn = DateOnly.FromDateTime(DateTimeOffset.FromUnixTimeMilliseconds(trader.RegistrationTimestamp).DateTime);
-                            var transactions = await apiService.GetTransactions((long)act.CtidTraderAccountId, act.IsLive, start, end);
-                            entry.StartBalance = (decimal)(transactions[0].Balance / 100);
-                            entry.CreatedOn = DateTime.Now;
-                            cta.Accounts.Add(entry);
+                            await OpenApiImporter.ImportPositionAsync(position, ctx.OpenApiService, parent);
                         }
-                        entry.CurrentBalance = (decimal?)MonetaryConverter.FromMonetary(trader.Balance);
-                        entry.LastModifiedOn = DateTime.Now;
-                        
+
+                        processedAccounts++;
                     }
                     dbContext.SaveChanges();
                 }
             }
             return processedAccounts;
         }
+
+
     }
 
     internal class LoginContext
     {
+        private static OpenClient LiveClientFactory() => new(ApiInfo.LiveHost, ApiInfo.Port, TimeSpan.FromSeconds(10));
+        private static OpenClient DemoClientFactory() => new(ApiInfo.DemoHost, ApiInfo.Port, TimeSpan.FromSeconds(10));
+
         static readonly string openApiUrl = "https://openapi.ctrader.com/apps/auth?client_id={0}&redirect_uri={1}&scope=accounts";
         private readonly CTraderAccount forAccount;
+
+        private bool isConnected = false;
+        private Task? connection;
 
         public LoginContext(CTraderAccount account)
         {
@@ -233,9 +229,30 @@ namespace SmartFxJournal.CTrader.Services
         public Uri OAuthUri { get { return new Uri(string.Format(openApiUrl, forAccount.ClientId, RedirectUrl)); } }
 
         public OnBoardingResult OnBoardingResult { get; private set; }
+
         public OnBoardStatus OnBoardStatus { 
             get { return OnBoardingResult.OnBoardingStatus;  } 
             set { OnBoardingResult.OnBoardingStatus = value; } 
+        }
+
+        public OpenApiService? OpenApiService { get; private set; }
+
+        public TradingAccountsService? TradingAccountsService { get; private set; }
+
+        public async Task<OpenApiService> ConnectAsync()
+        {
+            if (! this.isConnected)
+            {
+                ApiCredentials creds = new();
+                creds.ClientId = forAccount.ClientId;
+                creds.Secret = forAccount.ClientSecret;
+                OpenApiService = new OpenApiService(LiveClientFactory, DemoClientFactory);
+                await OpenApiService.Connect(creds);
+                TradingAccountsService = new TradingAccountsService(OpenApiService);
+                isConnected = true;
+            };
+            
+            return OpenApiService;
         }
     }
 }

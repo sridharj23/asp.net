@@ -48,6 +48,7 @@ export abstract class RestApi {
 
     public async put<T>(path : string, input : T) : Promise<T> {
         try {
+            console.log(input);
             return await this.connection.put(path , input).then(response => response.data as T);
         } catch (error) {
             this.handleError(error, "PUT");

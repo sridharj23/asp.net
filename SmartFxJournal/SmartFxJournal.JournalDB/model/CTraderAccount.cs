@@ -1,4 +1,5 @@
 ﻿using Microsoft.EntityFrameworkCore;
+using SmartFxJournal.JournalDB.valueconverters;
 using System;
 using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
@@ -40,24 +41,34 @@ namespace SmartFxJournal.JournalDB.model
         [MaxLength(256)]
         public string? AccessToken { get; set; }
 
-
         [MaxLength(256)]
         public string? RefreshToken { get; set; }
 
-        public DateTime? LastFetchedOn { get; set; }
+        public DateTimeOffset? LastFetchedOn { get; set; }
 
-        public long? ExpiresIn { get; set; }
+        public DateTimeOffset? ExpiresOn { get; set; }
 
-        public List<Account> Accounts { get; set; } = new List<Account>();
+        public List<FxAccount> FxAccounts { get; set; } = new List<FxAccount>();
 
         internal static void OnModelCreate(ModelBuilder builder)
         {
-            Audited.OnModelCreate(builder);
+            builder.Entity<CTraderAccount>(entity =>
+            {
+                entity.HasIndex(x => x.ClientId).IsUnique();
+                entity.HasMany(x => x.FxAccounts).WithOne(a => a.Parent).HasForeignKey(a => a.CTraderId);
+                entity.Property(x => x.LastFetchedOn).HasConversion(new DateTimeOffsetToLongConverter());
+                entity.Property(x => x.ExpiresOn).HasConversion(new DateTimeOffsetToLongConverter());
 
-            builder.Entity<CTraderAccount>().HasIndex(x => x.ClientId).IsUnique();
+                entity.Property(e => e.CreatedOn)
+                .HasColumnType("timestamp without time zone")
+                .HasDefaultValueSql("now()");
 
-            builder.Entity<CTraderAccount>()
-                    .HasMany(x => x.Accounts);
+                entity.Property(e => e.LastModifiedOn)
+                .HasColumnType("timestamp without time zone")
+                .HasDefaultValueSql("now()");
+
+            });
+            
         }
     }
 }

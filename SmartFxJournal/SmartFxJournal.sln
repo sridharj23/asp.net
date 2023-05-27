@@ -5,13 +5,11 @@ VisualStudioVersion = 17.5.33627.172
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "SmartFxJournal", "SmartFxJournal\SmartFxJournal.csproj", "{734F2E7B-39BE-4F0A-BEED-134BF8933E1F}"
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "SmartFxJournal.Configuration", "JournalDB\SmartFxJournal.Configuration.csproj", "{C1BFA68E-7648-4364-BEB9-A940D6C218FF}"
-EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "SmartFxJournal.Common", "SmartFxJournal.common\SmartFxJournal.Common.csproj", "{220CC653-B159-4941-95D8-4914AFA89490}"
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "SmartFxJournal.JournalDB", "SmartFxJournal.JournalDB\SmartFxJournal.JournalDB.csproj", "{0BDB573F-CE45-4D09-B974-8AB0FC3735ED}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SmartFxJournal.CTrader", "SmartFxJournal.CTrader\SmartFxJournal.CTrader.csproj", "{A43D25B7-726B-4619-ABFF-D32E7A850B62}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "SmartFxJournal.CTrader", "SmartFxJournal.CTrader\SmartFxJournal.CTrader.csproj", "{A43D25B7-726B-4619-ABFF-D32E7A850B62}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -23,10 +21,6 @@ Global
 		{734F2E7B-39BE-4F0A-BEED-134BF8933E1F}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{734F2E7B-39BE-4F0A-BEED-134BF8933E1F}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{734F2E7B-39BE-4F0A-BEED-134BF8933E1F}.Release|Any CPU.Build.0 = Release|Any CPU
-		{C1BFA68E-7648-4364-BEB9-A940D6C218FF}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{C1BFA68E-7648-4364-BEB9-A940D6C218FF}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{C1BFA68E-7648-4364-BEB9-A940D6C218FF}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{C1BFA68E-7648-4364-BEB9-A940D6C218FF}.Release|Any CPU.Build.0 = Release|Any CPU
 		{220CC653-B159-4941-95D8-4914AFA89490}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
 		{220CC653-B159-4941-95D8-4914AFA89490}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{220CC653-B159-4941-95D8-4914AFA89490}.Release|Any CPU.ActiveCfg = Release|Any CPU

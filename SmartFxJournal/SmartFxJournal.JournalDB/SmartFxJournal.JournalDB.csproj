@@ -23,7 +23,6 @@
   </ItemGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\JournalDB\SmartFxJournal.Configuration.csproj" />
     <ProjectReference Include="..\SmartFxJournal.common\SmartFxJournal.Common.csproj" />
   </ItemGroup>
 

@@ -1,21 +1,13 @@
 <script setup>
     import SettingsPage from '@/pages/SettingsPage.vue'
+    import PositionsView from '@/views/PositionsView.vue'
     import Card from '@/components/Card.vue';
 </script>
 <template>
     <div id="SummaryPage">
         <Card id="SummaryTop">
-            <template #header>
-                <div class="chead active titleBar">Summary Top</div>
-            </template>
-
             <template #default>
-            <p>A paragraph for the main content.</p>
-            <p>And another one.</p>
-            </template>
-
-            <template #footer>
-            <p>Here's some contact info</p>
+                <PositionsView id="positions"/>
             </template>
         </Card>
         <div id="MiddleContainer">

@@ -1,4 +1,6 @@
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.DependencyInjection.Extensions;
+using SmartFxJournal.Common.Services;
 using SmartFxJournal.CTrader.Services;
 using SmartFxJournal.JournalDB.model;
 
@@ -7,6 +9,7 @@ var builder = WebApplication.CreateBuilder(args);
 builder.Services.AddDbContext<JournalDbContext>(options => options.UseNpgsql(builder.Configuration.GetConnectionString("JournalDB")).UseSnakeCaseNamingConvention());
 // Add services to the container.
 builder.Services.AddSingleton<CTraderService, CTraderService>();
+builder.Services.AddScoped<AccountPositionsService>();
 
 builder.Services.AddControllersWithViews();
 

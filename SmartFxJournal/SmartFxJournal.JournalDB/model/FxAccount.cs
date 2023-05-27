@@ -56,6 +56,8 @@ namespace SmartFxJournal.JournalDB.model
 
         public List<FxPosition> Positions { get; set; } = new List<FxPosition>();
 
+        public List<FxHistoricalTrade> OrderHistory { get; set; } = new List<FxHistoricalTrade>();
+
         internal static void OnModelCreate(ModelBuilder builder)
         {
             builder.Entity<FxAccount>()
@@ -64,6 +66,7 @@ namespace SmartFxJournal.JournalDB.model
             builder.Entity<FxAccount>(entity =>
             {
                 entity.HasMany(a => a.Positions).WithOne(p => p.Owner).HasForeignKey(p => p.AccountNo).IsRequired();
+                entity.HasMany(a => a.OrderHistory).WithOne(p => p.Owner).HasForeignKey(p => p.AccountNo).IsRequired();
 
                 entity.Property(e => e.AccountNo)
                 .ValueGeneratedNever();

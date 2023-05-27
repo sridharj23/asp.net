@@ -23,8 +23,9 @@ namespace SmartFxJournal.JournalDB.model
         public FxAccount Owner { get; set; } = null!;
 
         [Required]
-        [MaxLength(10)]
-        public string SymbolName { get; set; } = null!;
+        [Column(TypeName = "smallint")]
+        [JsonConverter(typeof(JsonStringEnumConverter))]
+        public Symbol Symbol { get; set; }
 
         [Required]
         [JsonConverter(typeof(JsonStringEnumConverter))]
@@ -37,18 +38,21 @@ namespace SmartFxJournal.JournalDB.model
         public decimal VolumeInLots { 
             get
             {
-                return Volume > 0 ? Volume / _lotSize : Decimal.Zero;
+                return Volume > 0 ? Volume / _lotSize : decimal.Zero;
             }
          }
 
         [Column(TypeName = "decimal(10,5)")]
-        public decimal? ExecutionPrice { get; set; }
+        public decimal ExecutionPrice { get; set; } = decimal.Zero;
 
         [Column(TypeName = "decimal(10,2)")]
         public decimal Commission { get; set; } = decimal.Zero;
 
         [Column(TypeName = "decimal(10,2)")]
         public decimal Swap { get; set; } = decimal.Zero;
+
+        [Column(TypeName = "decimal(10,2)")]
+        public decimal GrossProfit { get; set; } = decimal.Zero;
 
         public DateTimeOffset? LastUpdatedAt { get; set; }
 

@@ -13,6 +13,10 @@ namespace SmartFxJournal.JournalDB.model
             EUR,
             USD
         }
+        public enum Symbol
+        {
+            EURUSD = 1
+        }
         public enum ImportMode
         {
             CSV,
@@ -20,8 +24,8 @@ namespace SmartFxJournal.JournalDB.model
         }
         public enum TradeDirection
         {
-            Buy = 1,
-            Sell = 2
+            BUY = 1,
+            SELL = 2
         }
         public enum PositionStatus
         {
@@ -39,13 +43,14 @@ namespace SmartFxJournal.JournalDB.model
             MarketRange = 5,
             StopLimit = 6
         }
-        public enum OrderStatus
+        public enum DealStatus
         {
-            Accepted = 1,
-            Filled = 2,
-            Rejected = 3,
-            Expired = 4,
-            Cancelled = 5
+            FILLED = 2,
+            PARTIALLY_FILLED = 3,
+            REJECTED = 4,
+            INTERNALLY_REJECTED = 5,
+            ERROR = 6,
+            MISSED = 7
         }
     }
 }

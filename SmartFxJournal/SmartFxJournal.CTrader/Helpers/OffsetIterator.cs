@@ -10,19 +10,19 @@ namespace SmartFxJournal.CTrader.helpers
     {
         private DateTimeOffset _start;
         private long _step = 604800000;
-        private long _diff = 0;
+        private long _now = 0;
         private List<TimeStampRange> _ranges = new List<TimeStampRange>();
 
         public OffsetIterator(long startTime)
         {
             _start = DateTimeOffset.FromUnixTimeMilliseconds(startTime);
-            _diff = (DateTimeOffset.Now - _start).Ticks;
+            _now = DateTimeOffset.Now.ToUnixTimeMilliseconds() ;
 
-            for (long i = startTime; i <= _diff; i += _step) {
+            for (long i = startTime; i <= _now; i += _step) {
                 var end = i + _step;
-                if ( end > DateTimeOffset.Now.ToUnixTimeMilliseconds() )
+                if ( end > _now )
                 {
-                    end = DateTimeOffset.Now.ToUnixTimeMilliseconds();
+                    end = _now;
                 }
                 _ranges.Add(new TimeStampRange(i, end));
             }

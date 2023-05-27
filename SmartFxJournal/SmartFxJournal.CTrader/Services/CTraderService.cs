@@ -12,6 +12,7 @@ using SmartFxJournal.CTrader.Helpers;
 using Microsoft.EntityFrameworkCore;
 using SmartFxJournal.CTrader.helpers;
 using static SmartFxJournal.CTrader.helpers.OffsetIterator;
+using System;
 
 namespace SmartFxJournal.CTrader.Services
 {
@@ -186,6 +187,7 @@ namespace SmartFxJournal.CTrader.Services
                         dbContext.SaveChanges();
 
                         FxAccount parent = dbContext.FxAccounts.Include(a => a.Positions).First(a => a.AccountNo == account.AccountNo);
+                        parent.Positions.RemoveAll(p => true);
 
                         var openOrders = await ctx.OpenApiService.GetAccountOrders((long)act.CtidTraderAccountId, act.IsLive);
 
@@ -194,6 +196,50 @@ namespace SmartFxJournal.CTrader.Services
                             await OpenApiImporter.ImportPositionAsync(position, ctx.OpenApiService, parent);
                         }
 
+                        DateTimeOffset to = DateTimeOffset.Now;
+                        parent = dbContext.FxAccounts.Include(a => a.OrderHistory).First(a => a.AccountNo == account.AccountNo);
+                        var history = await ctx.OpenApiService.GetHistoricalTrades((long)act.CtidTraderAccountId, act.IsLive, parent.LastImportedOn, to);
+                        //var orders = await ctx.OpenApiService.GetHistoricalOrders((long)act.CtidTraderAccountId, act.IsLive, parent.LastImportedOn, to);
+                        await OpenApiImporter.ImportHistoryAsync(history, ctx.OpenApiService, parent);
+
+                        var newOrders = parent.OrderHistory.Where(o => o.PositionId == 0).OrderBy(o => o.DealId).ToList();
+
+                        long deal = 0;
+                        long vol = 0;
+                        FxHistoricalTrade prev = null;
+                        List<FxHistoricalTrade> unmatched = new ();
+                        foreach (FxHistoricalTrade trade in newOrders)
+                        {
+                            if (trade.PositionId > 0)
+                            {
+                                continue;
+                            } else if (trade.IsClosing == false)
+                            {
+                                if (vol > 0 && prev != null) { unmatched.Add(prev); }
+                                prev = trade;
+                                trade.PositionId = trade.DealId;
+                                deal = trade.DealId;
+                                vol = trade.Volume;
+                            } else if (vol > 0)  
+                            {
+                                trade.PositionId = deal;
+                                vol -= trade.ClosedVolume;
+                            } else
+                            {
+                                foreach(FxHistoricalTrade unm in unmatched)
+                                {
+                                    if (unm.Volume == trade.Volume && unm.Direction != trade.Direction)
+                                    {
+                                        trade.PositionId = unm.PositionId;
+                                        unmatched.Remove(unm);
+                                        break;
+                                    }
+                                }
+                            }
+                        }
+
+                        parent.LastImportedOn = to;
+                        
                         processedAccounts++;
                     }
                     dbContext.SaveChanges();

@@ -673,6 +673,65 @@ namespace SmartFxJournal.CTrader.Services
             EnqueueMessage(requestMessage, ProtoOAPayloadType.ProtoOaAmendOrderReq, client);
         }
 
+        public Task<ProtoOAOrder[]> GetHistoricalOrders(long accountId, bool isLive, DateTimeOffset from, DateTimeOffset to)
+        {
+            VerifyConnection();
+
+            var client = GetClient(isLive);
+
+            List<ProtoOAOrder> result = new();
+
+            var taskCompletionSource = new TaskCompletionSource<ProtoOAOrder[]>();
+
+            var requestsNumber = 0;
+            var responsesNumber = 0;
+
+            IDisposable disposable = null;
+
+            disposable = client.OfType<ProtoOAOrderListRes>().Where(response => response.CtidTraderAccountId == accountId).Subscribe(response =>
+            {
+                var orders = response.Order.Select(order =>
+                {
+                    return order;
+                });
+
+                result.AddRange(orders);
+
+                responsesNumber++;
+
+                if (responsesNumber == requestsNumber)
+                {
+                    taskCompletionSource.SetResult(result.ToArray());
+
+                    disposable?.Dispose();
+                }
+            });
+
+            var timeAmountToAdd = TimeSpan.FromMilliseconds(604800000);
+
+            var time = from;
+
+            do
+            {
+                var toTime = time.Add(timeAmountToAdd);
+
+                var requestMessage = new ProtoOAOrderListReq
+                {
+                    FromTimestamp = time.ToUnixTimeMilliseconds(),
+                    ToTimestamp = toTime.ToUnixTimeMilliseconds(),
+                    CtidTraderAccountId = accountId
+                };
+
+                EnqueueMessage(requestMessage, ProtoOAPayloadType.ProtoOaOrderListReq, client);
+
+                time = toTime;
+
+                requestsNumber++;
+            } while (time < to);
+
+            return taskCompletionSource.Task;
+        }
+
         public Task<HistoricalTrade[]> GetHistoricalTrades(long accountId, bool isLive, DateTimeOffset from, DateTimeOffset to)
         {
             VerifyConnection();
@@ -1030,7 +1089,7 @@ namespace SmartFxJournal.CTrader.Services
                 Message = message,
                 PayloadType = payloadType,
                 Client = client,
-                IsHistorical = payloadType is ProtoOAPayloadType.ProtoOaDealListReq or ProtoOAPayloadType.ProtoOaGetTrendbarsReq or ProtoOAPayloadType.ProtoOaGetTickdataReq or ProtoOAPayloadType.ProtoOaCashFlowHistoryListReq
+                IsHistorical = payloadType is ProtoOAPayloadType.ProtoOaOrderListReq or ProtoOAPayloadType.ProtoOaDealListReq or ProtoOAPayloadType.ProtoOaGetTrendbarsReq or ProtoOAPayloadType.ProtoOaGetTickdataReq or ProtoOAPayloadType.ProtoOaCashFlowHistoryListReq
             };
 
             _messagesQueue.Enqueue(messageQueueItem);

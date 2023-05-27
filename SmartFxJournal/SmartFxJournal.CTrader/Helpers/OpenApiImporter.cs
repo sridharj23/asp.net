@@ -1,4 +1,5 @@
 ﻿using OpenAPI.Net.Helpers;
+using SmartFxJournal.CTrader.helpers;
 using SmartFxJournal.CTrader.Models;
 using SmartFxJournal.CTrader.Services;
 using SmartFxJournal.JournalDB.model;
@@ -36,7 +37,11 @@ namespace SmartFxJournal.CTrader.Helpers
                     OpenedOn = DateOnly.FromDateTime(DateTimeOffset.FromUnixTimeMilliseconds(trader.RegistrationTimestamp).DateTime),
                     LastImportedOn = DateTimeOffset.FromUnixTimeMilliseconds(trader.RegistrationTimestamp)
                 };
-                var transactions = await openApiService.GetTransactions(accountId, act.IsLive, start, end);
+
+                OffsetIterator iterator = new(entry.LastImportedOn.ToUnixTimeMilliseconds());
+                var span = iterator.TimeStampRanges.First();
+
+                var transactions = await openApiService.GetTransactions(accountId, act.IsLive, span.From, span.To);
                 entry.StartBalance = (decimal)(transactions[0].Balance / 100);
                 entry.CreatedOn = DateTime.Now;
                 
@@ -46,6 +51,42 @@ namespace SmartFxJournal.CTrader.Helpers
             entry.LastModifiedOn = DateTime.Now;
 
             return entry;
+        }
+
+        internal static async Task<FxAccount> ImportHistoryAsync(HistoricalTrade[] history, OpenApiService openApiService, FxAccount parent)
+        {
+            var assets = await openApiService.GetAssets((long)parent.CTraderAccountId, parent.IsLive);
+
+            foreach (HistoricalTrade tr in history)
+            {
+                FxHistoricalTrade? toImport = parent.OrderHistory.Find(a => a.OrderId == tr.OrderId);
+                if (toImport == null)
+                {
+                    toImport = new()
+                    {
+                        DealId = tr.Id,
+                        OrderId = tr.OrderId,
+                        AccountNo = parent.AccountNo,
+                        Symbol = (Symbol) tr.SymbolId,
+                        ExecutionPrice = (decimal)tr.ExecutionPrice,
+                        Direction = EnumUtil.ToEnum<TradeDirection>(tr.Direction),
+                        Volume = (long)tr.Volume,
+                        OrderOpenedAt = tr.ExecutionTime,
+                    };
+                    parent.OrderHistory.Add(toImport);
+                }
+                toImport.Commission = (decimal)(tr.Commission / 100);
+                toImport.DealStatus = EnumUtil.ToEnum<DealStatus>(tr.Status);
+                toImport.Swap = (decimal)(tr.Swap / 100);
+                toImport.LastUpdatedAt = tr.LastUpdateTime;
+                toImport.FilledVolume = (long)tr.FilledVolume;
+                toImport.ClosedVolume = (long)tr.ClosedVolume;
+                toImport.BalanceAfterClose = (decimal) (tr.ClosedBalance / 100);
+                toImport.GrossProfit = (decimal)(tr.GrossProfit / 100);
+                toImport.IsClosing = tr.IsClosing;
+            }
+
+            return parent;
         }
 
         internal static async Task<FxPosition> ImportPositionAsync(ProtoOAPosition position, OpenApiService openApiService, FxAccount parent)
@@ -65,13 +106,13 @@ namespace SmartFxJournal.CTrader.Helpers
                     Comment = position.TradeData.Comment,
                     Commission = (decimal)(position.Commission / Math.Pow(10, position.MoneyDigits)),
                     Direction = (TradeDirection)position.TradeData.TradeSide,
-                    ExecutionPrice = (decimal?)position.Price,
+                    ExecutionPrice = (decimal)position.Price,
                     IsGuaranteedSL = position.GuaranteedStopLoss,
                     IsTrailingStopLoss = position.TrailingStopLoss,
                     Label = position.TradeData.Label,
                     OrderOpenedAt = DateTimeOffset.FromUnixTimeMilliseconds(position.TradeData.OpenTimestamp),
                     PositionId = pId,
-                    SymbolName = name
+                    Symbol = EnumUtil.ToEnum<Symbol>(name)
                 };
                 parent.Positions.Add(fxPosition);
             }

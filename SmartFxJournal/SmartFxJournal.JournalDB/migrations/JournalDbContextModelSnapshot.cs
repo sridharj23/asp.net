@@ -168,6 +168,100 @@ namespace SmartFxJournal.JournalDB.migrations
                         });
                 });
 
+            modelBuilder.Entity("SmartFxJournal.JournalDB.model.FxHistoricalTrade", b =>
+                {
+                    b.Property<long>("DealId")
+                        .HasColumnType("bigint")
+                        .HasColumnName("deal_id");
+
+                    b.Property<long>("AccountNo")
+                        .HasColumnType("bigint")
+                        .HasColumnName("account_no");
+
+                    b.Property<decimal>("BalanceAfterClose")
+                        .HasPrecision(10, 2)
+                        .HasColumnType("numeric(10,2)")
+                        .HasColumnName("balance_after_close");
+
+                    b.Property<long>("ClosedVolume")
+                        .HasColumnType("bigint")
+                        .HasColumnName("closed_volume");
+
+                    b.Property<string>("Comment")
+                        .HasMaxLength(256)
+                        .HasColumnType("character varying(256)")
+                        .HasColumnName("comment");
+
+                    b.Property<decimal>("Commission")
+                        .HasColumnType("decimal(10,2)")
+                        .HasColumnName("commission");
+
+                    b.Property<int>("DealStatus")
+                        .HasColumnType("integer")
+                        .HasColumnName("deal_status");
+
+                    b.Property<int>("Direction")
+                        .HasColumnType("integer")
+                        .HasColumnName("direction");
+
+                    b.Property<decimal>("ExecutionPrice")
+                        .HasColumnType("decimal(10,5)")
+                        .HasColumnName("execution_price");
+
+                    b.Property<long>("FilledVolume")
+                        .HasColumnType("bigint")
+                        .HasColumnName("filled_volume");
+
+                    b.Property<decimal>("GrossProfit")
+                        .HasColumnType("decimal(10,2)")
+                        .HasColumnName("gross_profit");
+
+                    b.Property<bool>("IsClosing")
+                        .HasColumnType("boolean")
+                        .HasColumnName("is_closing");
+
+                    b.Property<string>("Label")
+                        .HasMaxLength(256)
+                        .HasColumnType("character varying(256)")
+                        .HasColumnName("label");
+
+                    b.Property<DateTimeOffset?>("LastUpdatedAt")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("last_updated_at");
+
+                    b.Property<long>("OrderId")
+                        .HasColumnType("bigint")
+                        .HasColumnName("order_id");
+
+                    b.Property<DateTimeOffset?>("OrderOpenedAt")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("order_opened_at");
+
+                    b.Property<long>("PositionId")
+                        .HasColumnType("bigint")
+                        .HasColumnName("position_id");
+
+                    b.Property<decimal>("Swap")
+                        .HasColumnType("decimal(10,2)")
+                        .HasColumnName("swap");
+
+                    b.Property<short>("Symbol")
+                        .HasColumnType("smallint")
+                        .HasColumnName("symbol");
+
+                    b.Property<long>("Volume")
+                        .HasColumnType("bigint")
+                        .HasColumnName("volume");
+
+                    b.HasKey("DealId")
+                        .HasName("pk_historytrades");
+
+                    b.HasIndex("AccountNo")
+                        .HasDatabaseName("ix_historytrades_account_no");
+
+                    b.ToTable("historytrades", (string)null);
+                });
+
             modelBuilder.Entity("SmartFxJournal.JournalDB.model.FxPosition", b =>
                 {
                     b.Property<long>("PositionId")
@@ -191,9 +285,13 @@ namespace SmartFxJournal.JournalDB.migrations
                         .HasColumnType("integer")
                         .HasColumnName("direction");
 
-                    b.Property<decimal?>("ExecutionPrice")
+                    b.Property<decimal>("ExecutionPrice")
                         .HasColumnType("decimal(10,5)")
                         .HasColumnName("execution_price");
+
+                    b.Property<decimal>("GrossProfit")
+                        .HasColumnType("decimal(10,2)")
+                        .HasColumnName("gross_profit");
 
                     b.Property<bool?>("IsGuaranteedSL")
                         .HasColumnType("boolean")
@@ -228,11 +326,9 @@ namespace SmartFxJournal.JournalDB.migrations
                         .HasColumnType("decimal(10,2)")
                         .HasColumnName("swap");
 
-                    b.Property<string>("SymbolName")
-                        .IsRequired()
-                        .HasMaxLength(10)
-                        .HasColumnType("character varying(10)")
-                        .HasColumnName("symbol_name");
+                    b.Property<short>("Symbol")
+                        .HasColumnType("smallint")
+                        .HasColumnName("symbol");
 
                     b.Property<decimal?>("TakeProfit")
                         .HasColumnType("decimal(10,5)")
@@ -269,6 +365,18 @@ namespace SmartFxJournal.JournalDB.migrations
                     b.Navigation("Parent");
                 });
 
+            modelBuilder.Entity("SmartFxJournal.JournalDB.model.FxHistoricalTrade", b =>
+                {
+                    b.HasOne("SmartFxJournal.JournalDB.model.FxAccount", "Owner")
+                        .WithMany("OrderHistory")
+                        .HasForeignKey("AccountNo")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired()
+                        .HasConstraintName("fk_historytrades_accounts_owner_account_no");
+
+                    b.Navigation("Owner");
+                });
+
             modelBuilder.Entity("SmartFxJournal.JournalDB.model.FxPosition", b =>
                 {
                     b.HasOne("SmartFxJournal.JournalDB.model.FxAccount", "Owner")
@@ -288,6 +396,8 @@ namespace SmartFxJournal.JournalDB.migrations
 
             modelBuilder.Entity("SmartFxJournal.JournalDB.model.FxAccount", b =>
                 {
+                    b.Navigation("OrderHistory");
+
                     b.Navigation("Positions");
                 });
 #pragma warning restore 612, 618

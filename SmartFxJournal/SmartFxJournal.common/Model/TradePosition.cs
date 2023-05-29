@@ -16,7 +16,11 @@ namespace SmartFxJournal.Common.Model
 
         public decimal GrossProfit { get; set; }
 
-        public decimal Fees { get; set;}
+        public decimal Commission { get; set;}
+
+        public decimal Swap { get; set; }
+
+        public decimal Fees { get => Commission + Swap; }
 
         public decimal NetProfit { get => GrossProfit + Fees; }
 

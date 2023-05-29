@@ -1,6 +1,7 @@
 ﻿using Microsoft.EntityFrameworkCore;
 using SmartFxJournal.Common.Model;
 using SmartFxJournal.JournalDB.model;
+using System.Globalization;
 using System.Security.Principal;
 
 namespace SmartFxJournal.Common.Services
@@ -20,7 +21,8 @@ namespace SmartFxJournal.Common.Services
             List<FxHistoricalTrade> trades = acc.OrderHistory.OrderBy(o => o.PositionId).ThenBy(o => o.OrderOpenedAt).ToList();
 
             TradePosition pos = null;
-            decimal totFees = decimal.Zero;
+            decimal totSwap = decimal.Zero;
+            decimal totComm = decimal.Zero;
             decimal totProfit = decimal.Zero;
 
             foreach(var tra in trades)
@@ -30,11 +32,13 @@ namespace SmartFxJournal.Common.Services
                 {
                     if (pos != null)
                     {
-                        pos.Fees = totFees;
+                        pos.Commission = totComm;
+                        pos.Swap = totSwap;
                         pos.GrossProfit = totProfit;
                         positions.Add(pos);
                         totProfit = 0;
-                        totFees = 0;
+                        totSwap = 0;
+                        totComm = 0;
                     }
 
                     pos = new()
@@ -50,10 +54,11 @@ namespace SmartFxJournal.Common.Services
                         Price = tra.ExecutionPrice,
                         Swap = tra.Swap,
                         Commission = tra.Commission,
-                        FilledVolume = tra.FilledVolume,
+                        FilledVolume = tra.VolumeInLots,
                         GrossProfit = tra.GrossProfit,
+                        NetProfit = tra.GrossProfit + tra.Commission + tra.Swap,
                         BalanceAfterExecution = tra.BalanceAfterClose,
-                        ExecutionTime = (DateTimeOffset)tra.OrderOpenedAt
+                        ExecutionTime = ((DateTimeOffset)tra.OrderOpenedAt).DateTime.ToString(new CultureInfo("de-DE"))
                     };
                     pos.OpenedOrders.Add(opening);
                 } else if (pos != null)
@@ -65,15 +70,17 @@ namespace SmartFxJournal.Common.Services
                         Price = tra.ExecutionPrice,
                         Swap = tra.Swap,
                         Commission = tra.Commission,
-                        FilledVolume = tra.FilledVolume,
+                        FilledVolume = tra.VolumeInLots,
                         GrossProfit = tra.GrossProfit,
+                        NetProfit = tra.GrossProfit + tra.Commission + tra.Swap,
                         BalanceAfterExecution = tra.BalanceAfterClose,
-                        ExecutionTime = (DateTimeOffset)tra.OrderOpenedAt
-                    };
+                        ExecutionTime = ((DateTimeOffset)tra.OrderOpenedAt).DateTime.ToString(new CultureInfo("de-DE"))
+            };
 
                     pos.ClosedOrders.Add(closed);
                 }
-                totFees += (tra.Swap + tra.Commission);
+                totSwap += tra.Swap;
+                totComm += tra.Commission;
                 totProfit += tra.GrossProfit;
             }
 

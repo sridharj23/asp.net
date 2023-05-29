@@ -2,6 +2,7 @@
   import TabControl from './components/TabControl.vue';
   import Tab from './components/Tab.vue';
   import SummaryPage from './pages/SummaryPage.vue';
+  import TradesPage from '@/pages/TradesPage.vue'
 </script>
 
 <template>
@@ -11,7 +12,7 @@
           <SummaryPage id="summaryPage"/>
         </Tab>
         <Tab title="Trades">
-          
+          <TradesPage id="tradesPage"/>
         </Tab>
         <Tab title="Analysis">
           Morbi posuere, mauris eu vehicula tempor, nibh orci consectetur tortor, id eleifend dolor sapien ut augue.
@@ -52,6 +53,11 @@
     display: block;
     margin: 5px;
     width: 99.5%;
+    height: 100%;
+  }
+  #tradesPage{
+    display: block;
+    margin: 5px;
     height: 100%;
   }
 </style>

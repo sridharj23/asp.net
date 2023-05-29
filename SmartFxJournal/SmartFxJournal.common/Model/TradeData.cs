@@ -10,7 +10,7 @@ namespace SmartFxJournal.Common.Model
     {
         public long OderId { get; set; }
 
-        public DateTimeOffset ExecutionTime { get; set; }
+        public String ExecutionTime { get; set; } = null!;
 
         public decimal FilledVolume { get; set; }
 
@@ -25,5 +25,7 @@ namespace SmartFxJournal.Common.Model
         public decimal Commission { get; set; }
 
         public decimal GrossProfit { get; set; }
+
+        public decimal NetProfit { get; set; }
     }
 }

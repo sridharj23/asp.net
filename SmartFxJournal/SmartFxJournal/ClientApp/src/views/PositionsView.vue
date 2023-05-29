@@ -1,90 +1,78 @@
 <script lang="ts">
-import { PostionsAPI } from '@/api/PositionsApi';
-import type { Position } from '@/api/PositionsApi';
+    import { PostionsAPI, type TradeData } from '@/api/PositionsApi';
+    import type { Position } from '@/api/PositionsApi';
+    import TableControl from '@/components/TableControl.vue';
 
-const api = new PostionsAPI();
+    const api = new PostionsAPI()
 
-export default {
+    export class PositionEntry {
+        constructor(pos : Position, td : TradeData, summary : boolean) {
+            this.Position = summary ? pos.positionId : "-";
+            this.Symbol = summary ? pos.symbol : "-";
+            this.Direction = td.direction;
+            this.Volume = td.filledVolume.toFixed(2);
+            this.ExecutionPrice = td.price.toFixed(5);
+            this.Commission = (summary ? pos.commission : td.commission).toFixed(2);
+            this.Swap = (summary ? pos.swap : td.swap).toFixed(2);
+            this.GrossProfit = (summary ? pos.grossProfit : td.grossProfit).toFixed(2);
+            this.NetProfit = (summary ? pos.netProfit : td.netProfit).toFixed(2);
+            this.ExecutionTime = summary ? "-" : td.executionTime;
+        }
+        Position!: string;
+        Symbol!: string;
+        Volume!: string;
+        Direction!: string;
+        ExecutionPrice!: string;
+        ExecutionTime?: string;
+        Swap!: string;
+        Commission!: string;
+        GrossProfit!: string;
+        NetProfit!: string;
+    }
+
+    export default {
     data() {
         return {
-            positions : [] as Position[]
-        }
+            positions: [] as PositionEntry[],
+            headers: ["Position ID", "Symbol", "Direction", "Volume", "Executed Price", "Commission", "Swap", "Gross Profit", "Net Profit", "Execution Time"]
+        };
     },
-
-    methods : {
+    methods: {
         loadPostions() {
             api.getAll().then((resp) => {
                 console.log(resp);
-                resp.forEach(p => this.positions.push(p));
-            })
+                resp.forEach(p => this.addPosition(p));
+            });
+        },
+        addPosition(pos: Position) {
+            this.positions.push(new PositionEntry(pos, pos.openedOrders[0], true));
+            this.positions.push(new PositionEntry(pos, pos.openedOrders[0], false));
+            pos.closedOrders.forEach(entry => {
+                this.positions.push(new PositionEntry(pos, entry, false));
+            });
         }
     },
-
     mounted() {
         this.loadPostions();
-    }
+    },
+    components: { TableControl }
 }
 </script>
 
 <template>
     <div id="tableContainer">
-        <table>
-            <thead>
-                <tr>
-                    <th>Account</th>
-                    <th>Position</th>
-                    <th>Symbol</th>
-                    <th>Size</th>
-                    <th>Type</th>
-                    <th>Executed Price</th>
-                    <th>Fees</th>
-                    <th>Gross Profit</th>
-                    <th>NetProfit</th>
-                    <th style="width: 235px;">Execution Time</th>
-                </tr>
-            </thead>
-            <tbody>
-                <tr v-for="position in positions" :key="position.positionId">
-                    <td>{{ position.accountNo }}</td>
-                    <td>{{ position.positionId }}</td>
-                    <td>{{ position.symbol }}</td>
-                    <td>{{ position.openedOrders[0].filledVolume }}</td>
-                    <td>{{ position.openedOrders[0].direction }}</td>
-                    <td>{{ position.openedOrders[0].price }}</td>
-                    <td>{{ position.fees }}</td>
-                    <td>{{ position.grossProfit }}</td>
-                    <td>{{ position.netProfit }}</td>
-                    <td style="width: 235px;">{{ position.openedOrders[0].executionTime }}</td>
-                </tr>
-            </tbody>
-        </table>
+        <TableControl id="positionsTable" :dataSource="positions" :headerSource="headers"/>
     </div>
 </template>
 
 <style scoped>
-    table {
-        display: block;
-        border: 1px solid black;
+    #tableContainer {
+        display: flex;
+        flex-direction: column;
+        flex-grow: 1;
+        height: 100%;
     }
-    thead {
-        display: block;
-        text-align: center;
-        margin-right: 1em;
-    }
-    th {
-        border-bottom: 2px solid dodgerblue;
-    }
-    td {
-        border-bottom: 1px solid gainsboro;
-    }
-    td, th {
-        border-left: 1px solid gainsboro;
-        width: 10%;
-        padding: 0.5em;
-    }
-    tbody {
-        display: block;
-        overflow-y: scroll;
-        max-height: 300px;
+    #positionsTable {
+        flex-grow: 1;
     }
 </style>

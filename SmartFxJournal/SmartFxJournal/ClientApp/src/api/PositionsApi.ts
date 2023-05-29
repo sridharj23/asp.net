@@ -8,15 +8,18 @@ export interface TradeData {
     price: number,
     swap: number,
     commission: number,
-    grossProfit: number
+    grossProfit: number,
+    netProfit : number
 }
 
 export interface Position {
-    positionId : string,
     accountNo: string,
+    positionId : string,
     symbol : string,
     grossProfit : number,
     fees : number,
+    swap : number,
+    commission: number,
     netProfit : number
     openedOrders: TradeData[],
     closedOrders: TradeData[]

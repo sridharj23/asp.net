@@ -84,6 +84,15 @@ namespace SmartFxJournal.Common.Services
                 totProfit += tra.GrossProfit;
             }
 
+            // add the last position
+            if (pos != null) 
+            {
+                pos.Commission = totComm;
+                pos.Swap = totSwap;
+                pos.GrossProfit = totProfit;
+                positions.Add(pos); 
+            } 
+
             return positions;
         }
     }

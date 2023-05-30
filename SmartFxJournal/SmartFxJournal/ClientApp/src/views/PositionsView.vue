@@ -34,7 +34,8 @@
     data() {
         return {
             positions: [] as PositionEntry[],
-            headers: ["Position ID", "Symbol", "Direction", "Volume", "Executed Price", "Commission", "Swap", "Gross Profit", "Net Profit", "Execution Time"]
+            headers: ["Position ID", "Symbol", "Direction", "Volume", "Executed Price", "Commission", "Swap", "Gross Profit", "Net Profit", "Execution Time"],
+            propKeys: ["Position", "Symbol", "Direction", "Volume", "ExecutionPrice", "Commission", "Swap", "GrossProfit", "NetProfit", "ExecutionTime"]
         };
     },
     methods: {
@@ -61,7 +62,7 @@
 
 <template>
     <div id="tableContainer">
-        <TableControl id="positionsTable" :dataSource="positions" :headerSource="headers"/>
+        <TableControl id="positionsTable" :dataSource="positions" :headerSource="headers" :dataKeys="propKeys"/>
     </div>
 </template>
 

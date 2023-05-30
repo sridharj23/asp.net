@@ -1,8 +1,11 @@
 <script lang="ts">
+import { computed } from '@vue/reactivity';
+
     export default {
         props : {
-            headerSource : {type : Array},
-            dataSource : { type: Array}
+            headerSource : Array,
+            dataSource : { type: Array},
+            dataKeys : Array
         }
     }
 </script>
@@ -17,7 +20,7 @@
             </thead>
             <tbody>
                 <tr class="tableRow" v-for="entry in dataSource">
-                    <td class="tableDataCell" v-for="val in entry">{{ val }}</td>
+                    <td class="tableDataCell" v-for="key in entry">{{ key }}</td>
                 </tr>
             </tbody>
         </table>
@@ -28,23 +31,23 @@
     .tableContainer {
         display: block;
         height: 100%;
+        max-height: 89vh;
         overflow-y: scroll;
     }
     table {
         width: 100%;
-        height: 90vh;
     }
     .tableHeaderRow, .tableRow {
         width: 100%;
     }
     .tableHeaderCell {
         color: dodgerblue;
+        background-color: rgba(0, 191, 255, 0.178);
         font-weight: bold;
         font-size: large;
         text-align: center;
         padding-top: .3em;
         padding-bottom: .3em;
-        border-bottom: 2px solid dodgerblue;
     }
     .tableDataCell {
         padding-top: 4px;

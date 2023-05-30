@@ -1,14 +1,22 @@
 <script setup>
     import SettingsPage from '@/pages/SettingsPage.vue'
     import Card from '@/components/Card.vue';
+    import AggregateSummaryView from '@/views/AggregateSummaryView.vue';
+    import EquityView from '@/views/EquityView.vue'
 </script>
 <template>
     <div id="SummaryPage">
-        <Card id="SummaryTop">
-            <template #default>
-                <p>A paragraph for the main content.</p>
-            </template>
-        </Card>
+        <div id="SummaryTop">
+            <Card id="TopLeft">
+                <AggregateSummaryView id="SummaryView"/>
+            </Card>
+            <Card id="TopRight">
+                <template #default>
+                    <EquityView id="GrowthChart"/>
+                </template>
+            </Card>
+        </div>
+
         <div id="MiddleContainer">
             <Card id="MiddleLeft">
                 <template #default>
@@ -33,6 +41,16 @@
     #SummaryTop {
         width: 100%;
         height: 30%;
+        display: flex;
+        flex-direction: row;
+    }
+    #TopLeft {
+        width: 50%;
+        margin-right: 5px;
+    }
+    #TopRight {
+        width: 50%;
+        margin-left: 5px;
     }
     #MiddleContainer {
         display: flex;
@@ -55,8 +73,13 @@
         flex-direction: column;
     }
     #SettingsView {
-        flex-grow: 1;
         height: 100%;
         width: auto;
+    }
+    #SummaryView {
+        height: 100%;
+    }
+    #GrowthChart {
+        height: 100%;
     }
 </style>

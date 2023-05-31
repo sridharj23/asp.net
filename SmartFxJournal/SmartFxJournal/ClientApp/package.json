@@ -10,6 +10,7 @@
     "type-check": "vue-tsc --noEmit"
   },
   "dependencies": {
+    "highcharts": "^11.0.1",
     "highcharts-vue": "^1.4.1",
     "pinia": "^2.0.35",
     "vue": "^3.2.47",

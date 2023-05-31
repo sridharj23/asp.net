@@ -62,6 +62,8 @@ export default {
                     this.selectedAccount = ac;
                 }
             }
+            this.SelectedAccountNumber = this.selectedAcNo;
+            console.log(this.SelectedAccountNumber);
         },
         enableEditing() {
             this.editMode = true;

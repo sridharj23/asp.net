@@ -1,6 +1,7 @@
 <script lang="ts">
     import { Chart } from 'highcharts-vue';
-
+    import type {DefaultChartOptions} from '@/helpers/ChartHelper'
+    
     export default {
         components: {
             highcharts: Chart 
@@ -32,7 +33,6 @@
                                 name: '2022',
                                 y: 100,
                                 color: '#B0BF1A',
-                                drilldown: '2022'
                             }, {
                                 name: 2023,
                                 y: 200,

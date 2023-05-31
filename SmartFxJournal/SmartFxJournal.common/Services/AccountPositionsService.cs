@@ -10,9 +10,28 @@ namespace SmartFxJournal.Common.Services
     {
         private readonly JournalDbContext _context;
 
-        public AccountPositionsService(JournalDbContext context) 
-        { 
+        public AccountPositionsService(JournalDbContext context)
+        {
             _context = context;
+        }
+
+        public EquityCurve GetEquityCurve(long AccountNo)
+        {
+            EquityCurve curve = new(AccountNo);
+
+            FxAccount acc = _context.FxAccounts.Include(a => a.OrderHistory).First(a => a.AccountNo == AccountNo);
+            List<FxHistoricalTrade> trades = acc.OrderHistory.Where(o => o.IsClosing == true).OrderBy(o => o.OrderOpenedAt).ToList();
+
+            // Add account start balance first
+            DateTimeOffset dof = new DateTimeOffset(acc.OpenedOn.ToDateTime(TimeOnly.MinValue));
+            curve.DataPoints.Add(new(acc.StartBalance, dof.ToUnixTimeMilliseconds()));
+
+            foreach(FxHistoricalTrade tra in trades)
+            {
+                curve.DataPoints.Add(new(tra.BalanceAfterClose, ((DateTimeOffset)tra.OrderOpenedAt).ToUnixTimeMilliseconds()));
+            }
+
+            return curve;
         }
         public List<TradePosition> GetPositions(long AccountNo) 
         {

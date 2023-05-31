@@ -22,15 +22,41 @@ namespace SmartFxJournal.Common.Services
             FxAccount acc = _context.FxAccounts.Include(a => a.OrderHistory).First(a => a.AccountNo == AccountNo);
             List<FxHistoricalTrade> trades = acc.OrderHistory.Where(o => o.IsClosing == true).OrderBy(o => o.OrderOpenedAt).ToList();
 
+            decimal startBal = acc.StartBalance;
+            DateOnly at = acc.OpenedOn;
+            DateTime startDate = acc.OpenedOn.ToDateTime(TimeOnly.FromTimeSpan(TimeSpan.FromHours(2)));
+            DateTime point = at.ToDateTime(TimeOnly.FromTimeSpan(TimeSpan.FromHours(2)));
+
             // Add account start balance first
-            DateTimeOffset dof = new DateTimeOffset(acc.OpenedOn.ToDateTime(TimeOnly.MinValue));
-            curve.DataPoints.Add(new(acc.StartBalance, dof.ToUnixTimeMilliseconds()));
+            curve.DataPoints.Add(new(startBal, new DateTimeOffset(startDate).ToUnixTimeMilliseconds()));
+
+            decimal totCommission = decimal.Zero;
+            decimal totSwap = decimal.Zero;
+            decimal totPL = decimal.Zero;
+            decimal lastBal = decimal.Zero;
 
             foreach(FxHistoricalTrade tra in trades)
             {
-                curve.DataPoints.Add(new(tra.BalanceAfterClose, ((DateTimeOffset)tra.OrderOpenedAt).ToUnixTimeMilliseconds()));
+                DateTimeOffset dt = (DateTimeOffset)tra.OrderOpenedAt;
+                DateOnly cur = DateOnly.FromDateTime(dt.DateTime);
+
+                if (! cur.Equals(at))
+                {
+                    point = at.ToDateTime(TimeOnly.FromTimeSpan(TimeSpan.FromHours(2)));
+                    curve.DataPoints.Add(new(lastBal, (new DateTimeOffset(point)).ToUnixTimeMilliseconds()));
+                    at = cur;
+                    totCommission = decimal.Zero;
+                    totSwap = decimal.Zero;
+                    totPL = decimal.Zero;
+                }
+                totCommission += tra.Commission;
+                totSwap += tra.Swap;
+                totPL += tra.GrossProfit;
+                lastBal = tra.BalanceAfterClose;
+                point = cur.ToDateTime(TimeOnly.FromTimeSpan(TimeSpan.FromHours(2)));
             }
 
+            curve.DataPoints.Add(new(lastBal, (new DateTimeOffset(point)).ToUnixTimeMilliseconds()));
             return curve;
         }
         public List<TradePosition> GetPositions(long AccountNo) 

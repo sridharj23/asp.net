@@ -13,15 +13,15 @@ export class ChartHelper {
                 line: {
                     color: '#1E90FF',
                     dataLabels: {
-                        enabled: true
+                        enabled: false
                     },
-                    enableMouseTracking: false,
+                    enableMouseTracking: true,
                     lineWidth: 3,
                     marker: {
                         enabled: true,
                         states: {
                             hover: {
-                                enabled: false
+                                enabled: true
                             }
                         }
                     }
@@ -37,7 +37,7 @@ export class ChartHelper {
                 type: 'linear'
             },
             series:[{
-                name: 'Balance',
+                name: '€ ',
                 data: [] as any[]
             }] 
         } as ChartOptions;

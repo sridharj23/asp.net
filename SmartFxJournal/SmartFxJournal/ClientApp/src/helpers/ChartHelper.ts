@@ -9,6 +9,24 @@ export class ChartHelper {
             legend: {
                 enabled: false
             },
+            plotOptions: {
+                line: {
+                    color: '#1E90FF',
+                    dataLabels: {
+                        enabled: true
+                    },
+                    enableMouseTracking: false,
+                    lineWidth: 3,
+                    marker: {
+                        enabled: true,
+                        states: {
+                            hover: {
+                                enabled: false
+                            }
+                        }
+                    }
+                }
+            },
             xAxis: {
                 type: 'datetime'
             },

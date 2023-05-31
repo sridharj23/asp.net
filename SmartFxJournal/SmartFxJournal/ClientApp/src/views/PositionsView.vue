@@ -41,7 +41,6 @@
     methods: {
         loadPostions() {
             api.getAll().then((resp) => {
-                console.log(resp);
                 resp.forEach(p => this.addPosition(p));
             });
         },

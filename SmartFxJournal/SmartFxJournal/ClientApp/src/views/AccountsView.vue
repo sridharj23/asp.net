@@ -1,11 +1,17 @@
 <script lang="ts">
+
+import { useAccountStore } from '@/stores/accountstore';
 import {AccountsAPI} from '@/api/AccountsApi';
 import type { Account } from '@/api/AccountsApi';
 
-const api = new AccountsAPI();
-
 export default {
     name: "AccountsView",
+    setup() {
+        const api = new AccountsAPI();
+        const store = useAccountStore();
+
+        return {api, store};
+    },
     data() {
         return {
             theAccounts: [] as Account[],
@@ -34,6 +40,7 @@ export default {
                 this.activeAccount = ac;
                 this.selectedAccount = ac;
                 this.selectedAcNo = ac.accountNo;
+                this.store.setSelectedAccount(ac.accountNo);
             }
         },
         loadAccounts() {
@@ -41,29 +48,26 @@ export default {
                 this.theAccounts.length = 0;
                 this.selectedAccount = {} as Account;
             }
-            let result = api.getAll();
+            let result = this.api.getAll();
             result.then((resp) => {
                 resp?.forEach(entry => {
-                  console.log(entry);
                   this.addAccount(entry);
                 })
                 if (this.selectedAcNo == "" && resp.length > 0) {
                     this.selectedAcNo = resp[0].accountNo;
                     this.setSelected();
                 }
-                console.log(this.theAccounts);
             });
         },
         setSelected: function() {
-            console.log("Selected account : " + this.selectedAcNo)
             this.selectedAccount = {} as Account;
             for(var ac of this.theAccounts) {
                 if (ac.accountNo == this.selectedAcNo) {
                     this.selectedAccount = ac;
                 }
             }
-            this.SelectedAccountNumber = this.selectedAcNo;
-            console.log(this.SelectedAccountNumber);
+            this.store.setSelectedAccount(this.selectedAcNo);
+            console.log("Selected account : " + this.store.getSelectedAccount);
         },
         enableEditing() {
             this.editMode = true;
@@ -81,9 +85,9 @@ export default {
             if (this.createMode) {
                 this.addAccount(this.selectedAccount);
                 this.selectedAcNo = this.selectedAccount.accountNo;
-                api.createNew(this.selectedAccount);
+                this.api.createNew(this.selectedAccount);
             } else if(this.editMode) {
-                api.update(this.selectedAccount);
+                this.api.update(this.selectedAccount);
             }
             this.createMode = false;
             this.editMode = false;
@@ -95,7 +99,7 @@ export default {
         },
         deleteAccount() {
             if (confirm("The account and all the associated trades and stored data will be deleted ! Are you sure you want to delte?")) {
-                api.delete(this.selectedAccount).then(() => this.loadAccounts());
+                this.api.delete(this.selectedAccount).then(() => this.loadAccounts());
             }
         },
         importTrades() {

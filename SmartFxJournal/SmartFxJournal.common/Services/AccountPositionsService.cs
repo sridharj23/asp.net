@@ -1,5 +1,4 @@
-﻿using Microsoft.EntityFrameworkCore;
-using SmartFxJournal.Common.Model;
+﻿using SmartFxJournal.Common.Model;
 using SmartFxJournal.JournalDB.model;
 using System.Globalization;
 using System.Security.Principal;
@@ -13,6 +12,54 @@ namespace SmartFxJournal.Common.Services
         public AccountPositionsService(JournalDbContext context)
         {
             _context = context;
+        }
+
+        public List<SummaryAggregate> GetSummaryAggregates(long AccountNo) 
+        {
+            Dictionary<int, SummaryAggregate> aggregates = new();
+
+            // Prepare aggregates
+            int curYear = DateTime.Now.Year;
+            int curMonth = DateTime.Now.Month;
+            int prevYear = curYear - 1;
+
+            aggregates.Add(curYear, new SummaryAggregate(curYear.ToString()));
+            aggregates.Add(prevYear, new SummaryAggregate(prevYear.ToString()));
+
+            for (int i = 1; i <= curMonth; i++) 
+            {
+                string key = new DateTime(curYear, i, 1).ToString("MMM", CultureInfo.InvariantCulture) + "-" + curYear.ToString();
+                aggregates.Add(i, new SummaryAggregate(key));
+            }
+
+            // Collect aggregate data
+            FxAccount acc = _context.FxAccounts.Include(a => a.OrderHistory).First(a => a.AccountNo == AccountNo);
+            List<FxHistoricalTrade> trades = acc.OrderHistory.Where(o => o.IsClosing == true && o.OrderOpenedAt?.Year >= prevYear).OrderBy(o => o.OrderOpenedAt).ToList();
+
+
+            foreach(FxHistoricalTrade tr in trades) {
+                int month = tr.OrderOpenedAt?.Month ?? 0;
+                if (tr.OrderOpenedAt?.Year == prevYear) {
+                    CollectAggregate(tr, aggregates[prevYear]);
+                } else if (tr.OrderOpenedAt?.Year == curYear) {
+                    CollectAggregate(tr, aggregates[curYear]);
+                    if (month > 0) {
+                        CollectAggregate(tr, aggregates[month]);
+                    }
+                }
+            }
+
+            return aggregates.Values.ToList().FindAll(a => a.TotalPL != 0);
+        }
+
+        private void CollectAggregate(FxHistoricalTrade tr, SummaryAggregate agg) {
+            decimal tot = tr.GrossProfit + tr.Commission + tr.Swap;
+            agg.TotalPL += tot;
+            if (tr.Direction == GlobalEnums.TradeDirection.BUY) {
+                agg.PLFromLongs += tot;
+            } else {
+                agg.PLFromShorts += tot;
+            }
         }
 
         public EquityCurve GetEquityCurve(long AccountNo)
@@ -103,7 +150,7 @@ namespace SmartFxJournal.Common.Services
                         GrossProfit = tra.GrossProfit,
                         NetProfit = tra.GrossProfit + tra.Commission + tra.Swap,
                         BalanceAfterExecution = tra.BalanceAfterClose,
-                        ExecutionTime = ((DateTimeOffset)tra.OrderOpenedAt).DateTime.ToString(new CultureInfo("de-DE"))
+                        ExecutionTime = tra.OrderOpenedAt?.DateTime.ToString(new CultureInfo("de-DE"))
                     };
                     pos.OpenedOrders.Add(opening);
                 } else if (pos != null)
@@ -119,7 +166,7 @@ namespace SmartFxJournal.Common.Services
                         GrossProfit = tra.GrossProfit,
                         NetProfit = tra.GrossProfit + tra.Commission + tra.Swap,
                         BalanceAfterExecution = tra.BalanceAfterClose,
-                        ExecutionTime = ((DateTimeOffset)tra.OrderOpenedAt).DateTime.ToString(new CultureInfo("de-DE"))
+                        ExecutionTime = tra.OrderOpenedAt?.DateTime.ToString(new CultureInfo("de-DE"))
             };
 
                     pos.ClosedOrders.Add(closed);

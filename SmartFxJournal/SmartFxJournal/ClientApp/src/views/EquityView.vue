@@ -32,7 +32,7 @@
         },
         data() {
             return {
-                chartOptions: ChartHelper.getDefaultOptions()
+                chartOptions: ChartHelper.getDefaultLineOptions()
             }
         }
     }

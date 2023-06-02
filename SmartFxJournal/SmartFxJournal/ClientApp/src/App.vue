@@ -1,63 +1,62 @@
 <script setup>
-  import TabControl from './components/TabControl.vue';
-  import Tab from './components/Tab.vue';
-  import SummaryPage from './pages/SummaryPage.vue';
-  import TradesPage from '@/pages/TradesPage.vue'
+  import { RouterLink, RouterView } from 'vue-router';
+  import StatusBar from '@/components/StatusBar.vue'
+  import Card from '@/components/Card.vue';
 </script>
 
 <template>
-    <div id="MainPage" style="text-align:center">
-      <TabControl id="MainTab">
-        <Tab active="true" title="Summary">
-          <SummaryPage id="summaryPage"/>
-        </Tab>
-        <Tab title="Trades">
-          <TradesPage id="tradesPage"/>
-        </Tab>
-        <Tab title="Analysis">
-          Morbi posuere, mauris eu vehicula tempor, nibh orci consectetur tortor, id eleifend dolor sapien ut augue.
-        </Tab>
-      </TabControl>
-      <div id="StatusBar"/>
+  <Card>
+    <div class="wrapper">
+      <nav>
+        <RouterLink to="/">Summary</RouterLink>
+        <RouterLink to="/trades">Trades</RouterLink>
+      </nav>
     </div>
+  </Card>
+  <RouterView class="routerView"/>
+  <Card id="StatusBar">
+    <StatusBar id="statusdisplay"/>
+  </Card>
 </template>
 
 <style scoped>
-  #MainPage {
-    display: flex;
-    flex-direction: column;
-    position: fixed;
-    left: 0;
-    top: 0;
-    width: 98.5vw;
-    height: 99%;
-    margin: 5px;
+  .routerView {
+    margin-top: 5px;
+    height: 90vh;
+  }
+  nav {
+    width: 100%;
+    font-size: 23px;
+    text-align: left;
+    padding-bottom: 0.5rem;
   }
 
-  #MainTab {
-    flex-grow: 1;
+  nav a.router-link {
+    color: darkgray;
+    font-weight: bold;
+  }
+
+  nav a.router-link-exact-active {
+    color: dodgerblue;
+    font-weight: bold;
+
+  }
+
+  nav a {
+    display: inline-block;
+    padding: 0 1rem;
+    margin-top: 10px;
+    border-left: 1px solid var(grey);
   }
 
   #StatusBar {
-    left: 0;
-    bottom: 0;
-    margin: 5px;
-    width: 99.5%;
+    margin-top: 8px;
     height: 35px;
-    border: 1px solid darkgray;
-    border-radius: 5px;
-    box-shadow: 1px 1px 4px 2px silver;
   }
 
-  #summaryPage {
-    display: block;
-    margin: 5px;
-    width: 99.5%;
-    height: 100%;
+  #statusdisplay {
+    margin-top: 4px;
+    margin-left: 5px;
   }
-  #tradesPage{
-    display: block;
-    margin: 5px;
-    height: 100%;
-  }
+
 </style>

@@ -15,6 +15,9 @@
         },
         mounted() {
             this.store.$subscribe(this.loadEquityCurve);
+            if(this.store.selectedAccount != "0") {
+                this.loadEquityCurve();
+            }
         },
         methods: {
             loadEquityCurve() {

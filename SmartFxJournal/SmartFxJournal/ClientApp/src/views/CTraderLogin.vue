@@ -22,7 +22,7 @@
                     if (has) {
                         //directly request backend for any new accounts
                         api.importAccounts(this.ctTraderId).then(a => {
-                            alert(a + " Please refresh your accounts page to see the changes.");
+                            api.displayInfo(a + " Please refresh your accounts page to see the changes.");
                         })
                     } else {
                         //initiate first time login

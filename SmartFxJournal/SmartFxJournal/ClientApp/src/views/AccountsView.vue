@@ -40,7 +40,7 @@ export default {
                 this.activeAccount = ac;
                 this.selectedAccount = ac;
                 this.selectedAcNo = ac.accountNo;
-                this.store.setSelectedAccount(ac.accountNo);
+                this.store.selectedAccount = ac.accountNo;
             }
         },
         loadAccounts() {
@@ -66,8 +66,8 @@ export default {
                     this.selectedAccount = ac;
                 }
             }
-            this.store.setSelectedAccount(this.selectedAcNo);
-            console.log("Selected account : " + this.store.getSelectedAccount);
+            this.store.selectedAccount = this.selectedAcNo;
+            console.log("Selected account : " + this.store.selectedAccount);
         },
         enableEditing() {
             this.editMode = true;

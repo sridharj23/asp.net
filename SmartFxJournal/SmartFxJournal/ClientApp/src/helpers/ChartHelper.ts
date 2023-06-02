@@ -18,6 +18,7 @@ export class ChartHelper {
             plotOptions: {
                 column: {
                     shadow: true,
+                    dataLabels: { enabled: true },
                     borderColor: 'grey'
                 },
             } as PlotOptions

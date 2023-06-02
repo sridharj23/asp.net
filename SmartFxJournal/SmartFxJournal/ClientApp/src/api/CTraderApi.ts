@@ -25,7 +25,6 @@ export class CTraderAPI extends RestApi {
 
     public async importAccounts(cTraderId : string) : Promise<string> {
         let res = await super.post<string>(this.resource + '/import/' + cTraderId, cTraderId);
-        console.log(res);
         return res;
     }
 }

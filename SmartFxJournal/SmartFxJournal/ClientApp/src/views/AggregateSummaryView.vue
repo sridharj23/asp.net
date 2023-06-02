@@ -6,8 +6,8 @@
     
     const boldPositive = '#009933';
     const boldNegative = '#e60000';
-    const positive = '#99cc00';
-    const negative = '#e65c00';
+    const longs = '#b3b3ff';
+    const shorts = '#ffbb99';
 
     export default {
         setup() {
@@ -20,6 +20,9 @@
         },
         created() {
             this.store.$subscribe(this.initializeChartOptions);
+            if(this.store.selectedAccount != "0") {
+                this.initializeChartOptions();
+            }
         },
         methods: {
             initializeChartOptions() {
@@ -30,9 +33,9 @@
                     this.chartOptions.series.push({name: 'Shorts', data: [] as any});
                     console.log(this.chartOptions.series);
                     resp.forEach(entry => {
-                        this.chartOptions.series[0].data.push({ name: entry.aggregateKey, y: entry.totalPL, color : entry.totalPL > 0 ? boldPositive : boldNegative});
-                        this.chartOptions.series[1].data.push({ name: entry.aggregateKey, y: entry.plFromLongs, color : entry.plFromLongs > 0 ? positive : negative});
-                        this.chartOptions.series[2].data.push({ name: entry.aggregateKey, y: entry.plFromShorts, color : entry.plFromShorts > 0 ? positive : negative});
+                        this.chartOptions.series[0].data.push({ name: entry.aggregateKey, y: entry.totalPL, color: entry.totalPL > 0 ? boldPositive : boldNegative});
+                        this.chartOptions.series[1].data.push({ name: entry.aggregateKey, y: entry.plFromLongs, color: longs, borderWidth: 2, borderColor: entry.plFromLongs > 0 ? boldPositive : boldNegative });
+                        this.chartOptions.series[2].data.push({ name: entry.aggregateKey, y: entry.plFromShorts, color: shorts, borderWidth: 2, borderColor: entry.plFromShorts > 0 ? boldPositive : boldNegative});
                     });
                 });
             }

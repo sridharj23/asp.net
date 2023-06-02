@@ -35,7 +35,7 @@ namespace SmartFxJournal.Common.Services
 
             // Collect aggregate data
             FxAccount acc = await _context.FxAccounts.Include(a => a.OrderHistory).FirstAsync(a => a.AccountNo == AccountNo);
-            List<FxHistoricalTrade> trades = acc.OrderHistory.Where(o => o.IsClosing == true && o.OrderOpenedAt?.Year >= prevYear).OrderBy(o => o.OrderOpenedAt).ToList();
+            List<FxHistoricalTrade> trades = acc.OrderHistory.Where(o => o.OrderOpenedAt?.Year >= prevYear).OrderBy(o => o.OrderOpenedAt).ToList();
 
 
             foreach(FxHistoricalTrade tr in trades) {

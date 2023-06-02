@@ -18,12 +18,11 @@
     #TradesOverview {
         display: flex;
         flex-direction: row;
-        background-color: azure;
         flex-grow: 1;
     }
     #mainContainer {
         flex-grow: 1;
-        height: 100%;
+        height: 99%;
         display: flex;
         flex-direction: row;
         margin-top: 10px;

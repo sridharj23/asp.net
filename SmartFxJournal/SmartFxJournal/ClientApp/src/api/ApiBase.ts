@@ -1,4 +1,5 @@
 import axios, { type AxiosResponse } from 'axios';
+import { useStatusStore } from '@/stores/statusstore';
 
 export abstract class RestApi {
     readonly connection;
@@ -12,8 +13,14 @@ export abstract class RestApi {
         });
     };
 
-    protected handleError(e: unknown, method : string) {
-        alert("Error in " + method + " : " + e);
+    public handleError(e: unknown, method : string) {
+        let store = useStatusStore();
+        store.setError("Error in " + method + " : " + e)
+    }
+
+    public displayInfo(msg : string) {
+        let store = useStatusStore();
+        store.setInfo(msg);
     }
 
     public async index<T>(path : string) : Promise<T[]> {

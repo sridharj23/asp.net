@@ -70,7 +70,7 @@
         display: flex;
         flex-direction: column;
         flex-grow: 1;
-        height: 100%;
+        height: 99%;
     }
     #positionsTable {
         flex-grow: 1;

@@ -1,4 +1,5 @@
-﻿using SmartFxJournal.Common.Model;
+﻿using Microsoft.EntityFrameworkCore;
+using SmartFxJournal.Common.Model;
 using SmartFxJournal.JournalDB.model;
 using System.Globalization;
 using System.Security.Principal;
@@ -14,7 +15,7 @@ namespace SmartFxJournal.Common.Services
             _context = context;
         }
 
-        public List<SummaryAggregate> GetSummaryAggregates(long AccountNo) 
+        public async Task<List<SummaryAggregate>> GetSummaryAggregatesAsync(long AccountNo) 
         {
             Dictionary<int, SummaryAggregate> aggregates = new();
 
@@ -33,7 +34,7 @@ namespace SmartFxJournal.Common.Services
             }
 
             // Collect aggregate data
-            FxAccount acc = _context.FxAccounts.Include(a => a.OrderHistory).First(a => a.AccountNo == AccountNo);
+            FxAccount acc = await _context.FxAccounts.Include(a => a.OrderHistory).FirstAsync(a => a.AccountNo == AccountNo);
             List<FxHistoricalTrade> trades = acc.OrderHistory.Where(o => o.IsClosing == true && o.OrderOpenedAt?.Year >= prevYear).OrderBy(o => o.OrderOpenedAt).ToList();
 
 
@@ -62,11 +63,11 @@ namespace SmartFxJournal.Common.Services
             }
         }
 
-        public EquityCurve GetEquityCurve(long AccountNo)
+        public async Task<EquityCurve> GetEquityCurveAsync(long AccountNo)
         {
             EquityCurve curve = new(AccountNo);
 
-            FxAccount acc = _context.FxAccounts.Include(a => a.OrderHistory).First(a => a.AccountNo == AccountNo);
+            FxAccount acc = await _context.FxAccounts.Include(a => a.OrderHistory).FirstAsync(a => a.AccountNo == AccountNo);
             List<FxHistoricalTrade> trades = acc.OrderHistory.Where(o => o.IsClosing == true).OrderBy(o => o.OrderOpenedAt).ToList();
 
             decimal startBal = acc.StartBalance;
@@ -106,9 +107,9 @@ namespace SmartFxJournal.Common.Services
             curve.DataPoints.Add(new(lastBal, (new DateTimeOffset(point)).ToUnixTimeMilliseconds()));
             return curve;
         }
-        public List<TradePosition> GetPositions(long AccountNo) 
+        public async Task<List<TradePosition>> GetPositionsAsync(long AccountNo) 
         {
-            FxAccount acc = _context.FxAccounts.Include(a => a.OrderHistory).First(a => a.AccountNo == AccountNo); 
+            FxAccount acc = await _context.FxAccounts.Include(a => a.OrderHistory).FirstAsync(a => a.AccountNo == AccountNo); 
             var positions = new List<TradePosition>();
             List<FxHistoricalTrade> trades = acc.OrderHistory.OrderBy(o => o.PositionId).ThenBy(o => o.OrderOpenedAt).ToList();
 

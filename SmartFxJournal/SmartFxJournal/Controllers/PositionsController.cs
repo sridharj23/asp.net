@@ -17,11 +17,11 @@ namespace SmartFxJournal.Controllers
         }
 
         [HttpGet]
-        public List<TradePosition> GetPositions(long account)
+        public async Task<List<TradePosition>> GetPositionsAsync(long account)
         {
             if (account == 0) { account = 4091794; }
 
-            return _service.GetPositions(account);
+            return await _service.GetPositionsAsync(account);
         }
 
     }

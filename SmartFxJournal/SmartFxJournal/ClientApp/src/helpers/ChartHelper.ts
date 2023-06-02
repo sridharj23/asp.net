@@ -36,7 +36,7 @@ export class ChartHelper {
             },
             series:[{
                 name: '€ ',
-                data: [3, 9, 6] as any[]
+                data: [] as any[]
             }], 
             plotOptions: {
                 line: {

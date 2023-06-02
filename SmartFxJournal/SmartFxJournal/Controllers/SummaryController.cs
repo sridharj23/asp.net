@@ -17,10 +17,15 @@ namespace SmartFxJournal.Controllers
         }
 
         [HttpGet("api/Summary/{AccountNo}/equity")]
-        public EquityCurve GetEquityCurve(long AccountNo) 
+        public async Task<ActionResult<EquityCurve>> GetEquityCurve(long AccountNo) 
         {
-            return _service.GetEquityCurve(AccountNo);
+            return await _service.GetEquityCurveAsync(AccountNo);
         }
 
+        [HttpGet("api/Summary/{AccountNo}/aggregates")]
+        public async Task<ActionResult<List<SummaryAggregate>>> GetSummaryAggregates(long AccountNo)
+        {
+            return await _service.GetSummaryAggregatesAsync(AccountNo);
+        }
     }
 }

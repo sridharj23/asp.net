@@ -20,7 +20,6 @@
             loadEquityCurve() {
                 this.api.getEquityCurve(this.store.selectedAccount).then( (resp) => {
                     this.chartOptions.series[0].data = [];
-                    console.log(resp?.dataPoints);
                     resp?.dataPoints.forEach( dp => {
                         this.chartOptions.series[0].data.push({
                             x: dp.timeStamp,

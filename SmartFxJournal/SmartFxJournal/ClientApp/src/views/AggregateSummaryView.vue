@@ -1,4 +1,6 @@
 <script lang="ts">
+    import { useAccountStore } from '@/stores/accountstore';
+    import { SummaryAPI, type EquityDataPoint } from '@/api/SummaryApi';
     import { Chart, type ChartOptions } from 'highcharts-vue';
     import {ChartHelper} from '@/helpers/ChartHelper'
     
@@ -8,38 +10,36 @@
     const negative = '#e65c00';
 
     export default {
+        setup() {
+            const api = new SummaryAPI();
+            const store = useAccountStore();
+            return {api, store};
+        },
         components: {
             highcharts: Chart 
         },
         created() {
-            this.initializeChartOptions()
+            this.store.$subscribe(this.initializeChartOptions);
         },
         methods: {
             initializeChartOptions() {
-                let opt = ChartHelper.getDefaultColumnOptions();
-                opt.series[0].data.push({name: '2022', y: 100, color: boldPositive,});
-                opt.series[0].data.push({name: '2023', y: 200, color: boldPositive,});
-                opt.series[0].data.push({name: 'April-2023', y: -75, color: boldNegative,});
-                opt.series[0].data.push({name: 'May-2023', y: 300, color: boldPositive,});
-
-                opt.series.push({name: 'Longs', data: [] as any});
-                opt.series[1].data.push({name: '2022', y: 250, color: positive,});
-                opt.series[1].data.push({name: '2023', y: 100, color: positive,});
-                opt.series[1].data.push({name: 'April-2023', y: 75, color: positive,});
-                opt.series[1].data.push({name: 'May-2023', y: 100, color: positive,});
-
-                opt.series.push({name: 'Shorts', data: [] as any});
-                opt.series[2].data.push({name: '2022', y: -150, color: negative,});
-                opt.series[2].data.push({name: '2023', y: 100, color: positive,});
-                opt.series[2].data.push({name: 'April-2023', y: -150, color: negative,});
-                opt.series[2].data.push({name: 'May-2023', y: 200, color: positive,});
-
-                this.chartOptions = opt;
+                this.api.getSummary(this.store.selectedAccount).then((resp) => {
+                    this.chartOptions.series = [];
+                    this.chartOptions.series.push({name: 'Net Profit', data: [] as any});
+                    this.chartOptions.series.push({name: 'Longs', data: [] as any});
+                    this.chartOptions.series.push({name: 'Shorts', data: [] as any});
+                    console.log(this.chartOptions.series);
+                    resp.forEach(entry => {
+                        this.chartOptions.series[0].data.push({ name: entry.aggregateKey, y: entry.totalPL, color : entry.totalPL > 0 ? boldPositive : boldNegative});
+                        this.chartOptions.series[1].data.push({ name: entry.aggregateKey, y: entry.plFromLongs, color : entry.plFromLongs > 0 ? positive : negative});
+                        this.chartOptions.series[2].data.push({ name: entry.aggregateKey, y: entry.plFromShorts, color : entry.plFromShorts > 0 ? positive : negative});
+                    });
+                });
             }
         },
         data() {
             return {
-                chartOptions: {} as ChartOptions
+                chartOptions: ChartHelper.getDefaultColumnOptions()
             }
         }
     }

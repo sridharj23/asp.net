@@ -1,5 +1,4 @@
 import { createRouter, createWebHistory } from 'vue-router'
-import SummaryPageVue from '@/pages/SummaryPage.vue'
 
 const router = createRouter({
     history: createWebHistory(import.meta.env.BASE_URL),
@@ -7,7 +6,7 @@ const router = createRouter({
         {
           path: '/',
           name: 'summary',
-          component: SummaryPageVue
+          component: () => import('@/pages/SummaryPage.vue')
         },
         {
           path: '/trades',
@@ -15,7 +14,7 @@ const router = createRouter({
           // route level code-splitting
           // this generates a separate chunk (About.[hash].js) for this route
           // which is lazy-loaded when the route is visited.
-          component: () => import('../pages/TradesPage.vue')
+          component: () => import('@/pages/TradesPage.vue')
         }
     ] 
 })

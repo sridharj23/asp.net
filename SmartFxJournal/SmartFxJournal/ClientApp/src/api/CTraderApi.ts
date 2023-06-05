@@ -27,5 +27,11 @@ export class CTraderAPI extends RestApi {
         let res = await super.post<string>(this.resource + '/import/' + cTraderId, cTraderId);
         return res;
     }
+
+    public async getChartData(positionId: string) {
+        let res = await super.single(this.resource + '/trendbars/' + positionId);
+        console.log(res);
+        return res;
+    }
 }
 

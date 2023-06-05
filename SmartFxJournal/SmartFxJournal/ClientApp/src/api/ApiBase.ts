@@ -1,5 +1,6 @@
 import axios, { type AxiosResponse } from 'axios';
 import { useStatusStore } from '@/stores/statusstore';
+import { type Store } from 'pinia'
 
 export abstract class RestApi {
     readonly connection;

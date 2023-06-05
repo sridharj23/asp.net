@@ -4,38 +4,47 @@
 </script>
 
 <template>
-    <div id="TradesOverview">
-        <div id="mainContainer">
-            <Card id="tradesTable">
-                <PositionsView/>
-            </Card>
+    <div id="TradesPage">
+        <Card id="positionsView">
+            <PositionsView/>
+        </Card>
+        <div id="TradesPageRight">
+            <Card id="tradeGraph"/>
             <Card id="tradesNotes"/>
         </div>
     </div>
 </template>
 
 <style scoped>
-    #TradesOverview {
+    #TradesPage {
         display: flex;
-        flex-direction: row;
         flex-grow: 1;
-    }
-    #mainContainer {
+        flex-direction: row;
         flex-grow: 1;
         height: 99%;
-        display: flex;
-        flex-direction: row;
-        margin-top: 10px;
     }
-    #tradesTable {
-        width: 65%;
+    #positionsView {
+        width: 50%;
         height: 100%;
         margin-right: 5px;
     }
-    #tradesNotes {
-        width: 35%;
-        height: 100%;
+    #TradesPageRight {
+        width: 50%;
         margin-left: 5px;
+        display: flex;
+        flex-direction: column;
+        height: 90%;
+        flex-grow: 1;
+        border: 2px solid blue;
+    }
+    #tradeGraph {
+        height: 50%;
+        flex-grow: 1;
+    }
+    #tradesNotes {
+        height: 50%;
+        margin-top: 5px;
+        flex-grow: 1;
     }
 
 </style>

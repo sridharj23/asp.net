@@ -52,5 +52,12 @@ namespace SmartFxJournal.JournalDB.model
             ERROR = 6,
             MISSED = 7
         }
+
+        public enum ChartPeriod
+        {
+            H1 = 60,
+            H4 = 240,
+            D1 = 1440
+        }
     }
 }

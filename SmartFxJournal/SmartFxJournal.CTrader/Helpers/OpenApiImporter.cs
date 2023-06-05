@@ -55,7 +55,7 @@ namespace SmartFxJournal.CTrader.Helpers
 
         internal static async Task<FxAccount> ImportHistoryAsync(HistoricalTrade[] history, OpenApiService openApiService, FxAccount parent)
         {
-            var assets = await openApiService.GetAssets((long)parent.CTraderAccountId, parent.IsLive);
+            var symbols = await openApiService.GetLightSymbols((long)parent.CTraderAccountId, parent.IsLive);
 
             foreach (HistoricalTrade tr in history)
             {

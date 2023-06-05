@@ -13,6 +13,7 @@ using Microsoft.EntityFrameworkCore;
 using SmartFxJournal.CTrader.helpers;
 using static SmartFxJournal.CTrader.helpers.OffsetIterator;
 using System;
+using System.ComponentModel;
 
 namespace SmartFxJournal.CTrader.Services
 {
@@ -248,7 +249,65 @@ namespace SmartFxJournal.CTrader.Services
             return processedAccounts;
         }
 
+        public async Task<ChartTrendBarSnapshot> GetTrendBarsAsync(long PositionId)
+        {
+            ChartTrendBarSnapshot snapshot = new(ChartPeriod.H1, Symbol.EURUSD);
 
+            using (var serviceScope = _scopeFactory.CreateScope())
+            {
+                JournalDbContext dbContext = serviceScope.ServiceProvider.GetService<JournalDbContext>() ?? throw new ArgumentNullException(nameof(serviceScope));
+                var positions = await dbContext.FxOrderHistory.Include(o => o.Owner).Where((pos) =>  pos.PositionId == PositionId).ToListAsync();
+
+                DateTimeOffset openedAt = DateTimeOffset.FromUnixTimeMilliseconds(1);
+                DateTimeOffset closedAt = DateTimeOffset.FromUnixTimeMilliseconds(1);
+
+                foreach(var pos in positions)
+                {
+                    DateTimeOffset val = pos.OrderOpenedAt.GetValueOrDefault();
+
+                    if (pos.IsClosing)
+                    {
+                        if (val > closedAt)
+                        {
+                            closedAt = val;
+                        }
+                    } else
+                    {
+                        openedAt = val;
+                    }
+                }
+
+                openedAt = openedAt.Subtract(TimeSpan.FromDays(5));
+                closedAt = closedAt.AddDays(5);
+                if (closedAt > DateTimeOffset.Now)
+                {
+                    closedAt = DateTimeOffset.Now;
+                }
+
+                FxAccount acc = positions[0].Owner;
+                long symbol = (long)positions[0].Symbol;
+
+                LoginContext ctx = _loginContexts.First().Value;
+                await ctx.ConnectAsync();
+
+                var trendBars = await ctx.OpenApiService.GetTrendbars(acc.AccountNo, acc.IsLive, DateTimeOffset.Now.Subtract(TimeSpan.FromDays(5)), DateTimeOffset.Now, ProtoOATrendbarPeriod.H1, symbol);
+
+                long digits = 100000;
+
+                foreach (var bar in trendBars)
+                {
+                    OHLC oHLC = new OHLC();
+                    oHLC.Low = bar.Low / digits;
+                    oHLC.Open = oHLC.Low + ((long)bar.DeltaOpen / digits);
+                    oHLC.Close = oHLC.Low + ((long)bar.DeltaClose / digits);
+                    oHLC.High = oHLC.Low + ((long)bar.DeltaHigh / digits);
+                    oHLC.OpenTimeStamp = DateTimeOffset.FromUnixTimeSeconds(bar.UtcTimestampInMinutes * 60);
+                    snapshot.TrendBars.Add(oHLC);
+                }
+            }
+
+            return snapshot;
+        }
     }
 
     internal class LoginContext

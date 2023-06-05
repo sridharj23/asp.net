@@ -66,5 +66,11 @@ namespace SmartFxJournal.Controllers
         {
             return await _service.ImportAccounts(ctraderid);
         }
+
+        [HttpGet("api/ctrader/trendbars/{positionid}")]
+        public async Task<ActionResult<ChartTrendBarSnapshot>> GetTrendBarSnapshot(long positionid)
+        {
+            return await _service.GetTrendBarsAsync(positionid);
+        }
     }
 }

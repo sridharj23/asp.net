@@ -1,5 +1,6 @@
 <script setup>
-    import PositionsView from '@/views/PositionsView.vue'
+    import PositionsView from '@/views/PositionsView.vue';
+    import TradeChart from '@/views/TradeChart.vue';
     import Card from '@/components/Card.vue';
 </script>
 
@@ -9,7 +10,9 @@
             <PositionsView/>
         </Card>
         <div id="TradesPageRight">
-            <Card id="tradeGraph"/>
+            <Card id="tradeGraph">
+                <TradeChart id="tradeChartView"/>
+            </Card>
             <Card id="tradesNotes"/>
         </div>
     </div>
@@ -18,10 +21,9 @@
 <style scoped>
     #TradesPage {
         display: flex;
-        flex-grow: 1;
         flex-direction: row;
         flex-grow: 1;
-        height: 99%;
+        height: 90vh;
     }
     #positionsView {
         width: 50%;
@@ -33,13 +35,15 @@
         margin-left: 5px;
         display: flex;
         flex-direction: column;
-        height: 90%;
+        height: 100%;
         flex-grow: 1;
-        border: 2px solid blue;
     }
     #tradeGraph {
         height: 50%;
         flex-grow: 1;
+    }
+    #tradeChartView {
+        height: 100%;
     }
     #tradesNotes {
         height: 50%;

@@ -9,7 +9,7 @@ using System.Text.Json;
 using static SmartFxJournal.JournalDB.model.GlobalEnums;
 using SmartFxJournal.CTrader.Helpers;
 using Microsoft.EntityFrameworkCore;
-
+using System.Globalization;
 
 namespace SmartFxJournal.CTrader.Services
 {
@@ -233,19 +233,26 @@ namespace SmartFxJournal.CTrader.Services
                 LoginContext ctx = _loginContexts.First().Value;
                 await ctx.ConnectAsync();
 
-                var trendBars = await ctx.OpenApiService.GetTrendbars(acc.AccountNo, acc.IsLive, DateTimeOffset.Now.Subtract(TimeSpan.FromDays(5)), DateTimeOffset.Now, ProtoOATrendbarPeriod.H1, symbol);
+                ctx.OpenApiService.AuthorizeAccount((long)acc.CTraderAccountId, acc.IsLive, ctx.CTraderAccount.AccessToken);
+
+                var trendBars = await ctx.OpenApiService.GetTrendbars((long)acc.CTraderAccountId, acc.IsLive, openedAt, closedAt, ProtoOATrendbarPeriod.H1, symbol);
 
                 long digits = 100000;
 
+                NumberFormatInfo precision = new();
+                precision.NumberDecimalDigits = 5;
+                List<string> ohlc;
+
                 foreach (var bar in trendBars)
                 {
-                    OHLC oHLC = new OHLC();
-                    oHLC.Low = bar.Low / digits;
-                    oHLC.Open = oHLC.Low + ((long)bar.DeltaOpen / digits);
-                    oHLC.Close = oHLC.Low + ((long)bar.DeltaClose / digits);
-                    oHLC.High = oHLC.Low + ((long)bar.DeltaHigh / digits);
-                    oHLC.OpenTimeStamp = DateTimeOffset.FromUnixTimeSeconds(bar.UtcTimestampInMinutes * 60);
-                    snapshot.TrendBars.Add(oHLC);
+                    ohlc = new List<string>();
+                    ohlc.Add((((long)bar.UtcTimestampInMinutes) * 60000).ToString());
+                    ohlc.Add(decimal.Divide(bar.Low + (long)bar.DeltaOpen, digits).ToString("N", precision));
+                    ohlc.Add(decimal.Divide(bar.Low + (long)bar.DeltaHigh, digits).ToString("N", precision));
+                    ohlc.Add(decimal.Divide(bar.Low, digits).ToString("N", precision));
+                    ohlc.Add(decimal.Divide(bar.Low + (long)bar.DeltaClose, digits).ToString("N", precision));
+
+                    snapshot.TrendBars.Add(ohlc.ToArray());
                 }
             }
 

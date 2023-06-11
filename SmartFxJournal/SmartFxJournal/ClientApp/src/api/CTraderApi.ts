@@ -11,6 +11,12 @@ export interface AccountEntry {
     opendedOn: string
 }
 
+export interface TrendBars {
+    timePeriod: string;
+    symbol: string;
+    trendBars: number[][];
+}
+
 export class CTraderAPI extends RestApi {
     readonly resource = 'ctrader';
 
@@ -28,10 +34,20 @@ export class CTraderAPI extends RestApi {
         return res;
     }
 
-    public async getChartData(positionId: string) {
-        let res = await super.single(this.resource + '/trendbars/' + positionId);
-        console.log(res);
-        return res;
+    public async getChartData(positionId: string) : Promise<TrendBars> {
+        let data : TrendBars = {} ;
+        super.single<TrendBars>(this.resource + '/trendbars/' + positionId).then(resp => {
+            data = {symbol: resp.symbol, timePeriod: resp.timePeriod, trendBars: new Array<number[]>()}
+
+            resp.trendBars.forEach(element => {
+                let entry = new Array<number>();
+                element.forEach(val => {
+                    entry.push(+val);
+                });
+                data.trendBars.push(entry);
+            });
+            return data;
+        });
     }
 }
 

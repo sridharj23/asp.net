@@ -21,15 +21,15 @@ namespace SmartFxJournal.CTrader.Models
 
         public Symbol Symbol { get; init; }
 
-        public List<OHLC> TrendBars { get; set; } = new List<OHLC>();
+        public List<string[]> TrendBars { get; set; } = new List<string[]>();
     }
 
     public class OHLC
     {
-        public decimal Open { get; set; }
-        public decimal High { get; set; }
-        public decimal Low { get; set; }
-        public decimal Close { get; set; }
+        public string Open { get; set; } = null!;
+        public string High { get; set; } = null!;
+        public string Low { get; set; } = null!;
+        public string Close { get; set; } = null!;
         public DateTimeOffset OpenTimeStamp { get; set; }
     }
 }

@@ -1,6 +1,19 @@
 import type { ChartOptions, PlotOptions, SeriesOptionsType } from "highcharts";
 
 export class ChartHelper {
+    public static getDefaultStockChartOptions() : ChartOptions {
+        return {
+            chart: {type : 'candlestick'},
+            turboThreshold: 5000,
+            title: {text: 'Price Chart'},
+            series: [{
+                name: '',
+                type: 'candlestick',
+                data: [] as any[]
+            }],
+        }
+    }
+
     public static getDefaultColumnOptions() : ChartOptions {
         return {
             chart: { type: 'column' },

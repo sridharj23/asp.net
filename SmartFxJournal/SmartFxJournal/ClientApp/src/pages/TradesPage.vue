@@ -1,17 +1,35 @@
-<script setup>
+<script lang="ts">
     import PositionsView from '@/views/PositionsView.vue';
     import TradeChart from '@/views/TradeChart.vue';
     import Card from '@/components/Card.vue';
+
+    export default {
+        components: {
+            PositionsView,
+            TradeChart,
+            Card
+        },
+        data() {
+            return {
+                selectedPosition: ""
+            }
+        },
+        methods: {
+            handlePositionSelection(position : string) {
+                this.selectedPosition = position;
+            }
+        }
+    }
 </script>
 
 <template>
     <div id="TradesPage">
         <Card id="positionsView">
-            <PositionsView/>
+            <PositionsView @positionSelected="handlePositionSelection"/>
         </Card>
         <div id="TradesPageRight">
             <Card id="tradeGraph">
-                <TradeChart id="tradeChartView"/>
+                <TradeChart id="tradeChartView" ref="tradeChart" :positionId="selectedPosition"/>
             </Card>
             <Card id="tradesNotes"/>
         </div>

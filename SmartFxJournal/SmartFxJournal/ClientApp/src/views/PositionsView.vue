@@ -1,7 +1,6 @@
 <script lang="ts">
     import { CTraderAPI } from '@/api/CTraderApi';
-    import { PostionsAPI, type TradeData } from '@/api/PositionsApi';
-    import type { Position } from '@/api/PositionsApi';
+    import { PostionsAPI, type Position } from '@/api/PositionsApi';
     import DataTable from '@/components/DataTable.vue';
     import type { DataColumn } from '@/components/DataTable.vue';
     
@@ -16,13 +15,16 @@
                 { property: "positionId", title: "Position ID", propType: "default" },
                 { property: "symbol", title: "Symbol", propType: "default" },
                 { property: "direction", title: "Direction", propType: "default" },
-                { property: "volume", title: "Volume", propType: "default" },
-                { property: "price", title: "Execution Price", propType: "default" },
+                { property: "volumeInLots", title: "Volume", propType: "default" },
+                { property: "entryPrice", title: "Entry Price", propType: "default" },
+                { property: "exitPrice", title: "Exit Price", propType: "default" },
                 { property: "commission", title: "Commission", propType: "Currency" },
                 { property: "swap", title: "Swap", propType: "Currency" },
                 { property: "grossProfit", title: "Gross Profit", propType: "Currency" },
                 { property: "netProfit", title: "Net Profit", propType: "Currency" },
-                { property: "executionTime", title: "Execution Time", propType: "default" }
+                { property: "balanceAfter", title: "Balance After", propType: "Currency" },
+                { property: "orderOpenedAt", title: "Opened At", propType: "default" },
+                { property: "orderClosedAt", title: "Closed At", propType: "default" }
             ] as DataColumn[],
             selectedRowId: "0"
         };
@@ -30,28 +32,24 @@
     methods: {
         loadPostions() {
             api.getAll().then((resp) => {
-                resp.forEach(pos => {
-                    this.positions.push(this.createRow(pos, pos.openedOrders[0], true));
-                    this.positions.push(this.createRow(pos, pos.openedOrders[0], false));
-                    pos.closedOrders.forEach(entry => {
-                        this.positions.push(this.createRow(pos, entry, false));
-                    });
-                });
+                resp.forEach(pos => this.positions.push(this.createRow(pos)));
             });
         },
-        createRow(pos: Position, td: TradeData, summary: boolean) {
+        createRow(pos: Position) {
             return {
-                group: pos.positionId,
-                positionId: summary ? pos.positionId : "",
-                symbol: summary ? pos.symbol : "",
-                direction: td.direction,
-                volume: td.filledVolume.toFixed(2),
-                price: td.price.toFixed(5),
-                commission: (summary ? pos.commission : td.commission).toFixed(2),
-                swap: (summary ? pos.swap : td.swap).toFixed(2),
-                grossProfit: (summary ? pos.grossProfit : td.grossProfit).toFixed(2),
-                netProfit: (summary ? pos.netProfit : td.netProfit).toFixed(2),
-                executionTime: summary ? "-" : td.executionTime
+                positionId: pos.positionId,
+                symbol: pos.symbol,
+                direction: pos.direction,
+                volume: pos.volumeInLots.toFixed(2),
+                entryPrice: pos.entryPrice.toFixed(5),
+                exitPrice: pos.exitPrice.toFixed(5),
+                commission: pos.commission.toFixed(2),
+                swap: pos.swap.toFixed(2),
+                grossProfit: pos.grossProfit.toFixed(2),
+                netProfit: pos.netProfit.toFixed(2),
+                balanceAfter: pos.balanceAfter.toFixed(2),
+                orderOpenedAt: new Date(pos.orderOpenedAt).toLocaleString(),
+                orderClosedAt: new Date(pos.orderClosedAt).toLocaleString(),
             } as Record<string, string>;
         },
         handleRowSelection(position: string) {
@@ -71,7 +69,7 @@
 
 <template>
     <div id="positionsTable">
-        <DataTable class="dataTable" :columns="columns" :dataSource="positions" :rowIdProperty="'group'" @rowSelected="handleRowSelection" @rowDoubleClicked="handleRowDblClick"/>
+        <DataTable class="dataTable" :columns="columns" :dataSource="positions" :rowIdProperty="'positionId'" @rowSelected="handleRowSelection" @rowDoubleClicked="handleRowDblClick"/>
     </div>
 </template>
 

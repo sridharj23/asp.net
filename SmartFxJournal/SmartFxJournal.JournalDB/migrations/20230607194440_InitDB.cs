@@ -6,13 +6,13 @@ using Microsoft.EntityFrameworkCore.Migrations;
 namespace SmartFxJournal.JournalDB.migrations
 {
     /// <inheritdoc />
-    public partial class InitialDBCreate : Migration
+    public partial class InitDB : Migration
     {
         /// <inheritdoc />
         protected override void Up(MigrationBuilder migrationBuilder)
         {
             migrationBuilder.CreateTable(
-                name: "ctraderaccounts",
+                name: "ctradermaster",
                 columns: table => new
                 {
                     c_trader_id = table.Column<string>(type: "character varying(256)", maxLength: 256, nullable: false),
@@ -28,11 +28,11 @@ namespace SmartFxJournal.JournalDB.migrations
                 },
                 constraints: table =>
                 {
-                    table.PrimaryKey("pk_ctraderaccounts", x => x.c_trader_id);
+                    table.PrimaryKey("pk_ctradermaster", x => x.c_trader_id);
                 });
 
             migrationBuilder.CreateTable(
-                name: "accounts",
+                name: "tradingaccounts",
                 columns: table => new
                 {
                     account_no = table.Column<long>(type: "bigint", nullable: false),
@@ -52,123 +52,129 @@ namespace SmartFxJournal.JournalDB.migrations
                 },
                 constraints: table =>
                 {
-                    table.PrimaryKey("pk_accounts", x => x.account_no);
+                    table.PrimaryKey("pk_tradingaccounts", x => x.account_no);
                     table.CheckConstraint("chk_positive", "account_no > 0");
                     table.ForeignKey(
-                        name: "fk_accounts_ctraderaccounts_parent_c_trader_id",
+                        name: "fk_tradingaccounts_ctradermaster_c_trader_account_c_trader_id",
                         column: x => x.c_trader_id,
-                        principalTable: "ctraderaccounts",
+                        principalTable: "ctradermaster",
                         principalColumn: "c_trader_id");
                 });
 
             migrationBuilder.CreateTable(
-                name: "fxpositions",
+                name: "tradedpositions",
                 columns: table => new
                 {
                     position_id = table.Column<long>(type: "bigint", nullable: false),
                     position_status = table.Column<short>(type: "smallint", nullable: false),
-                    is_guaranteed_sl = table.Column<bool>(type: "boolean", nullable: true),
-                    is_trailing_stop_loss = table.Column<bool>(type: "boolean", nullable: false),
-                    used_margin = table.Column<decimal>(type: "numeric(10,2)", nullable: false),
-                    tax = table.Column<decimal>(type: "numeric(10,2)", nullable: false),
-                    stop_loss = table.Column<decimal>(type: "numeric(10,5)", nullable: true),
-                    take_profit = table.Column<decimal>(type: "numeric(10,5)", nullable: true),
                     account_no = table.Column<long>(type: "bigint", nullable: false),
                     symbol = table.Column<short>(type: "smallint", nullable: false),
                     direction = table.Column<int>(type: "integer", nullable: false),
                     volume = table.Column<long>(type: "bigint", nullable: false),
-                    execution_price = table.Column<decimal>(type: "numeric(10,5)", nullable: false),
+                    entry_price = table.Column<decimal>(type: "numeric(10,5)", nullable: false),
+                    exit_price = table.Column<decimal>(type: "numeric(10,5)", nullable: false),
+                    stop_loss = table.Column<decimal>(type: "numeric(10,5)", nullable: false),
+                    take_profit = table.Column<decimal>(type: "numeric(10,5)", nullable: true),
                     commission = table.Column<decimal>(type: "numeric(10,2)", nullable: false),
                     swap = table.Column<decimal>(type: "numeric(10,2)", nullable: false),
                     gross_profit = table.Column<decimal>(type: "numeric(10,2)", nullable: false),
-                    last_updated_at = table.Column<DateTimeOffset>(type: "timestamp with time zone", nullable: true),
-                    order_opened_at = table.Column<DateTimeOffset>(type: "timestamp with time zone", nullable: true),
-                    comment = table.Column<string>(type: "character varying(256)", maxLength: 256, nullable: true),
-                    label = table.Column<string>(type: "character varying(256)", maxLength: 256, nullable: true)
+                    net_profit = table.Column<decimal>(type: "numeric(10,2)", nullable: false),
+                    balance_after = table.Column<decimal>(type: "numeric(10,2)", nullable: false),
+                    last_updated_at = table.Column<DateTimeOffset>(type: "timestamp with time zone", nullable: false),
+                    order_opened_at = table.Column<DateTimeOffset>(type: "timestamp with time zone", nullable: false),
+                    order_closed_at = table.Column<DateTimeOffset>(type: "timestamp with time zone", nullable: false)
                 },
                 constraints: table =>
                 {
-                    table.PrimaryKey("pk_fxpositions", x => x.position_id);
+                    table.PrimaryKey("pk_tradedpositions", x => x.position_id);
                     table.ForeignKey(
-                        name: "fk_fxpositions_accounts_owner_account_no",
+                        name: "fk_tradedpositions_tradingaccounts_trading_account_account_no",
                         column: x => x.account_no,
-                        principalTable: "accounts",
+                        principalTable: "tradingaccounts",
                         principalColumn: "account_no",
                         onDelete: ReferentialAction.Cascade);
                 });
 
             migrationBuilder.CreateTable(
-                name: "historytrades",
+                name: "executedorders",
                 columns: table => new
                 {
                     deal_id = table.Column<long>(type: "bigint", nullable: false),
                     order_id = table.Column<long>(type: "bigint", nullable: false),
-                    position_id = table.Column<long>(type: "bigint", nullable: false),
-                    filled_volume = table.Column<long>(type: "bigint", nullable: false),
-                    closed_volume = table.Column<long>(type: "bigint", nullable: false),
-                    balance_after_close = table.Column<decimal>(type: "numeric(10,2)", precision: 10, scale: 2, nullable: false),
-                    deal_status = table.Column<int>(type: "integer", nullable: false),
-                    is_closing = table.Column<bool>(type: "boolean", nullable: false),
+                    deal_status = table.Column<short>(type: "smallint", nullable: false),
                     account_no = table.Column<long>(type: "bigint", nullable: false),
+                    position_id = table.Column<long>(type: "bigint", nullable: false),
                     symbol = table.Column<short>(type: "smallint", nullable: false),
                     direction = table.Column<int>(type: "integer", nullable: false),
-                    volume = table.Column<long>(type: "bigint", nullable: false),
+                    filled_volume = table.Column<long>(type: "bigint", nullable: false),
+                    closed_volume = table.Column<long>(type: "bigint", nullable: false),
+                    is_closing = table.Column<bool>(type: "boolean", nullable: false),
                     execution_price = table.Column<decimal>(type: "numeric(10,5)", nullable: false),
                     commission = table.Column<decimal>(type: "numeric(10,2)", nullable: false),
                     swap = table.Column<decimal>(type: "numeric(10,2)", nullable: false),
                     gross_profit = table.Column<decimal>(type: "numeric(10,2)", nullable: false),
-                    last_updated_at = table.Column<DateTimeOffset>(type: "timestamp with time zone", nullable: true),
-                    order_opened_at = table.Column<DateTimeOffset>(type: "timestamp with time zone", nullable: true),
-                    comment = table.Column<string>(type: "character varying(256)", maxLength: 256, nullable: true),
-                    label = table.Column<string>(type: "character varying(256)", maxLength: 256, nullable: true)
+                    balance_after = table.Column<decimal>(type: "numeric(10,2)", nullable: false),
+                    order_executed_at = table.Column<DateTimeOffset>(type: "timestamp with time zone", nullable: false),
+                    last_updated_at = table.Column<DateTimeOffset>(type: "timestamp with time zone", nullable: false)
                 },
                 constraints: table =>
                 {
-                    table.PrimaryKey("pk_historytrades", x => x.deal_id);
+                    table.PrimaryKey("pk_executedorders", x => x.deal_id);
                     table.ForeignKey(
-                        name: "fk_historytrades_accounts_owner_account_no",
+                        name: "fk_executedorders_tradedpositions_position_id",
+                        column: x => x.position_id,
+                        principalTable: "tradedpositions",
+                        principalColumn: "position_id",
+                        onDelete: ReferentialAction.Cascade);
+                    table.ForeignKey(
+                        name: "fk_executedorders_tradingaccounts_trading_account_account_no",
                         column: x => x.account_no,
-                        principalTable: "accounts",
+                        principalTable: "tradingaccounts",
                         principalColumn: "account_no",
                         onDelete: ReferentialAction.Cascade);
                 });
 
             migrationBuilder.CreateIndex(
-                name: "ix_accounts_c_trader_id",
-                table: "accounts",
-                column: "c_trader_id");
-
-            migrationBuilder.CreateIndex(
-                name: "ix_ctraderaccounts_client_id",
-                table: "ctraderaccounts",
+                name: "ix_ctradermaster_client_id",
+                table: "ctradermaster",
                 column: "client_id",
                 unique: true);
 
             migrationBuilder.CreateIndex(
-                name: "ix_fxpositions_account_no",
-                table: "fxpositions",
+                name: "ix_executedorders_account_no",
+                table: "executedorders",
                 column: "account_no");
 
             migrationBuilder.CreateIndex(
-                name: "ix_historytrades_account_no",
-                table: "historytrades",
+                name: "ix_executedorders_position_id",
+                table: "executedorders",
+                column: "position_id");
+
+            migrationBuilder.CreateIndex(
+                name: "ix_tradedpositions_account_no",
+                table: "tradedpositions",
                 column: "account_no");
+
+            migrationBuilder.CreateIndex(
+                name: "ix_tradingaccounts_c_trader_id",
+                table: "tradingaccounts",
+                column: "c_trader_id");
         }
 
         /// <inheritdoc />
         protected override void Down(MigrationBuilder migrationBuilder)
         {
             migrationBuilder.DropTable(
-                name: "fxpositions");
+                name: "executedorders");
 
             migrationBuilder.DropTable(
-                name: "historytrades");
+                name: "tradedpositions");
 
             migrationBuilder.DropTable(
-                name: "accounts");
+                name: "tradingaccounts");
 
             migrationBuilder.DropTable(
-                name: "ctraderaccounts");
+                name: "ctradermaster");
         }
     }
 }

@@ -15,13 +15,16 @@ namespace SmartFxJournal.CTrader.Helpers
 {
     internal class OpenApiImporter
     {
-        internal static async Task<FxAccount> ImportAccountAsync(ProtoOACtidTraderAccount act, OpenApiService openApiService, CTraderAccount parent)
+        private static readonly long RECONCILE_POSITION_ID = -1000000;
+
+        internal static async Task<TradingAccount> ImportAccountAsync(ProtoOACtidTraderAccount act, OpenApiService openApiService, CTraderAccount parent)
         {
+
             long accountId = (long)act.CtidTraderAccountId;
             var trader = await openApiService.GetTrader(accountId, act.IsLive);
             var assets = await openApiService.GetAssets(accountId, act.IsLive);
 
-            FxAccount? entry = parent.FxAccounts.Find(a => a.AccountNo.Equals(act.TraderLogin));
+            TradingAccount? entry = parent.TradingAccounts.Find(a => a.AccountNo.Equals(act.TraderLogin));
 
             if (entry == null)
             {
@@ -45,7 +48,7 @@ namespace SmartFxJournal.CTrader.Helpers
                 entry.StartBalance = (decimal)(transactions[0].Balance / 100);
                 entry.CreatedOn = DateTime.Now;
                 
-                parent.FxAccounts.Add(entry);
+                parent.TradingAccounts.Add(entry);
             }
             entry.CurrentBalance = (decimal)MonetaryConverter.FromMonetary(trader.Balance);
             entry.LastModifiedOn = DateTime.Now;
@@ -53,78 +56,73 @@ namespace SmartFxJournal.CTrader.Helpers
             return entry;
         }
 
-        internal static async Task<FxAccount> ImportHistoryAsync(HistoricalTrade[] history, OpenApiService openApiService, FxAccount parent)
+        internal static ClosedPosition CreateReconcilePosition(TradingAccount parent)
+        {
+            ClosedPosition toReconcile = new()
+            {
+                PositionId = -1 * parent.AccountNo,
+                AccountNo = parent.AccountNo,
+                BalanceAfter = Decimal.Zero,
+                Direction = TradeDirection.BUY,
+                EntryPrice = Decimal.Zero,
+                ExitPrice = Decimal.Zero,
+                GrossProfit = Decimal.Zero,
+                NetProfit = Decimal.Zero,
+                PositionStatus = PositionStatus.Open,
+                StopLoss = Decimal.Zero,
+                Symbol = Decimal.Zero,
+                Commission = Decimal.Zero,
+                Swap = Decimal.Zero,
+                TakeProfit = Decimal.Zero,
+                Volume = 0,
+                LastUpdatedAt = DateTime.Now.ToUniversalTime(),
+                OrderClosedAt = DateTime.Now.ToUniversalTime(),
+                OrderOpenedAt = DateTime.Now.ToUniversalTime()
+            };
+
+            return toReconcile;
+        }
+
+        internal static async Task<TradingAccount> ImportHistoryAsync(HistoricalTrade[] history, OpenApiService openApiService, TradingAccount parent)
         {
             var symbols = await openApiService.GetLightSymbols((long)parent.CTraderAccountId, parent.IsLive);
 
             foreach (HistoricalTrade tr in history)
             {
-                FxHistoricalTrade? toImport = parent.OrderHistory.Find(a => a.OrderId == tr.OrderId);
+                ExecutedOrder? toImport = parent.ExecutedOrders.Find(a => a.OrderId == tr.OrderId);
                 if (toImport == null)
                 {
                     toImport = new()
                     {
                         DealId = tr.Id,
                         OrderId = tr.OrderId,
+                        PositionId = -1 * parent.AccountNo, // orders are added to reconcile position first
                         AccountNo = parent.AccountNo,
                         Symbol = (Symbol) tr.SymbolId,
                         ExecutionPrice = (decimal)tr.ExecutionPrice,
                         Direction = EnumUtil.ToEnum<TradeDirection>(tr.Direction),
-                        Volume = (long)tr.Volume,
-                        OrderOpenedAt = tr.ExecutionTime,
+                        OrderExecutedAt = tr.ExecutionTime,
                     };
-                    parent.OrderHistory.Add(toImport);
+                    parent.ExecutedOrders.Add(toImport);
                 }
                 toImport.Commission = (decimal)(tr.Commission / 100);
                 toImport.DealStatus = EnumUtil.ToEnum<DealStatus>(tr.Status);
                 toImport.Swap = (decimal)(tr.Swap / 100);
                 toImport.LastUpdatedAt = tr.LastUpdateTime;
-                toImport.FilledVolume = (long)tr.FilledVolume;
-                toImport.ClosedVolume = (long)tr.ClosedVolume;
-                toImport.BalanceAfterClose = (decimal) (tr.ClosedBalance / 100);
+                if (tr.IsClosing)
+                {
+                    toImport.ClosedVolume = (long)tr.ClosedVolume;
+                } else
+                {
+                    toImport.FilledVolume = (long)tr.FilledVolume;
+                }
+
+                toImport.BalanceAfter = (decimal) (tr.ClosedBalance / 100);
                 toImport.GrossProfit = (decimal)(tr.GrossProfit / 100);
                 toImport.IsClosing = tr.IsClosing;
             }
 
             return parent;
         }
-
-        internal static async Task<FxPosition> ImportPositionAsync(ProtoOAPosition position, OpenApiService openApiService, FxAccount parent)
-        {
-            long pId = position.PositionId;
-            long symId = position.TradeData.SymbolId;
-            var symbols = await openApiService.GetLightSymbols((long)parent.CTraderAccountId, parent.IsLive);
-            string name = symbols.First(sym => sym.SymbolId == symId).SymbolName;
-            
-            FxPosition? fxPosition = parent.Positions.Find(p => p.PositionId == pId);
-
-            if (fxPosition == null)
-            {
-                fxPosition = new()
-                {
-                    AccountNo = parent.AccountNo,
-                    Comment = position.TradeData.Comment,
-                    Commission = (decimal)(position.Commission / Math.Pow(10, position.MoneyDigits)),
-                    Direction = (TradeDirection)position.TradeData.TradeSide,
-                    ExecutionPrice = (decimal)position.Price,
-                    IsGuaranteedSL = position.GuaranteedStopLoss,
-                    IsTrailingStopLoss = position.TrailingStopLoss,
-                    Label = position.TradeData.Label,
-                    OrderOpenedAt = DateTimeOffset.FromUnixTimeMilliseconds(position.TradeData.OpenTimestamp),
-                    PositionId = pId,
-                    Symbol = EnumUtil.ToEnum<Symbol>(name)
-                };
-                parent.Positions.Add(fxPosition);
-            }
-            fxPosition.LastUpdatedAt = DateTimeOffset.FromUnixTimeMilliseconds(position.UtcLastUpdateTimestamp);
-            fxPosition.PositionStatus = (PositionStatus)position.PositionStatus;
-            fxPosition.StopLoss = (decimal?)position.StopLoss;
-            fxPosition.TakeProfit = (decimal?)position.TakeProfit;
-            fxPosition.Volume = position.TradeData.Volume;
-            fxPosition.Swap = (decimal)(position.Swap / Math.Pow(10, position.MoneyDigits));
-
-            return fxPosition;
-        }
-
     }
 }

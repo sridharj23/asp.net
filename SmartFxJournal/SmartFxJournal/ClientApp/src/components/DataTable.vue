@@ -9,11 +9,14 @@
         props : {
             columns: {type: Array<DataColumn>, required: true},
             dataSource : {type: Array<Record<string, string>>, required: true},
-            rowIdProperty: {type: String, required: true}
+            rowIdProperty: {type: String, required: true},
+            multiSelect: {type: Boolean}
         },
         data() {
             return {
-                selectedRowId: "0"
+                selectedRowId: "0",
+                draggedObject: {} as Record<string, string>,
+                dragStarted: false
             }
         },
         methods: {
@@ -23,6 +26,20 @@
             },
             doubleClicked(rec: Record<string, string>) {
                 this.$emit("rowDoubleClicked", this.selectedRowId);
+            },
+            mouseDownHandler(event : any) {
+                console.log(event);
+                let tab = document.getElementById("theTable");
+                tab?.addEventListener('drag', this.dragEventHandler);
+                this.draggedObject = event;
+            },
+            mouseUpHandler(event: any) {
+                this.dragStarted = false;
+                let tab = document.getElementById("theTable");
+                tab?.removeEventListener('drag', this.dragEventHandler);
+            },
+            dragEventHandler(event: DragEvent) {
+                console.log(this.rowIdProperty + " : " + this.draggedObject[this.rowIdProperty]);
             },
             getFormat(col : DataColumn, rec: Record<string, string>): string {
                 let cellClass = 'tableDataCell';
@@ -42,14 +59,19 @@
 
 <template>
     <div class="tableContainer">
-        <table class="dataTable">
+        <table class="dataTable" id="theTable">
             <thead>
                 <tr class="tableHeaderRow">
+                    <th v-if="multiSelect" class="tableHeaderCell">Select</th>
                     <th class="tableHeaderCell" v-for="col in columns">{{ col.title }}</th>
                 </tr>
             </thead>
             <tbody>
-                <tr :class="selectedRowId == rec[rowIdProperty] ? 'tableRow selectedRow' : 'tableRow'" v-for="rec in dataSource" :key="rowIdProperty" @click="setSelected(rec)" @dblclick="doubleClicked(rec)">
+                <tr :class="selectedRowId == rec[rowIdProperty] ? 'tableRow selectedRow' : 'tableRow'" v-for="rec in dataSource" :key="rowIdProperty" 
+                    @click="setSelected(rec)" @dblclick="doubleClicked(rec)">
+                    <td v-if="multiSelect" :class="'tableDataCell'">
+                        <input type="checkbox" :disabled="rec['isSelected'] == 'disabled'" v-model="rec['isSelected']" true-value="true" false-value="false"/>
+                    </td> 
                     <td :class="getFormat(col, rec)" v-for="col in columns">{{ rec[col.property] }}</td>
                 </tr>
             </tbody>
@@ -86,6 +108,8 @@
     border-bottom: 1px solid gainsboro;
     border-left: 1px solid gainsboro;
     border-right: 1px solid gainsboro;
+    cursor: move;
+    user-select: none;
 }
 
 .tableRow:not(.selectedRow):hover {

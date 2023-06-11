@@ -10,7 +10,7 @@ using System.Threading.Tasks;
 
 namespace SmartFxJournal.JournalDB.model
 {
-    [Table("ctraderaccounts")]
+    [Table("ctradermaster")]
     public sealed class CTraderAccount : Audited
     {
         private string? _authToken;
@@ -48,14 +48,14 @@ namespace SmartFxJournal.JournalDB.model
 
         public DateTimeOffset? ExpiresOn { get; set; }
 
-        public List<FxAccount> FxAccounts { get; set; } = new List<FxAccount>();
+        public List<TradingAccount> TradingAccounts { get; set; } = new List<TradingAccount>();
 
         internal static void OnModelCreate(ModelBuilder builder)
         {
             builder.Entity<CTraderAccount>(entity =>
             {
                 entity.HasIndex(x => x.ClientId).IsUnique();
-                entity.HasMany(x => x.FxAccounts).WithOne(a => a.Parent).HasForeignKey(a => a.CTraderId);
+                entity.HasMany(x => x.TradingAccounts).WithOne(a => a.CTraderAccount).HasForeignKey(a => a.CTraderId);
                 entity.Property(x => x.LastFetchedOn).HasConversion(new DateTimeOffsetToLongConverter());
                 entity.Property(x => x.ExpiresOn).HasConversion(new DateTimeOffsetToLongConverter());
 

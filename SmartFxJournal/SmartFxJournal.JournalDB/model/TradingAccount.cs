@@ -8,8 +8,8 @@ using static SmartFxJournal.JournalDB.model.GlobalEnums;
 
 namespace SmartFxJournal.JournalDB.model
 {
-    [Table("accounts")]
-    public class FxAccount : Audited
+    [Table("tradingaccounts")]
+    public class TradingAccount : Audited
     {
         [Key]
         [DatabaseGenerated(DatabaseGeneratedOption.None)]
@@ -52,21 +52,21 @@ namespace SmartFxJournal.JournalDB.model
 
         public string? CTraderId { get; set; }
 
-        public CTraderAccount? Parent { get; set; }
+        public CTraderAccount? CTraderAccount { get; set; }
 
-        public List<FxPosition> Positions { get; set; } = new List<FxPosition>();
+        public List<ClosedPosition> Positions { get; set; } = new List<ClosedPosition>();
 
-        public List<FxHistoricalTrade> OrderHistory { get; set; } = new List<FxHistoricalTrade>();
+        public List<ExecutedOrder> ExecutedOrders { get; set; } = new List<ExecutedOrder>();
 
         internal static void OnModelCreate(ModelBuilder builder)
         {
-            builder.Entity<FxAccount>()
+            builder.Entity<TradingAccount>()
                    .ToTable(t => t.HasCheckConstraint("chk_positive", "account_no > 0"));
 
-            builder.Entity<FxAccount>(entity =>
+            builder.Entity<TradingAccount>(entity =>
             {
-                entity.HasMany(a => a.Positions).WithOne(p => p.Owner).HasForeignKey(p => p.AccountNo).IsRequired();
-                entity.HasMany(a => a.OrderHistory).WithOne(p => p.Owner).HasForeignKey(p => p.AccountNo).IsRequired();
+                entity.HasMany(a => a.Positions).WithOne(p => p.TradingAccount).HasForeignKey(p => p.AccountNo).IsRequired();
+                entity.HasMany(a => a.ExecutedOrders).WithOne(p => p.TradingAccount).HasForeignKey(p => p.AccountNo).IsRequired();
 
                 entity.Property(e => e.AccountNo)
                 .ValueGeneratedNever();

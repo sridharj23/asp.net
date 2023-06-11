@@ -26,12 +26,12 @@
         height: 90vh;
     }
     #positionsView {
-        width: 50%;
+        width: 60%;
         height: 100%;
         margin-right: 5px;
     }
     #TradesPageRight {
-        width: 50%;
+        width: 40%;
         margin-left: 5px;
         display: flex;
         flex-direction: column;

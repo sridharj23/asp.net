@@ -11,6 +11,7 @@
         <nav>
           <RouterLink to="/">Summary</RouterLink>
           <RouterLink to="/trades">Trades</RouterLink>
+          <RouterLink to="/reconcile">Reconcile Orders</RouterLink>
         </nav>
       </div>
     </Card>

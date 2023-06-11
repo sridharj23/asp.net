@@ -2,6 +2,7 @@
 using Microsoft.AspNetCore.Mvc;
 using SmartFxJournal.Common.Model;
 using SmartFxJournal.Common.Services;
+using SmartFxJournal.JournalDB.model;
 
 namespace SmartFxJournal.Controllers
 {
@@ -17,7 +18,7 @@ namespace SmartFxJournal.Controllers
         }
 
         [HttpGet]
-        public async Task<List<TradePosition>> GetPositionsAsync(long account)
+        public async Task<List<ClosedPosition>> GetPositionsAsync(long account)
         {
             if (account == 0) { account = 4091794; }
 

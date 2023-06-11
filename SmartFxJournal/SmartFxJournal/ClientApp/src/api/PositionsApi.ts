@@ -1,28 +1,22 @@
 import { JournalApi } from "./JournalApiBase";
 
-export interface TradeData {
-    orderId: number,
-    executionTime : string,
-    filledVolume: number,
-    direction: string,
-    price: number,
-    swap: number,
-    commission: number,
-    grossProfit: number,
-    netProfit : number
-}
-
 export interface Position {
     accountNo: string,
     positionId : string,
     symbol : string,
-    grossProfit : number,
+    direction: string,
+    volume: number,
+    volumeInLots: number,
+    entryPrice: number,
+    exitPrice: number,
     fees : number,
     swap : number,
     commission: number,
-    netProfit : number
-    openedOrders: TradeData[],
-    closedOrders: TradeData[]
+    grossProfit : number,
+    netProfit : number,
+    balanceAfter: number,
+    orderOpenedAt: string,
+    orderClosedAt: string
 }
 
 export class PostionsAPI extends JournalApi<Position> {

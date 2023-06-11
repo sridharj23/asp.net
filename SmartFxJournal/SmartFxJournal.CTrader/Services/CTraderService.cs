@@ -6,20 +6,17 @@ using System.Web;
 using SmartFxJournal.JournalDB.model;
 using OpenAPI.Net.Auth;
 using System.Text.Json;
-using System.Security.Principal;
 using static SmartFxJournal.JournalDB.model.GlobalEnums;
 using SmartFxJournal.CTrader.Helpers;
 using Microsoft.EntityFrameworkCore;
-using SmartFxJournal.CTrader.helpers;
-using static SmartFxJournal.CTrader.helpers.OffsetIterator;
-using System;
-using System.ComponentModel;
+
 
 namespace SmartFxJournal.CTrader.Services
 {
     public class CTraderService
     {
         private static readonly HttpClient sharedClient = new();
+
         private readonly IServiceScopeFactory _scopeFactory;
         private readonly Dictionary<String, LoginContext> _loginContexts = new Dictionary<string, LoginContext>();
 
@@ -179,65 +176,24 @@ namespace SmartFxJournal.CTrader.Services
                 JournalDbContext dbContext = serviceScope.ServiceProvider.GetService<JournalDbContext>() ?? throw new ArgumentNullException(nameof(serviceScope));
                 if (dbContext.CTraderAccounts != null)
                 {
-                    CTraderAccount? cta = dbContext.CTraderAccounts.Include(a => a.FxAccounts).First(c => c.CTraderId == cTraderId) ?? 
+                    CTraderAccount? cta = dbContext.CTraderAccounts.Include(a => a.TradingAccounts).First(c => c.CTraderId == cTraderId) ?? 
                                                 throw new Exception("CTrader ID : " + cTraderId + " is not yet onboarded !. Cannot import information.");
 
                     foreach (var act in protoAccounts)
                     {
-                        FxAccount account = await OpenApiImporter.ImportAccountAsync(act, ctx.OpenApiService, cta);
+                        TradingAccount account = await OpenApiImporter.ImportAccountAsync(act, ctx.OpenApiService, cta);
+                        var accounts = dbContext.TradingAccounts.ToList();
+                        if (accounts.FirstOrDefault(a => a.AccountNo == account.AccountNo) == null)
+                        {
+                            // new account
+                            account.Positions.Add(OpenApiImporter.CreateReconcilePosition(account));
+                        }
                         dbContext.SaveChanges();
 
-                        FxAccount parent = dbContext.FxAccounts.Include(a => a.Positions).First(a => a.AccountNo == account.AccountNo);
-                        parent.Positions.RemoveAll(p => true);
-
-                        var openOrders = await ctx.OpenApiService.GetAccountOrders((long)act.CtidTraderAccountId, act.IsLive);
-
-                        foreach (var position in openOrders.Position)
-                        {
-                            await OpenApiImporter.ImportPositionAsync(position, ctx.OpenApiService, parent);
-                        }
-
                         DateTimeOffset to = DateTimeOffset.Now;
-                        parent = dbContext.FxAccounts.Include(a => a.OrderHistory).First(a => a.AccountNo == account.AccountNo);
+                        TradingAccount parent = dbContext.TradingAccounts.Include(a => a.ExecutedOrders).First(a => a.AccountNo == account.AccountNo);
                         var history = await ctx.OpenApiService.GetHistoricalTrades((long)act.CtidTraderAccountId, act.IsLive, parent.LastImportedOn, to);
-                        //var orders = await ctx.OpenApiService.GetHistoricalOrders((long)act.CtidTraderAccountId, act.IsLive, parent.LastImportedOn, to);
                         await OpenApiImporter.ImportHistoryAsync(history, ctx.OpenApiService, parent);
-
-                        var newOrders = parent.OrderHistory.Where(o => o.PositionId == 0).OrderBy(o => o.DealId).ToList();
-
-                        long deal = 0;
-                        long vol = 0;
-                        FxHistoricalTrade prev = null;
-                        List<FxHistoricalTrade> unmatched = new ();
-                        foreach (FxHistoricalTrade trade in newOrders)
-                        {
-                            if (trade.PositionId > 0)
-                            {
-                                continue;
-                            } else if (trade.IsClosing == false)
-                            {
-                                if (vol > 0 && prev != null) { unmatched.Add(prev); }
-                                prev = trade;
-                                trade.PositionId = trade.DealId;
-                                deal = trade.DealId;
-                                vol = trade.Volume;
-                            } else if (vol > 0)  
-                            {
-                                trade.PositionId = deal;
-                                vol -= trade.ClosedVolume;
-                            } else
-                            {
-                                foreach(FxHistoricalTrade unm in unmatched)
-                                {
-                                    if (unm.Volume == trade.Volume && unm.Direction != trade.Direction)
-                                    {
-                                        trade.PositionId = unm.PositionId;
-                                        unmatched.Remove(unm);
-                                        break;
-                                    }
-                                }
-                            }
-                        }
 
                         parent.LastImportedOn = to;
                         
@@ -256,36 +212,23 @@ namespace SmartFxJournal.CTrader.Services
             using (var serviceScope = _scopeFactory.CreateScope())
             {
                 JournalDbContext dbContext = serviceScope.ServiceProvider.GetService<JournalDbContext>() ?? throw new ArgumentNullException(nameof(serviceScope));
-                var positions = await dbContext.FxOrderHistory.Include(o => o.Owner).Where((pos) =>  pos.PositionId == PositionId).ToListAsync();
+                ClosedPosition? position = dbContext.ClosedPositions.Include(p => p.TradingAccount).First(p => p.PositionId == PositionId);
 
-                DateTimeOffset openedAt = DateTimeOffset.FromUnixTimeMilliseconds(1);
-                DateTimeOffset closedAt = DateTimeOffset.FromUnixTimeMilliseconds(1);
-
-                foreach(var pos in positions)
+                if (position == null)
                 {
-                    DateTimeOffset val = pos.OrderOpenedAt.GetValueOrDefault();
-
-                    if (pos.IsClosing)
-                    {
-                        if (val > closedAt)
-                        {
-                            closedAt = val;
-                        }
-                    } else
-                    {
-                        openedAt = val;
-                    }
+                    return snapshot;
                 }
 
-                openedAt = openedAt.Subtract(TimeSpan.FromDays(5));
-                closedAt = closedAt.AddDays(5);
+                DateTimeOffset openedAt = position.OrderOpenedAt.Subtract(TimeSpan.FromDays(5));
+                DateTimeOffset closedAt = position.OrderClosedAt.AddDays(5);
+
                 if (closedAt > DateTimeOffset.Now)
                 {
                     closedAt = DateTimeOffset.Now;
                 }
 
-                FxAccount acc = positions[0].Owner;
-                long symbol = (long)positions[0].Symbol;
+                TradingAccount acc = position.TradingAccount;
+                long symbol = (long)position.Symbol;
 
                 LoginContext ctx = _loginContexts.First().Value;
                 await ctx.ConnectAsync();

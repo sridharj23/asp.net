@@ -10,6 +10,7 @@ builder.Services.AddDbContext<JournalDbContext>(options => options.UseNpgsql(bui
 // Add services to the container.
 builder.Services.AddSingleton<CTraderService, CTraderService>();
 builder.Services.AddScoped<AccountPositionsService>();
+builder.Services.AddScoped<OrderReconciliationService>();
 
 builder.Services.AddControllersWithViews();
 

@@ -1,11 +1,16 @@
 <script lang="ts">
-        import { PostionsAPI, type Position } from '@/api/PositionsApi';
+    import { PostionsAPI, type Position } from '@/api/PositionsApi';
+    import { usePositionStore } from '@/stores/positionstore';
     import DataTable from '@/components/DataTable.vue';
     import type { DataColumn } from '@/components/DataTable.vue';
     
     const api = new PostionsAPI()
     
     export default {
+        setup() {
+            const store = usePositionStore();
+            return {store};
+        },
         emits: ['positionSelected'],
         data() {
             return {
@@ -54,7 +59,9 @@
             handleRowSelection(position: string) {
 
             },
-            handleRowDblClick(position: string) {
+            handleRowDblClick(position: Record<string, string>) {
+                this.store.selectedPosition = position;
+                this.store.selectedPositionId = position['positionId'];
                 this.$emit('positionSelected', position);
             }
     },

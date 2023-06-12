@@ -25,7 +25,7 @@
                 this.$emit('rowSelected', this.selectedRowId);
             },
             doubleClicked(rec: Record<string, string>) {
-                this.$emit("rowDoubleClicked", this.selectedRowId);
+                this.$emit("rowDoubleClicked", rec);
             },
             mouseDownHandler(event : any) {
                 console.log(event);

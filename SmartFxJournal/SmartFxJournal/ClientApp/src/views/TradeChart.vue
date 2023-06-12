@@ -41,7 +41,7 @@
 
 <template>
     <div>
-        <highcharts id="tradeChart" :constructor-type="'stockChart'" :positionId="pos" class="hc" :options="chartOptions"/>
+        <highcharts id="tradeChart" :constructor-type="'stockChart'" class="hc" :options="chartOptions"/>
     </div>
 </template>
 

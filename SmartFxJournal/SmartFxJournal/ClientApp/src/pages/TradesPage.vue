@@ -15,8 +15,8 @@
             }
         },
         methods: {
-            handlePositionSelection(position : string) {
-                this.selectedPosition = position;
+            handlePositionSelection(position : Record<string, string>) {
+                this.selectedPosition = position['positionId'];
             }
         }
     }

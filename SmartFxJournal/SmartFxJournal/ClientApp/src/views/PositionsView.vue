@@ -11,17 +11,17 @@
             return {
                 positions: [] as Record<string, string>[],
                 columns: [
-                    { property: "positionId", title: "Position ID", propType: "default" },
+                    { property: "positionId", title: "Position", propType: "default" },
                     { property: "symbol", title: "Symbol", propType: "default" },
                     { property: "direction", title: "Direction", propType: "default" },
                     { property: "volumeInLots", title: "Volume", propType: "default" },
                     { property: "entryPrice", title: "Entry Price", propType: "default" },
                     { property: "exitPrice", title: "Exit Price", propType: "default" },
-                    { property: "commission", title: "Commission", propType: "Currency" },
+                    { property: "commission", title: "Comm.", propType: "Currency" },
                     { property: "swap", title: "Swap", propType: "Currency" },
-                    { property: "grossProfit", title: "Gross Profit", propType: "Currency" },
-                    { property: "netProfit", title: "Net Profit", propType: "Currency" },
-                    { property: "balanceAfter", title: "Balance After", propType: "Currency" },
+                    { property: "grossProfit", title: "Gross P/L", propType: "Currency" },
+                    { property: "netProfit", title: "Net P/L", propType: "Currency" },
+                    { property: "balanceAfter", title: "Balance", propType: "Currency" },
                     { property: "orderOpenedAt", title: "Opened At", propType: "default" },
                     { property: "orderClosedAt", title: "Closed At", propType: "default" }
                 ] as DataColumn[],

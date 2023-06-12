@@ -1,18 +1,6 @@
 import type { ChartOptions, PlotOptions, SeriesOptionsType } from "highcharts";
 
 export class ChartHelper {
-    public static getDefaultStockChartOptions() : ChartOptions {
-        return {
-            chart: {type : 'candlestick'},
-            turboThreshold: 5000,
-            title: {text: 'Price Chart'},
-            series: [{
-                name: '',
-                type: 'candlestick',
-                data: [] as any[]
-            }],
-        }
-    }
 
     public static getDefaultColumnOptions() : ChartOptions {
         return {
@@ -65,6 +53,50 @@ export class ChartHelper {
                         }
                     }
                 },
+            } as PlotOptions
+        } as ChartOptions;
+    }
+
+    public static getDefaultStockChartOptions() : ChartOptions {
+        return {
+            chart: { zoomType: 'x'},
+            title: { text: '' },
+            rangeSelector: { enabled : false},
+            turboThreshold: 5000,
+            legend: { enabled: false },
+            xAxis: { type: 'datetime' },
+            yAxis: {
+                title: { text: 'Exchange Rate' },
+                type: 'linear'
+            },
+            series:[{
+                type: 'candlestick',
+                name: 'EURUSD',
+                data: [] as any[]
+            },{
+                type: 'line',
+                name: 'trade',
+                data: [
+                    
+                ]
+            }], 
+            plotOptions: {
+                line: {
+                    color: 'red',
+                    dataLabels: { enabled: false },
+                    enableMouseTracking: true,
+                    lineWidth: 2,
+                    marker: {
+                        enabled: true,
+                        states: {
+                            hover: { enabled: true }
+                        }
+                    }
+                },
+                candlestick: {
+                    color: 'red',
+                    upColor: 'limegreen',
+                }
             } as PlotOptions
         } as ChartOptions;
     }

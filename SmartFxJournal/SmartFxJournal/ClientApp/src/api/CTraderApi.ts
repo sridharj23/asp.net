@@ -35,19 +35,7 @@ export class CTraderAPI extends RestApi {
     }
 
     public async getChartData(positionId: string) : Promise<TrendBars> {
-        let data : TrendBars = {} ;
-        super.single<TrendBars>(this.resource + '/trendbars/' + positionId).then(resp => {
-            data = {symbol: resp.symbol, timePeriod: resp.timePeriod, trendBars: new Array<number[]>()}
-
-            resp.trendBars.forEach(element => {
-                let entry = new Array<number>();
-                element.forEach(val => {
-                    entry.push(+val);
-                });
-                data.trendBars.push(entry);
-            });
-            return data;
-        });
+        return await super.single<TrendBars>(this.resource + '/trendbars/' + positionId);
     }
 }
 

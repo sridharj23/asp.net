@@ -62,6 +62,7 @@
             handleRowDblClick(position: Record<string, string>) {
                 this.store.selectedPosition = position;
                 this.store.selectedPositionId = position['positionId'];
+                console.log("Positions view: Position chaned to " + this.store.selectedPositionId);
                 this.$emit('positionSelected', position);
             }
     },

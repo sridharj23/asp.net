@@ -19,6 +19,7 @@ namespace SmartFxJournal.CTrader.Models
         [JsonConverter(typeof(JsonStringEnumConverter))]
         public ChartPeriod TimePeriod { get; init; }
 
+        [JsonConverter(typeof(JsonStringEnumConverter))]
         public Symbol Symbol { get; init; }
 
         public List<string[]> TrendBars { get; set; } = new List<string[]>();

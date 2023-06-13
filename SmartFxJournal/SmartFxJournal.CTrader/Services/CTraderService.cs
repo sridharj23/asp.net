@@ -2,7 +2,6 @@
 using OpenAPI.Net;
 using SmartFxJournal.CTrader.Models;
 using Microsoft.Extensions.DependencyInjection;
-using System.Web;
 using SmartFxJournal.JournalDB.model;
 using OpenAPI.Net.Auth;
 using System.Text.Json;
@@ -10,6 +9,9 @@ using static SmartFxJournal.JournalDB.model.GlobalEnums;
 using SmartFxJournal.CTrader.Helpers;
 using Microsoft.EntityFrameworkCore;
 using System.Globalization;
+using System.Web;
+using Google.Protobuf;
+using Google.Protobuf.Reflection;
 
 namespace SmartFxJournal.CTrader.Services
 {
@@ -229,13 +231,9 @@ namespace SmartFxJournal.CTrader.Services
 
                 TradingAccount acc = position.TradingAccount;
                 long symbol = (long)position.Symbol;
+                OpenApiService service = await GetOpenApi(acc);
 
-                LoginContext ctx = _loginContexts.First().Value;
-                await ctx.ConnectAsync();
-
-                ctx.OpenApiService.AuthorizeAccount((long)acc.CTraderAccountId, acc.IsLive, ctx.CTraderAccount.AccessToken);
-
-                var trendBars = await ctx.OpenApiService.GetTrendbars((long)acc.CTraderAccountId, acc.IsLive, openedAt, closedAt, ProtoOATrendbarPeriod.H1, symbol);
+                var trendBars = await service.GetTrendbars((long)acc.CTraderAccountId, acc.IsLive, openedAt, closedAt, ProtoOATrendbarPeriod.H1, symbol);
 
                 long digits = 100000;
 
@@ -258,6 +256,63 @@ namespace SmartFxJournal.CTrader.Services
 
             return snapshot;
         }
+
+        private async Task<OpenApiService> GetOpenApi(TradingAccount account)
+        {
+            string ctraderId = account.CTraderId ?? "";
+            LoginContext ctx = _loginContexts[ctraderId];
+
+            if (ctx == null)
+            {
+                throw new Exception("CTrader account is not found for " + ctraderId);
+            }
+
+            if (DateTimeOffset.Now > ctx.CTraderAccount.ExpiresOn)
+            {
+                CTraderAccount acc = await RefreshToken(ctraderId);
+                ctx = new LoginContext(acc);
+                _loginContexts[ctraderId] = ctx;
+            }
+
+            await ctx.AuthorizeAccount(account);
+
+            return ctx.OpenApiService;
+        }
+
+        private async Task<CTraderAccount> RefreshToken(string ctraderId)
+        {
+            using (var serviceScope = _scopeFactory.CreateScope())
+            {
+                JournalDbContext dbContext = serviceScope.ServiceProvider.GetService<JournalDbContext>() ?? throw new ArgumentNullException(nameof(serviceScope));
+                CTraderAccount acc = dbContext.CTraderAccounts.Where(a => a.CTraderId == ctraderId).First();
+
+                var nvPairs = HttpUtility.ParseQueryString(string.Empty);
+                nvPairs.Add("grant_type", "refresh_token");
+                nvPairs.Add("refresh_token", acc.RefreshToken);
+                nvPairs.Add("client_id", acc.ClientId);
+                nvPairs.Add("client_secret", acc.ClientSecret);
+
+                string url = "https://openapi.ctrader.com/apps/token" + nvPairs.ToQueryString();
+
+                var response = await sharedClient.PostAsync(url, default);
+                var tokenString = await response.Content.ReadAsStringAsync();
+
+                if (tokenString.Contains("errorCode"))
+                {
+                    throw new Exception("Unable to refresh token for Ctrader account " +  ctraderId + ", " + tokenString);
+                }
+
+                Token token = TokenFactory.DeserializeToken(tokenString);
+                acc.LastFetchedOn = DateTimeOffset.Now;
+                acc.AuthToken = tokenString;
+                acc.RefreshToken = token.RefreshToken;
+                acc.AccessToken = token.AccessToken;
+                acc.ExpiresOn = token.ExpiresIn;
+
+                dbContext.SaveChanges();
+                return acc;
+            }
+        }
     }
 
     internal class LoginContext
@@ -267,6 +322,7 @@ namespace SmartFxJournal.CTrader.Services
 
         static readonly string openApiUrl = "https://openapi.ctrader.com/apps/auth?client_id={0}&redirect_uri={1}&scope=accounts";
         private readonly CTraderAccount forAccount;
+        private readonly Dictionary<long, bool> accountAuthorizations = new Dictionary<long, bool>();
 
         private bool isConnected = false;
         private Task? connection;
@@ -309,5 +365,26 @@ namespace SmartFxJournal.CTrader.Services
             
             return OpenApiService;
         }
+
+        public async Task<bool> AuthorizeAccount(TradingAccount  acc)
+        {
+            long accountId = (long)acc.CTraderAccountId;
+
+            if (accountAuthorizations.ContainsKey(accountId))
+            {
+                return accountAuthorizations[accountId];
+            }
+
+            if (! this.isConnected)
+            {
+                await ConnectAsync();
+            }
+
+            await OpenApiService.AuthorizeAccount(accountId, acc.IsLive, forAccount.AccessToken);
+            accountAuthorizations[accountId] = true;
+            return true;
+        }
+
+
     }
 }

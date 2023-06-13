@@ -4,30 +4,37 @@
     import HighCharts from 'highcharts';
     import stockInit from 'highcharts/modules/stock';
     import chartdata from '@/data/chartdata.json';
+    import { usePositionStore } from '@/stores/positionstore';
 
     stockInit(HighCharts);
 
     export default {
         setup() {
             const api = new CTraderAPI();
-            return {api};
+            const store = usePositionStore();
+            return {api, store};
         },
         props: ['positionId'],
-        watch: {
-            positionId(newVal, oldVal) {
-                console.log("Position ID changed : " + newVal + " | was " + oldVal);
-                this.api.getChartData(newVal).then(resp => {
+        methods: {
+            loadChartForPosition() {
+                console.log("Trade Chart : Position changed to " + this.store.selectedPositionId );
+                this.api.getChartData(this.store.selectedPositionId).then(resp => {
                     console.log(resp);
                     this.chartOptions.title.text = resp.symbol + " : " + resp.timePeriod;
-                    this.chartOptions.series[0].data = resp.trendBars;
+                    this.chartOptions.series[0].data = [];
+                    let data = new Array<number[]>();
+                    resp.trendBars.forEach(bar => {
+                        let entry = new Array<number>();
+                        bar.forEach(n => entry.push(+n));
+                        data.push(entry);
+                    });
+                    this.chartOptions.series[0].data = data;
                 });
             }
         },
-        methods: {
-
-        },
         mounted() {
             this.chartOptions.series[0].data = chartdata;
+            this.store.$subscribe(this.loadChartForPosition)
         },
         data() {
             return {

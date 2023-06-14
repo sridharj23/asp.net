@@ -1,21 +1,5 @@
 import { RestApi } from "./ApiBase";
-
-export interface AccountEntry {
-    cTraderId : string,
-    accountId : string,
-    accountCurrency : string,
-    brokerName: string,
-    isLive : boolean,
-    isImported : boolean,
-    balance : number,
-    opendedOn: string
-}
-
-export interface TrendBars {
-    timePeriod: string;
-    symbol: string;
-    trendBars: number[][];
-}
+import type { TrendBars } from "@/types/JournalTypes";
 
 export class CTraderAPI extends RestApi {
     readonly resource = 'ctrader';

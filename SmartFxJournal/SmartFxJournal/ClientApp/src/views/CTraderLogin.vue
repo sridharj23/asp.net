@@ -1,6 +1,6 @@
 <script lang="ts">
-    import { CTraderAPI, type AccountEntry } from '@/api/CTraderApi';
-
+    import { CTraderAPI } from '@/api/CTraderApi';
+    
     const api = new CTraderAPI();
 
     export default {

@@ -1,5 +1,6 @@
 <script lang="ts">
-    import {ReconcileApi, type OrderToReconcile, type ReconcileEntry} from '@/api/ReconcileApi';
+    import {ReconcileApi} from '@/api/ReconcileApi';
+    import type { ReconcileEntry, OrderToReconcile } from '@/types/JournalTypes';
     import DataTable from '@/components/DataTable.vue';
     import type { DataColumn } from '@/components/DataTable.vue';
     import { useAccountStore } from '@/stores/accountstore';

@@ -1,7 +1,7 @@
 <script lang="ts">
     import { useAccountStore } from '@/stores/accountstore';
-    import { SummaryAPI, type EquityDataPoint } from '@/api/SummaryApi';
-    import { Chart, type ChartOptions } from 'highcharts-vue';
+    import { SummaryAPI } from '@/api/SummaryApi';
+    import { Chart } from 'highcharts-vue';
     import {ChartHelper} from '@/helpers/ChartHelper';
 
     export default {

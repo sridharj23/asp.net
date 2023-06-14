@@ -22,6 +22,14 @@ namespace SmartFxJournal.CTrader.Models
         [JsonConverter(typeof(JsonStringEnumConverter))]
         public Symbol Symbol { get; init; }
 
+        public long PositionOpenedAt { get; set; }
+
+        public decimal PositionOpenPrice { get; set; }
+
+        public long PositionClosedAt { get; set; }
+
+        public decimal PositionClosePrice { get; set; }
+
         public List<string[]> TrendBars { get; set; } = new List<string[]>();
     }
 

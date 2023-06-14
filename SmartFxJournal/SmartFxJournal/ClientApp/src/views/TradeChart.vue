@@ -17,9 +17,7 @@
         props: ['positionId'],
         methods: {
             loadChartForPosition() {
-                console.log("Trade Chart : Position changed to " + this.store.selectedPositionId );
                 this.api.getChartData(this.store.selectedPositionId).then(resp => {
-                    console.log(resp);
                     this.chartOptions.title.text = resp.symbol + " : " + resp.timePeriod;
                     this.chartOptions.series[0].data = [];
                     let data = new Array<number[]>();
@@ -29,7 +27,17 @@
                         data.push(entry);
                     });
                     this.chartOptions.series[0].data = data;
+
+                    this.chartOptions.series[1].data = [{x: this.floorToHour(resp.positionOpenedAt), y: resp.positionOpenPrice},
+                                                        {x: this.floorToHour(resp.positionClosedAt), y: resp.positionClosePrice}];
+
+                    let isProfit = +this.store.selectedPosition['netProfit'] > 0;
+                    this.chartOptions.plotOptions.line.color = isProfit ? 'yellowgreen' : 'purple';
                 });
+            },
+            floorToHour(mseconds: number) {
+                let mod = mseconds % 3600000;
+                return mseconds - mod;
             }
         },
         mounted() {

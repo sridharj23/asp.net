@@ -1,27 +1,5 @@
-import type { NumberFormatterCallbackFunction } from "highcharts";
 import { RestApi } from "./ApiBase";
-
-export interface OrderToReconcile {
-    dealId: number,
-    orderId: number,
-    positionId: number,
-    symbol: string,
-    direction: string,
-    filledVolume: number,
-    closedVolume: number,
-    isClosing: boolean,
-    executionPrice: number,
-    commission: number,
-    swap: number,
-    grossProfit: number,
-    balanceAfter: number,
-    orderExecutedAt: string
-}
-
-export interface ReconcileEntry {
-    positionId: number,
-    orders: number[]
-}
+import type { OrderToReconcile, ReconcileEntry } from "@/types/JournalTypes";
 
 export class ReconcileApi extends RestApi {
     public async getOrderToReconcile(accountNo : string) : Promise<OrderToReconcile[]> {

@@ -2,7 +2,7 @@
 
 import { useAccountStore } from '@/stores/accountstore';
 import {AccountsAPI} from '@/api/AccountsApi';
-import type { Account } from '@/api/AccountsApi';
+import type { Account } from '@/types/JournalTypes';
 
 export default {
     name: "AccountsView",

@@ -1,4 +1,3 @@
-import axios, { type AxiosResponse } from 'axios';
 import { RestApi } from './ApiBase';
 
 export abstract class JournalApi<T> extends RestApi {

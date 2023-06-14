@@ -164,12 +164,7 @@ namespace SmartFxJournal.CTrader.Services
             CTraderAccount ctAccount = ctx.CTraderAccount;
             OpenApiService apiService = await ctx.ConnectAsync();
 
-            if (ctx.TradingAccountsService == null)
-            {
-                throw new Exception("CTrader ID : " + cTraderId + " is not yet connected !. Cannot import information.");
-            }
-
-            var protoAccounts = await ctx.TradingAccountsService.GetAccounts(ctAccount.AccessToken);
+            var protoAccounts = await apiService.GetAccountsList(ctAccount.AccessToken);
 
             int processedAccounts = 0;
 
@@ -183,6 +178,7 @@ namespace SmartFxJournal.CTrader.Services
 
                     foreach (var act in protoAccounts)
                     {
+                        await ctx.AuthorizeAccount(Convert.ToInt64(act.CtidTraderAccountId), act.IsLive);
                         TradingAccount account = await OpenApiImporter.ImportAccountAsync(act, ctx.OpenApiService, cta);
                         var accounts = dbContext.TradingAccounts.ToList();
                         if (accounts.FirstOrDefault(a => a.AccountNo == account.AccountNo) == null)
@@ -221,7 +217,12 @@ namespace SmartFxJournal.CTrader.Services
                     return snapshot;
                 }
 
-                DateTimeOffset openedAt = position.OrderOpenedAt.Subtract(TimeSpan.FromDays(5));
+                snapshot.PositionOpenedAt = position.OrderOpenedAt.ToUnixTimeMilliseconds();
+                snapshot.PositionOpenPrice = position.EntryPrice;
+                snapshot.PositionClosedAt = position.OrderClosedAt.ToUnixTimeMilliseconds();
+                snapshot.PositionClosePrice = position.ExitPrice;
+
+                DateTimeOffset openedAt = position.OrderOpenedAt.Subtract(TimeSpan.FromDays(1));
                 DateTimeOffset closedAt = position.OrderClosedAt.AddDays(5);
 
                 if (closedAt > DateTimeOffset.Now)
@@ -274,7 +275,7 @@ namespace SmartFxJournal.CTrader.Services
                 _loginContexts[ctraderId] = ctx;
             }
 
-            await ctx.AuthorizeAccount(account);
+            await ctx.AuthorizeAccount(Convert.ToInt64(account.CTraderAccountId), account.IsLive); 
 
             return ctx.OpenApiService;
         }
@@ -348,8 +349,6 @@ namespace SmartFxJournal.CTrader.Services
 
         public OpenApiService? OpenApiService { get; private set; }
 
-        public TradingAccountsService? TradingAccountsService { get; private set; }
-
         public async Task<OpenApiService> ConnectAsync()
         {
             if (! this.isConnected)
@@ -359,32 +358,27 @@ namespace SmartFxJournal.CTrader.Services
                 creds.Secret = forAccount.ClientSecret;
                 OpenApiService = new OpenApiService(LiveClientFactory, DemoClientFactory);
                 await OpenApiService.Connect(creds);
-                TradingAccountsService = new TradingAccountsService(OpenApiService);
                 isConnected = true;
             };
             
             return OpenApiService;
         }
 
-        public async Task<bool> AuthorizeAccount(TradingAccount  acc)
+        public async Task<bool> AuthorizeAccount(long accountId, bool isLive)
         {
-            long accountId = (long)acc.CTraderAccountId;
-
             if (accountAuthorizations.ContainsKey(accountId))
             {
                 return accountAuthorizations[accountId];
             }
 
-            if (! this.isConnected)
+            if (!this.isConnected)
             {
                 await ConnectAsync();
             }
 
-            await OpenApiService.AuthorizeAccount(accountId, acc.IsLive, forAccount.AccessToken);
+            await OpenApiService.AuthorizeAccount(accountId, isLive, forAccount.AccessToken);
             accountAuthorizations[accountId] = true;
             return true;
         }
-
-
     }
 }

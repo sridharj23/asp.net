@@ -1,4 +1,5 @@
-import type { ChartOptions, PlotOptions, SeriesOptionsType } from "highcharts";
+import type { ChartOptions, PlotOptions } from "highcharts";
+import { Highcharts } from "highcharts";
 
 export class ChartHelper {
 
@@ -59,43 +60,42 @@ export class ChartHelper {
 
     public static getDefaultStockChartOptions() : ChartOptions {
         return {
-            chart: { zoomType: 'x'},
             title: { text: '' },
             rangeSelector: { enabled : false},
             turboThreshold: 5000,
             legend: { enabled: false },
-            xAxis: { type: 'datetime' },
+            navigator: { enabled: false },
+            xAxis: { 
+                type: 'datetime', 
+            },
             yAxis: {
                 title: { text: 'Exchange Rate' },
-                type: 'linear'
+                type: 'linear',
+                labels : {
+                    formatter: function() {
+                        return this.value.toFixed(5);
+                    }
+                }
             },
             series:[{
                 type: 'candlestick',
-                name: 'EURUSD',
+                name: '',
                 data: [] as any[]
             },{
                 type: 'line',
                 name: 'trade',
-                data: [
-                    
-                ]
+                marker: {symbol: 'cross'},
+                data: []
             }], 
             plotOptions: {
                 line: {
                     color: 'red',
                     dataLabels: { enabled: false },
-                    enableMouseTracking: true,
-                    lineWidth: 2,
-                    marker: {
-                        enabled: true,
-                        states: {
-                            hover: { enabled: true }
-                        }
-                    }
+                    lineWidth: 6,
                 },
                 candlestick: {
-                    color: 'red',
-                    upColor: 'limegreen',
+                    color: 'salmon',
+                    upColor: 'lightseagreen'
                 }
             } as PlotOptions
         } as ChartOptions;

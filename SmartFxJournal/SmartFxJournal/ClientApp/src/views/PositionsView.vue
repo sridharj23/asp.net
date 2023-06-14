@@ -1,5 +1,6 @@
 <script lang="ts">
-    import { PostionsAPI, type Position } from '@/api/PositionsApi';
+    import { PostionsAPI } from '@/api/PositionsApi';
+    import type { Position } from '@/types/JournalTypes';
     import { usePositionStore } from '@/stores/positionstore';
     import DataTable from '@/components/DataTable.vue';
     import type { DataColumn } from '@/components/DataTable.vue';
@@ -19,7 +20,7 @@
                     { property: "positionId", title: "Position", propType: "default" },
                     { property: "symbol", title: "Symbol", propType: "default" },
                     { property: "direction", title: "Direction", propType: "default" },
-                    { property: "volumeInLots", title: "Volume", propType: "default" },
+                    { property: "volume", title: "Volume", propType: "default" },
                     { property: "entryPrice", title: "Entry Price", propType: "default" },
                     { property: "exitPrice", title: "Exit Price", propType: "default" },
                     { property: "commission", title: "Comm.", propType: "Currency" },
@@ -36,6 +37,7 @@
         methods: {
             loadPostions() {
                 api.getAll().then((resp) => {
+                    console.log(resp);
                     resp.forEach(pos => this.positions.push(this.createRow(pos)));
                 });
             },
@@ -62,7 +64,6 @@
             handleRowDblClick(position: Record<string, string>) {
                 this.store.selectedPosition = position;
                 this.store.selectedPositionId = position['positionId'];
-                console.log("Positions view: Position chaned to " + this.store.selectedPositionId);
                 this.$emit('positionSelected', position);
             }
     },

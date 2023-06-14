@@ -1,20 +1,5 @@
 import { JournalApi } from "./JournalApiBase";
-
-export interface Account {
-    accountNo : string,
-    isLive: boolean,
-    isDefault : boolean,
-    nickName : string,
-    broker : string,
-    accountCurrency: string,
-    startBalance : number,
-    currentBalance : number,
-    openedOn : string,
-    importMode: string,
-    lastImportedOn?: string,
-    createdOn?: string,
-    modifiedOn?: string
-}
+import { type Account } from "@/types/JournalTypes";
 
 export class AccountsAPI extends JournalApi<Account> {
 

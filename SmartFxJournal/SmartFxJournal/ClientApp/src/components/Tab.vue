@@ -1,19 +1,32 @@
-<script setup>
-  const props = defineProps([ 'active' ]);
+<script lang="ts">
+  export default {
+    props: {
+      title: {
+        type: String,
+        default: 'Tab'
+      },
+      isActive: {
+        type: Boolean,
+        default: false
+      }
+    }
+  }
 </script>
 
 <template>
-  <div class="tab container" :class="(active == 'true') ? 'active' : ''" ref="tabs">
-    <slot class="tabSlot"></slot>
+  <div id="tabPage" v-show="isActive">
+    <slot></slot>
   </div>
 </template>
 
-<style>
-  .tab {
-    display: none;
+<style scoped>
+  #tabPage {
+    border: 2px solid purple;
   }
-  .tab.active {
+  .shown {
     display: block;
-    height: 100%;
+  }
+  .hidden {
+    display: none;
   }
 </style>

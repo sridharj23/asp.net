@@ -10,8 +10,9 @@
       <div class="wrapper">
         <nav>
           <RouterLink to="/">Summary</RouterLink>
-          <RouterLink to="/trades">Trades</RouterLink>
-          <RouterLink to="/reconcile">Reconcile Orders</RouterLink>
+          <RouterLink to="/history">History</RouterLink>
+          <RouterLink to="/notes">Notes</RouterLink>
+          <RouterLink to="/reconcile">Reconcile</RouterLink>
         </nav>
       </div>
     </Card>

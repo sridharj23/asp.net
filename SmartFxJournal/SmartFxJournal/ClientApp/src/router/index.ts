@@ -9,11 +9,16 @@ const router = createRouter({
           component: () => import('@/pages/SummaryPage.vue')
         },
         {
-          path: '/trades',
-          name: 'trades',
+          path: '/history',
+          name: 'history',
           // route level code-splitting
           // which is lazy-loaded when the route is visited.
-          component: () => import('@/pages/TradesPage.vue')
+          component: () => import('@/pages/HistoryPage.vue')
+        },
+        {
+          path: '/notes',
+          name: 'notes',
+          component: () => import('@/pages/NotesPage.vue')
         },
         {
           path: '/reconcile',

@@ -1,15 +1,24 @@
 <script lang="ts">
   import AccountsView from '@/views/AccountsView.vue'
   import CTraderLogin from '@/views/CTraderLogin.vue';
+  import TabControl from '@/components/TabControl.vue';
+  import Tab from '@/components/Tab.vue';
 
   export default {
     components : {
       AccountsView,
-      CTraderLogin
+      CTraderLogin,
+      TabControl,
+      Tab
     },
     data() {
       return {
-        selectedView: "accounts"
+        selectedTab: "accounts"
+      }
+    },
+    methods: {
+      handleSelectionChange(tabKey: string) {
+        this.selectedTab = tabKey;
       }
     }
   }
@@ -17,15 +26,14 @@
 
 <template>
     <div class="container" id="mainContainer">
-      <header id="sectionHeader">
-        <ul>
-          <li :class="selectedView == 'accounts' ? 'tabHead active' : 'tabHead'" @click="selectedView = 'accounts'">Registered Accounts</li>
-          <li :class="selectedView == 'cTrader' ? 'tabHead active' : 'tabHead'" @click="selectedView = 'cTrader'">CTrader Import</li>
-          <li class="tabHead spacer" />
-        </ul>
-      </header>
-      <AccountsView :class="selectedView == 'accounts' ? 'shown' : 'hidden'" id="accountsView"/>
-      <CTraderLogin :class="selectedView == 'cTrader' ? 'shown' : 'hidden'" id="cTraderView"/>
+      <TabControl id="settingsTab" @selectionChanged="handleSelectionChange">
+        <Tab :title="'Registered Accounts'" :key="'accounts'" :isActive="selectedTab == 'accounts'">
+          <AccountsView id="accountsView"/>
+        </Tab>
+        <Tab :title="'CTrader Import'" :key="'ctrader'" :isActive="selectedTab == 'ctrader'">
+          <CTraderLogin id="cTraderView"/>
+        </Tab>
+      </TabControl>
     </div>
 </template>
 
@@ -39,25 +47,7 @@
   #cTraderView {
     flex-grow: 1;
   }
-  #sectionHeader {
-    margin-bottom: 10px;
-  }
-  #sectionHeader ul {
-    margin-top: 0;
-    margin-bottom: 2px;
-    padding: 0;
-    display: flex;
-    flex-direction: row;
-  }
-  #sectionHeader ul li {
-    list-style: none;
-    position: relative;
-    cursor: pointer;
-  }
-  .shown {
-    display: block;
-  }
-  .hidden {
-    display: none;
+  #settingsTab {
+    height: 100%;
   }
 </style>

@@ -59,5 +59,24 @@ namespace SmartFxJournal.JournalDB.model
             H4 = 240,
             D1 = 1440
         }
+
+        public enum ArtifactType 
+        {
+            CTraderAccount = 1001,
+            TradingAccount = 1002,
+            ClosedPosition = 1003,
+            ExecutedOrder = 1004,
+            NotesEntry = 1005
+        }
+
+        public enum TradeAspect
+        {
+            Entry = 101,
+            Exit = 102,
+            TakeProfit = 103,
+            TrailingStop = 104,
+            StaggeredTakeProfit = 105,
+            StopLoss = 106
+        }
     }
 }

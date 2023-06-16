@@ -2,16 +2,17 @@
     import { PostionsAPI } from '@/api/PositionsApi';
     import type { Position } from '@/types/JournalTypes';
     import { usePositionStore } from '@/stores/positionstore';
+    import { useAccountStore } from '@/stores/accountstore';
     import DataTable from '@/components/DataTable.vue';
     import type { DataColumn } from '@/components/DataTable.vue';
-import { computed } from '@vue/reactivity';
     
     const api = new PostionsAPI()
     
     export default {
         setup() {
             const store = usePositionStore();
-            return {store};
+            const accountstore = useAccountStore();
+            return {store, accountstore};
         },
         emits: ['positionSelected'],
         data() {
@@ -37,7 +38,9 @@ import { computed } from '@vue/reactivity';
         },
         methods: {
             loadPostions() {
-                api.getAll().then((resp) => {
+                let params = new Map();
+                params.set("accountNo", this.accountstore.selectedAccount);
+                api.getAll(params).then((resp) => {
                     resp.forEach(pos => this.positions.push(this.createRow(pos)));
                 });
             },

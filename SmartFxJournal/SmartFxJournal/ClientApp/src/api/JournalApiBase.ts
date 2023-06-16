@@ -11,12 +11,14 @@ export abstract class JournalApi<T> extends RestApi {
 
     protected abstract getKeyOf(input : T) : string; 
 
-    public async getAll() : Promise<T[]> {
-        return super.index<T>(this.resourceName);
+    public async getAll(params?: Map<string, string>) : Promise<T[]> {
+        let path = this.resourceName + super.getQueryString(params);
+        return super.index<T>(path);
     }
 
-    public async get(key: string) : Promise<T> {
-        return super.single<T>(this.resourceName + '/' + key);
+    public async get(key: string, params?: Map<string, string>) : Promise<T> {
+        let path = this.resourceName + '/' + key + super.getQueryString(params);
+        return super.single<T>(path);
     }
 
     public async createNew(input : T) : Promise<T> {

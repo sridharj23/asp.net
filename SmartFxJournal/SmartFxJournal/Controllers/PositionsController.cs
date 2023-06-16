@@ -18,11 +18,17 @@ namespace SmartFxJournal.Controllers
         }
 
         [HttpGet]
-        public async Task<List<ClosedPosition>> GetPositionsAsync(long account)
+        public async Task<ActionResult<List<ClosedPosition>>> GetPositionsAsync(long accountNo)
         {
-            if (account == 0) { account = 4091794; }
+            //if (account == 0) { account = 4091794; }
 
-            return await _service.GetPositionsAsync(account);
+            return await _service.GetPositionsAsync(accountNo);
+        }
+
+        [HttpGet("{id}")]
+        public async Task<ActionResult<ClosedPosition>> GetPositionAsync(long positionId) 
+        {
+            return await _service.GetPositionAsync(positionId);
         }
 
     }

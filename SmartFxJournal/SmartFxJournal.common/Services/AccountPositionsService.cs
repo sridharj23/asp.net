@@ -1,4 +1,5 @@
 ﻿using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.DependencyInjection;
 using SmartFxJournal.Common.Model;
 using SmartFxJournal.JournalDB.model;
 using System.Globalization;
@@ -8,11 +9,11 @@ namespace SmartFxJournal.Common.Services
 {
     public class AccountPositionsService
     {
-        private readonly JournalDbContext _context;
+        private readonly IServiceScopeFactory _scopeFactory;
 
-        public AccountPositionsService(JournalDbContext context)
+        public AccountPositionsService(IServiceScopeFactory scopeFactory)
         {
-            _context = context;
+            _scopeFactory = scopeFactory;
         }
 
         public async Task<List<SummaryAggregate>> GetSummaryAggregatesAsync(long AccountNo) 
@@ -33,21 +34,31 @@ namespace SmartFxJournal.Common.Services
                 aggregates.Add(i, new SummaryAggregate(key));
             }
 
-            // Collect aggregate data
-            TradingAccount acc = await _context.TradingAccounts.Include(a => a.Positions).FirstAsync(a => a.AccountNo == AccountNo);
-            List<ClosedPosition> trades = acc.Positions.Where(o => o.OrderClosedAt.Year >= prevYear).OrderBy(o => o.OrderClosedAt).ToList();
+            using (var serviceScope = _scopeFactory.CreateScope())
+            {
+                JournalDbContext _context = serviceScope.ServiceProvider.GetService<JournalDbContext>() ?? throw new ArgumentNullException(nameof(serviceScope));
+                TradingAccount acc = await _context.TradingAccounts.Include(a => a.Positions).FirstAsync(a => a.AccountNo == AccountNo);
+                List<ClosedPosition> trades = acc.Positions.Where(o => o.OrderClosedAt.Year >= prevYear).OrderBy(o => o.OrderClosedAt).ToList();
 
-            foreach(ClosedPosition tr in trades) {
-                int month = tr.OrderClosedAt.Month;
-                if (tr.OrderClosedAt.Year == prevYear) {
-                    CollectAggregate(tr, aggregates[prevYear]);
-                } else if (tr.OrderClosedAt.Year == curYear) {
-                    CollectAggregate(tr, aggregates[curYear]);
-                    if (month > 0) {
-                        CollectAggregate(tr, aggregates[month]);
+                foreach (ClosedPosition tr in trades)
+                {
+                    int month = tr.OrderClosedAt.Month;
+                    if (tr.OrderClosedAt.Year == prevYear)
+                    {
+                        CollectAggregate(tr, aggregates[prevYear]);
+                    }
+                    else if (tr.OrderClosedAt.Year == curYear)
+                    {
+                        CollectAggregate(tr, aggregates[curYear]);
+                        if (month > 0)
+                        {
+                            CollectAggregate(tr, aggregates[month]);
+                        }
                     }
                 }
+
             }
+            // Collect aggregate data
 
             return aggregates.Values.ToList().FindAll(a => a.TotalPL != 0);
         }
@@ -66,36 +77,41 @@ namespace SmartFxJournal.Common.Services
         {
             EquityCurve curve = new(AccountNo);
 
-            TradingAccount acc = await _context.TradingAccounts.Include(a => a.Positions).FirstAsync(a => a.AccountNo == AccountNo);
-            List<ClosedPosition> trades = acc.Positions.OrderBy(o => o.OrderClosedAt).ToList();
-
-            decimal lastBal = acc.StartBalance;
-            DateOnly at = acc.OpenedOn;
-            DateOnly cur = DateOnly.MinValue;
-            long datePoint = DateOnlyToMs(at);
-
-            // Add account start balance first
-            //curve.DataPoints.Add(new(lastBal, datePoint));
-
-            foreach(ClosedPosition tra in trades)
+            using (var serviceScope = _scopeFactory.CreateScope())
             {
-                if (tra.PositionId < 0)
-                {
-                    continue; // Reconcilation position
-                }
+                JournalDbContext _context = serviceScope.ServiceProvider.GetService<JournalDbContext>() ?? throw new ArgumentNullException(nameof(serviceScope));
 
-                if (! at.Equals(cur) )
+                TradingAccount acc = await _context.TradingAccounts.Include(a => a.Positions).FirstAsync(a => a.AccountNo == AccountNo);
+                List<ClosedPosition> trades = acc.Positions.OrderBy(o => o.OrderClosedAt).ToList();
+
+                decimal lastBal = acc.StartBalance;
+                DateOnly at = acc.OpenedOn;
+                DateOnly cur = DateOnly.MinValue;
+                long datePoint = DateOnlyToMs(at);
+
+                // Add account start balance first
+                //curve.DataPoints.Add(new(lastBal, datePoint));
+
+                foreach (ClosedPosition tra in trades)
                 {
-                    curve.DataPoints.Add(new(lastBal, datePoint));
+                    if (tra.PositionId < 0)
+                    {
+                        continue; // Reconcilation position
+                    }
+
+                    if (!at.Equals(cur))
+                    {
+                        curve.DataPoints.Add(new(lastBal, datePoint));
+                        cur = DateOnly.FromDateTime(tra.OrderClosedAt.DateTime);
+                        at = cur;
+                    }
+
                     cur = DateOnly.FromDateTime(tra.OrderClosedAt.DateTime);
-                    at = cur;
+                    datePoint = DateOnlyToMs(cur);
+                    lastBal = tra.BalanceAfter;
                 }
-
-                cur = DateOnly.FromDateTime(tra.OrderClosedAt.DateTime);
-                datePoint = DateOnlyToMs(cur);
-                lastBal = tra.BalanceAfter;
+                curve.DataPoints.Add(new(lastBal, datePoint));
             }
-            curve.DataPoints.Add(new(lastBal, datePoint));
             return curve;
         }
 
@@ -107,8 +123,21 @@ namespace SmartFxJournal.Common.Services
 
         public async Task<List<ClosedPosition>> GetPositionsAsync(long AccountNo) 
         {
-            TradingAccount acc = await _context.TradingAccounts.Include(a => a.Positions).FirstAsync(a => a.AccountNo == AccountNo); 
-            return acc.Positions.Where(o => o.PositionId > 0).OrderByDescending(o => o.OrderClosedAt).ToList();
+            using (var serviceScope = _scopeFactory.CreateScope())
+            {
+                JournalDbContext _context = serviceScope.ServiceProvider.GetService<JournalDbContext>() ?? throw new ArgumentNullException(nameof(serviceScope));
+                TradingAccount acc = await _context.TradingAccounts.Include(a => a.Positions).FirstAsync(a => a.AccountNo == AccountNo);
+                return acc.Positions.Where(o => o.PositionId > 0).OrderByDescending(o => o.OrderClosedAt).ToList();
+            }
+        }
+
+        public async Task<ClosedPosition> GetPositionAsync(long PositionId)
+        {
+            using (var serviceScope = _scopeFactory.CreateScope())
+            {
+                JournalDbContext _context = serviceScope.ServiceProvider.GetService<JournalDbContext>() ?? throw new ArgumentNullException(nameof(serviceScope));
+                return await _context.ClosedPositions.Include(p => p.ExecutedOrders).Where(p => p.PositionId == PositionId).FirstAsync();
+            }
         }
     }
 }

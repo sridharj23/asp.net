@@ -1,6 +1,5 @@
 import axios, { type AxiosResponse } from 'axios';
 import { useStatusStore } from '@/stores/statusstore';
-import { type Store } from 'pinia'
 
 export abstract class RestApi {
     readonly connection;
@@ -13,6 +12,20 @@ export abstract class RestApi {
             headers: { 'Content-Type': 'application/json' }
         });
     };
+
+    protected getQueryString(params?: Map<string,string>) : string {
+        let qs = new URLSearchParams("");
+        if (params != undefined) {
+            params.forEach((value:string, key:string) => {
+                qs.append(key, value);
+            })
+        }
+        let str = qs.toString();
+        if (str) {
+            str = "?" + str;
+        }
+        return str;
+    }
 
     public handleError(e: unknown, method : string) {
         let store = useStatusStore();

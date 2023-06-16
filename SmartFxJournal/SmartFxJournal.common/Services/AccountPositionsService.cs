@@ -95,7 +95,7 @@ namespace SmartFxJournal.Common.Services
                 datePoint = DateOnlyToMs(cur);
                 lastBal = tra.BalanceAfter;
             }
-
+            curve.DataPoints.Add(new(lastBal, datePoint));
             return curve;
         }
 
@@ -108,7 +108,7 @@ namespace SmartFxJournal.Common.Services
         public async Task<List<ClosedPosition>> GetPositionsAsync(long AccountNo) 
         {
             TradingAccount acc = await _context.TradingAccounts.Include(a => a.Positions).FirstAsync(a => a.AccountNo == AccountNo); 
-            return acc.Positions.Where(o => o.PositionId > 0).OrderBy(o => o.OrderClosedAt).ToList();
+            return acc.Positions.Where(o => o.PositionId > 0).OrderByDescending(o => o.OrderClosedAt).ToList();
         }
     }
 }

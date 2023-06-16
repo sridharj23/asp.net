@@ -2,7 +2,8 @@ import { defineStore } from 'pinia'
 
 export const usePositionStore = defineStore('selectedposition', {
     state: () => ({ 
-        selectedPositionId: "0",
-        selectedPosition: {} as Record<string, string>
+        lastSelectedPositionId: "0",
+        dblClickedPositionId: "0",
+        dblClickedPosition: {} as Record<string, string>
     })  
   })

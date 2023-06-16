@@ -4,6 +4,7 @@
     import { usePositionStore } from '@/stores/positionstore';
     import DataTable from '@/components/DataTable.vue';
     import type { DataColumn } from '@/components/DataTable.vue';
+import { computed } from '@vue/reactivity';
     
     const api = new PostionsAPI()
     
@@ -37,7 +38,6 @@
         methods: {
             loadPostions() {
                 api.getAll().then((resp) => {
-                    console.log(resp);
                     resp.forEach(pos => this.positions.push(this.createRow(pos)));
                 });
             },
@@ -59,11 +59,11 @@
                 } as Record<string, string>;
             },
             handleRowSelection(position: string) {
-
+                this.store.lastSelectedPositionId = position;
             },
             handleRowDblClick(position: Record<string, string>) {
-                this.store.selectedPosition = position;
-                this.store.selectedPositionId = position['positionId'];
+                this.store.dblClickedPosition = position;
+                this.store.dblClickedPositionId = position['positionId'];
                 this.$emit('positionSelected', position);
             }
     },
@@ -76,7 +76,7 @@
 
 <template>
     <div id="positionsTable">
-        <DataTable class="dataTable" :columns="columns" :dataSource="positions" :rowIdProperty="'positionId'" @rowSelected="handleRowSelection" @rowDoubleClicked="handleRowDblClick"/>
+        <DataTable class="dataTable" :columns="columns" :dataSource="positions" :rowIdProperty="'positionId'" :selectedRowInitial="store.lastSelectedPositionId.toString()" @rowSelected="handleRowSelection" @rowDoubleClicked="handleRowDblClick"/>
     </div>
 </template>
 

@@ -10,7 +10,7 @@ using System.Threading.Tasks;
 
 namespace SmartFxJournal.JournalDB.model
 {
-    [Table("ctradermaster")]
+    [Table("ctrader_master")]
     public sealed class CTraderAccount : Audited
     {
         private string? _authToken;

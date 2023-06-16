@@ -17,7 +17,7 @@
         props: ['positionId'],
         methods: {
             loadChartForPosition() {
-                this.api.getChartData(this.store.selectedPositionId).then(resp => {
+                this.api.getChartData(this.store.dblClickedPositionId).then(resp => {
                     this.chartOptions.title.text = resp.symbol + " : " + resp.timePeriod;
                     this.chartOptions.series[0].data = [];
                     let data = new Array<number[]>();
@@ -31,7 +31,7 @@
                     this.chartOptions.series[1].data = [{x: this.floorToHour(resp.positionOpenedAt), y: resp.positionOpenPrice},
                                                         {x: this.floorToHour(resp.positionClosedAt), y: resp.positionClosePrice}];
 
-                    let isProfit = +this.store.selectedPosition['netProfit'] > 0;
+                    let isProfit = +this.store.dblClickedPosition['netProfit'] > 0;
                     this.chartOptions.plotOptions.line.color = isProfit ? 'yellowgreen' : 'purple';
                 });
             },
@@ -43,6 +43,9 @@
         mounted() {
             this.chartOptions.series[0].data = chartdata;
             this.store.$subscribe(this.loadChartForPosition)
+            if (+this.store.dblClickedPositionId > 0) {
+                this.loadChartForPosition();
+            }
         },
         data() {
             return {

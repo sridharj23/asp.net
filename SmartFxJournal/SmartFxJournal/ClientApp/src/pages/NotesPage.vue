@@ -46,13 +46,13 @@
         margin-top: 10px;
     }
     #MiddleLeft {
-        width: 70%;
+        width: 60%;
         margin-right: 5px;
         display: flex;
         flex-direction: column;
     }
     #MiddleRight {
-        width: 30%;
+        width: 40%;
         margin-left: 5px;
         display: flex;
         flex-direction: column;

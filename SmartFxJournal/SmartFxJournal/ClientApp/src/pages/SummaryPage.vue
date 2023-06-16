@@ -73,8 +73,8 @@
         flex-direction: column;
     }
     #SettingsView {
+        flex-grow: 1;
         height: 100%;
-        width: auto;
     }
     #SummaryView {
         height: 100%;

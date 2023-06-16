@@ -11,7 +11,7 @@ using static SmartFxJournal.JournalDB.model.GlobalEnums;
 
 namespace SmartFxJournal.JournalDB.model
 {
-    [Table("tradedpositions")]
+    [Table("traded_positions")]
     public class ClosedPosition
     {
         protected readonly decimal _lotSize = 10000000;
@@ -66,12 +66,6 @@ namespace SmartFxJournal.JournalDB.model
         [Column(TypeName = "decimal(10,5)")]
         public decimal ExitPrice { get; set; }
 
-        [Column(TypeName = "decimal(10,5)")]
-        public decimal StopLoss { get; set; }
-        
-        [Column(TypeName = "decimal(10,5)")]
-        public decimal? TakeProfit { get; set; }
-
         [Required]
         [Column(TypeName = "decimal(10,2)")]
         public decimal Commission { get; set; }
@@ -98,9 +92,17 @@ namespace SmartFxJournal.JournalDB.model
 
         public DateTimeOffset OrderClosedAt { get; set; }
 
+        public List<AnalysisEntry> AnalysisEntries { get; set; } = new List<AnalysisEntry>();
+
         internal static void OnModelCreate(ModelBuilder builder)
         {
-            
+            builder.Entity<ClosedPosition>(order => {
+                order.HasMany<AnalysisEntry>()
+                     .WithOne()
+                     .HasForeignKey(a => a.ParentId)
+                     .HasConstraintName("fk_Analysis_For_Positions")
+                     .IsRequired();
+            });
         }
     }
 }

@@ -24,9 +24,25 @@ namespace SmartFxJournal.Common.Services
             {
                 JournalDbContext dbContext = serviceScope.ServiceProvider.GetService<JournalDbContext>() ?? throw new ArgumentNullException(nameof(serviceScope));
                 orders = await dbContext.ExecutedOrders.Where(o => o.PositionId == -1* AccountNo).OrderBy(o => o.OrderExecutedAt).ToListAsync();
+
+                ExecutedOrder? prev = default;
+
                 foreach (var order in orders)
                 {
                     order.PositionId = 0;
+
+                    if (order.IsClosing && prev != default)
+                    {
+                        if (prev.FilledVolume == order.ClosedVolume && prev.Direction != order.Direction)
+                        {
+                            prev.PositionId = prev.DealId;
+                            order.PositionId = prev.DealId;
+                        }
+                        prev = default;
+                    } else if (! order.IsClosing && prev == default)
+                    {
+                        prev = order;
+                    }
                 }
             }
 

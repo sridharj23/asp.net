@@ -23,8 +23,6 @@
   </ItemGroup>
 
   <ItemGroup>
-    <Folder Include="helpers\" />
-    <Folder Include="jsonconverters\" />
     <Folder Include="migrations\" />
   </ItemGroup>
 

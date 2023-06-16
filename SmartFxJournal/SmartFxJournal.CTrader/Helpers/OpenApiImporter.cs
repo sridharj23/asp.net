@@ -15,8 +15,6 @@ namespace SmartFxJournal.CTrader.Helpers
 {
     internal class OpenApiImporter
     {
-        private static readonly long RECONCILE_POSITION_ID = -1000000;
-
         internal static async Task<TradingAccount> ImportAccountAsync(ProtoOACtidTraderAccount act, OpenApiService openApiService, CTraderAccount parent)
         {
 
@@ -69,11 +67,9 @@ namespace SmartFxJournal.CTrader.Helpers
                 GrossProfit = Decimal.Zero,
                 NetProfit = Decimal.Zero,
                 PositionStatus = PositionStatus.Open,
-                StopLoss = Decimal.Zero,
                 Symbol = Decimal.Zero,
                 Commission = Decimal.Zero,
                 Swap = Decimal.Zero,
-                TakeProfit = Decimal.Zero,
                 Volume = 0,
                 LastUpdatedAt = DateTime.Now.ToUniversalTime(),
                 OrderClosedAt = DateTime.Now.ToUniversalTime(),

@@ -35,6 +35,7 @@
         methods: {
             loadOrders() {
                 let acc = this.store.selectedAccount;
+                this.orders = [];
                 this.api.getOrderToReconcile(acc.toString()).then((resp) => {
                     resp.forEach(pos => this.orders.push(this.createRow(pos)));
                 });
@@ -57,7 +58,7 @@
                 let entries : Map<string, ReconcileEntry> = new Map<string, ReconcileEntry>();
 
                 this.orders.forEach(o => {
-                    if (o.isReconciled == 'true') {
+                    if (o.isReconciled == 'true' || +o.positionId > 0 ) {
                         let entry = entries.get(o.positionId);
                         if (entry == undefined) {
                             entry = {positionId: +o.positionId, orders: [] };
@@ -70,6 +71,7 @@
                 entries.forEach(e => this.reconciled.push(e));
                 this.api.reconcileOrders(this.store.selectedAccount, this.reconciled).then(res => {
                     this.api.displayInfo(res.result);
+                    this.loadOrders();
                 });
             },
             createRow(pos: OrderToReconcile) {
@@ -77,6 +79,7 @@
                     isSelected: "false",
                     isReconciled: "false",
                     dealId: pos.dealId.toString(),
+                    positionId: pos.positionId.toString(),
                     orderId: pos.orderId.toString(),
                     symbol: pos.symbol,
                     direction: pos.direction,

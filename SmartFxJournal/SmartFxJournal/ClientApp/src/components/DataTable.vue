@@ -10,13 +10,24 @@
             columns: {type: Array<DataColumn>, required: true},
             dataSource : {type: Array<Record<string, string>>, required: true},
             rowIdProperty: {type: String, required: true},
-            multiSelect: {type: Boolean}
+            multiSelect: {type: Boolean},
+            selectedRowInitial: {type: String, default: "0"}
         },
         data() {
             return {
                 selectedRowId: "0",
                 draggedObject: {} as Record<string, string>,
                 dragStarted: false
+            }
+        },
+        computed: {
+            getSelectedRowId() : string {
+                if (this.selectedRowId != "0" ) {
+                    return this.selectedRowId;
+                } else if (this.selectedRowInitial != "0") {
+                    return this.selectedRowInitial;
+                }
+                return "0";
             }
         },
         methods: {
@@ -67,7 +78,7 @@
                 </tr>
             </thead>
             <tbody>
-                <tr :class="selectedRowId == rec[rowIdProperty] ? 'tableRow selectedRow' : 'tableRow'" v-for="rec in dataSource" :key="rowIdProperty" 
+                <tr :class="getSelectedRowId == rec[rowIdProperty] ? 'tableRow selectedRow' : 'tableRow'" v-for="rec in dataSource" :key="rowIdProperty" 
                     @click="setSelected(rec)" @dblclick="doubleClicked(rec)">
                     <td v-if="multiSelect" :class="'tableDataCell'">
                         <input type="checkbox" :disabled="rec['isSelected'] == 'disabled'" v-model="rec['isSelected']" true-value="true" false-value="false"/>

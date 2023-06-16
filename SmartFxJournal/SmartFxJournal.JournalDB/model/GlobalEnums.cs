@@ -69,14 +69,19 @@ namespace SmartFxJournal.JournalDB.model
             NotesEntry = 1005
         }
 
-        public enum TradeAspect
+        public enum AnalyzedAspect
         {
             Entry = 101,
             Exit = 102,
-            TakeProfit = 103,
-            TrailingStop = 104,
-            StaggeredTakeProfit = 105,
-            StopLoss = 106
+            StopLoss = 103,
+            TakeProfit = 104
+        }
+
+        public enum AnalysisScenario
+        {
+            Actual = 201,
+            Ideal = 202,
+            WhatIf = 203
         }
     }
 }

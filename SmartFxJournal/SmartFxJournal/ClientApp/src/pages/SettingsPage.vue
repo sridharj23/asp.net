@@ -27,11 +27,11 @@
 <template>
     <div class="container" id="mainContainer">
       <TabControl id="settingsTab" @selectionChanged="handleSelectionChange">
-        <Tab :title="'Registered Accounts'" :key="'accounts'" :isActive="selectedTab == 'accounts'">
-          <AccountsView id="accountsView"/>
+        <Tab class="tabPage" :title="'Registered Accounts'" :key="'accounts'" :isActive="selectedTab == 'accounts'">
+          <AccountsView class="tabContent" id="accountsView"/>
         </Tab>
         <Tab :title="'CTrader Import'" :key="'ctrader'" :isActive="selectedTab == 'ctrader'">
-          <CTraderLogin id="cTraderView"/>
+          <CTraderLogin class="tabContent" id="cTraderView"/>
         </Tab>
       </TabControl>
     </div>
@@ -48,6 +48,12 @@
     flex-grow: 1;
   }
   #settingsTab {
+    height: 100%;
+  }
+  .tabPage {
+    height: 100%;
+  }
+  .tabContent {
     height: 100%;
   }
 </style>

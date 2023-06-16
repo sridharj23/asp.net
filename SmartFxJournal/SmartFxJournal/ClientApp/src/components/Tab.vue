@@ -21,7 +21,8 @@
 
 <style scoped>
   #tabPage {
-    border: 2px solid purple;
+    height: 100%;
+    width: 100%;
   }
   .shown {
     display: block;

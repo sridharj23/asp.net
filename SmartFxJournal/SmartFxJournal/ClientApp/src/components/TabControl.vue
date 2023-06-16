@@ -16,7 +16,6 @@
       }
     },
     mounted() {
-      console.log(this.tabs);
       this.$slots.default().forEach((item,index) => {
         this.headers.push(item.props?.title?? 'Tab');
         this.tabs.push(item.props?.key?? 'Tab' + index);

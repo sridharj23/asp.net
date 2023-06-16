@@ -11,7 +11,7 @@ using static SmartFxJournal.JournalDB.model.GlobalEnums;
 
 namespace SmartFxJournal.JournalDB.model
 {
-    [Table("executedorders")]
+    [Table("executed_orders")]
     public class ExecutedOrder
     {
         [Key]
@@ -78,8 +78,20 @@ namespace SmartFxJournal.JournalDB.model
 
         public DateTimeOffset LastUpdatedAt { get; set; }
 
-        internal static void OnModelCreate(ModelBuilder modelBuilder)
+        public List<AnalysisEntry> AnalysisEntries { get; set; } = new List<AnalysisEntry>();
+
+        internal static void OnModelCreate(ModelBuilder builder)
         {
+            builder.Entity<ExecutedOrder>().HasAlternateKey(o => o.OrderId);
+
+            builder.Entity<ExecutedOrder>(order => { 
+                order.HasMany<AnalysisEntry>()
+                     .WithOne()
+                     .HasForeignKey(a => a.ParentId)
+                     .HasPrincipalKey(o => o.OrderId)
+                     .HasConstraintName("fk_Analysis_For_Orders")
+                     .IsRequired();
+            });
         }
     }
 }

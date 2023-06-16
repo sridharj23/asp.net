@@ -8,14 +8,14 @@ using static SmartFxJournal.JournalDB.model.GlobalEnums;
 
 namespace SmartFxJournal.JournalDB.model
 {
-    [Table("tradingaccounts")]
+    [Table("trading_accounts")]
     public class TradingAccount : Audited
     {
         [Key]
         [DatabaseGenerated(DatabaseGeneratedOption.None)]
         public long AccountNo { get; set; }
 
-        public long? CTraderAccountId { get; set; }
+        public long CTraderAccountId { get; set; } = 0;
 
         [Required]
         public bool IsDefault { get; set; } = false;

@@ -1,10 +1,7 @@
 <script lang="ts">
-    export interface DataColumn {
-        property : string;
-        title : string;
-        propType: string;
-    }
-    export default {
+import { type DataColumn } from '@/types/CommonTypes';
+
+export default {
         emits: ['rowSelected', 'rowDoubleClicked'],
         props : {
             columns: {type: Array<DataColumn>, required: true},
@@ -39,7 +36,6 @@
                 this.$emit("rowDoubleClicked", rec);
             },
             mouseDownHandler(event : any) {
-                console.log(event);
                 let tab = document.getElementById("theTable");
                 tab?.addEventListener('drag', this.dragEventHandler);
                 this.draggedObject = event;

@@ -1,21 +1,21 @@
 <script setup>
     import Card from '@/components/Card.vue';
     import TradeChart from '@/views/TradeChart.vue';
+    import PositionDetailView from '@/views/PositionDetailView.vue'
 </script>
 
 <template>
     <div id="AnalysisPage">
         <Card id="PositionCard">
             <template #default>
-                <p>A paragraph for the main content.</p>
-                <p>And another one.</p>
+                <PositionDetailView id="positionDetails"/>
             </template>
         </Card>
 
         <div id="MiddleContainer">
             <Card id="MiddleLeft">
                 <template #default>
-                    <TradeChart id="tradeChartView" ref="tradeChart" :positionId="selectedPosition"/>
+                    <TradeChart id="tradeChartView" ref="tradeChart"/>
                 </template>
             </Card>
             <Card id="MiddleRight">
@@ -36,6 +36,11 @@
     #PositionCard {
         width: 100%;
         height: 30%;
+    }
+    #positionDetails {
+        display: block;
+        width: 100%;
+        height: 100%;
     }
     #MiddleContainer {
         display: flex;

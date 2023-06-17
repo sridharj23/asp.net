@@ -1,5 +1,5 @@
 import { RestApi } from "./ApiBase";
-import type { EquityCurve, SummaryAggregate } from "@/types/JournalTypes";
+import type { EquityCurve, SummaryAggregate } from "@/types/CommonTypes";
 
 export class SummaryAPI extends RestApi {
     public async getEquityCurve(accountNo : string) : Promise<EquityCurve> {

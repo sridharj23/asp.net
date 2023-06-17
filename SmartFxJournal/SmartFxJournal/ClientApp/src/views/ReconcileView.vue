@@ -1,9 +1,10 @@
 <script lang="ts">
     import {ReconcileApi} from '@/api/ReconcileApi';
-    import type { ReconcileEntry, OrderToReconcile } from '@/types/JournalTypes';
+    import { type ReconcileEntry, type ExecutedOrder, Common, type DataColumn } from '@/types/CommonTypes';
     import DataTable from '@/components/DataTable.vue';
-    import type { DataColumn } from '@/components/DataTable.vue';
     import { useAccountStore } from '@/stores/accountstore';
+
+    const prePend = { isSelected: "false", isReconciled: "false"} as Record<string, string>;
 
     export default {
         setup() {
@@ -14,20 +15,7 @@
         data() {
             return {
                 orders: [] as Record<string, string>[],
-                columns: [
-                    { property: "orderId", title: "Order ID", propType: "default" },
-                    { property: "positionId", title: "Position ID", propType: "default" },
-                    { property: "symbol", title: "Symbol", propType: "default" },
-                    { property: "direction", title: "Direction", propType: "default" },
-                    { property: "filledVolume", title: "Filled Volume", propType: "default" },
-                    { property: "closedVolume", title: "Filled Volume", propType: "default" },
-                    { property: "executionPrice", title: "Execution Price", propType: "default" },
-                    { property: "commission", title: "Commission", propType: "Currency" },
-                    { property: "swap", title: "Swap", propType: "Currency" },
-                    { property: "grossProfit", title: "Gross Profit", propType: "Currency" },
-                    { property: "balanceAfter", title: "Balance", propType: "Currency" },
-                    { property: "orderExecutedAt", title: "Execution Time", propType: "default" }
-                ] as DataColumn[],
+                columns: Common.getExcecutedOrderColumns(),
                 selectedRowId: "0",
                 reconciled: [] as ReconcileEntry[]
             };
@@ -37,7 +25,7 @@
                 let acc = this.store.selectedAccount;
                 this.orders = [];
                 this.api.getOrderToReconcile(acc.toString()).then((resp) => {
-                    resp.forEach(pos => this.orders.push(this.createRow(pos)));
+                    resp.forEach(pos => this.orders.push(Common.convertOrderToRecord(pos, prePend)));
                 });
             },
             handleGroupingRequest() {
@@ -73,25 +61,6 @@
                     this.api.displayInfo(res.result);
                     this.loadOrders();
                 });
-            },
-            createRow(pos: OrderToReconcile) {
-                return {
-                    isSelected: "false",
-                    isReconciled: "false",
-                    dealId: pos.dealId.toString(),
-                    positionId: pos.positionId.toString(),
-                    orderId: pos.orderId.toString(),
-                    symbol: pos.symbol,
-                    direction: pos.direction,
-                    filledVolume: pos.filledVolume.toString(),
-                    closedVolume: pos.closedVolume.toString(),
-                    executionPrice: pos.executionPrice.toFixed(5),
-                    commission: pos.commission.toFixed(2),
-                    swap: pos.swap.toFixed(2),
-                    grossProfit: pos.grossProfit.toFixed(2),
-                    balanceAfter: pos.balanceAfter.toFixed(2),
-                    orderExecutedAt: new Date(pos.orderExecutedAt).toLocaleString(),
-                } as Record<string, string>;
             },
             handleOnDrag(event : DragEvent) {
                 console.log(event);
@@ -136,6 +105,5 @@
     }
     .dataTable {
         max-height: 85vh;
-        border: 1px solid purple;
     }
 </style>

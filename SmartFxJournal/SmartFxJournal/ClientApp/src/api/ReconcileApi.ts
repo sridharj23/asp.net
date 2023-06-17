@@ -1,5 +1,5 @@
 import { RestApi } from "./ApiBase";
-import type { OrderToReconcile, ReconcileEntry } from "@/types/JournalTypes";
+import type { OrderToReconcile, ReconcileEntry } from "@/types/CommonTypes";
 
 export class ReconcileApi extends RestApi {
     public async getOrderToReconcile(accountNo : string) : Promise<OrderToReconcile[]> {

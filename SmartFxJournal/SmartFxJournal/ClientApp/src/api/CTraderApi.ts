@@ -1,5 +1,5 @@
 import { RestApi } from "./ApiBase";
-import type { TrendBars } from "@/types/JournalTypes";
+import type { TrendBars } from "@/types/CommonTypes";
 
 export class CTraderAPI extends RestApi {
     readonly resource = 'ctrader';

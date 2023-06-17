@@ -1,5 +1,5 @@
 import { JournalApi } from "./JournalApiBase";
-import { type Account } from "@/types/JournalTypes";
+import { type Account } from "@/types/CommonTypes";
 
 export class AccountsAPI extends JournalApi<Account> {
 

@@ -26,9 +26,9 @@ namespace SmartFxJournal.Controllers
         }
 
         [HttpGet("{id}")]
-        public async Task<ActionResult<ClosedPosition>> GetPositionAsync(long positionId) 
+        public async Task<ActionResult<ClosedPosition>> GetPositionAsync(long id) 
         {
-            return await _service.GetPositionAsync(positionId);
+            return await _service.GetPositionAsync(id);
         }
 
     }

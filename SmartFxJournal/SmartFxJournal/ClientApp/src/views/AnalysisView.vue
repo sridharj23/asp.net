@@ -1,63 +1,134 @@
 <script lang="ts">
     import {AnalysisApi} from '@/api/AnalysisApi';
-    import type {AnalysisEntry, RowDef} from '@/types/CommonTypes';
+    import Card from '@/components/Card.vue';
     import TabControl from '@/components/TabControl.vue';
     import Tab from '@/components/Tab.vue';
     import DataMatrix from '@/components/DataMatrix.vue';
-import { Common } from '@/types/CommonTypes';
+    import ModalDialog from '@/components/ModalDialog.vue';
+    import { Common } from '@/types/CommonTypes';
+    import { usePositionStore } from '@/stores/positionstore';
 
     const api = new AnalysisApi();
 
     export default {
-        props: ['analysisEntry'],
+        setup() {
+            const store = usePositionStore();
+            return {store};
+        },
         components: {
-            TabControl, Tab, DataMatrix
+            TabControl, Tab, DataMatrix, ModalDialog, Card
         },
         data() {
             return {
+                tabKeys: ["Actual", "Ideal", "WhatIf"],
+                aspects: ["Entry", "Exit", "StopLoss", "TakeProfit"],
+                selectedTab: "Actual",
+                showDialog: false,
                 selectEntryType: "",
                 selectEntryId: "",
-                analysisEntries: [] as Record<string,string>[],
-                rowDefs: Common.getAnalysisEntryRowDefs()
+                analysisEntries: new Map<string, Record<string,string>[]>(),
+                displayedEntries: [] as Record<string,string>[],
+                rowDefs: Common.getAnalysisEntryRowDefs(),
+                newEntryType: ""
             }
         },
-        watch: {
-            analysisEntry: function(newVal : string, oldVal : string) {
-                if (newVal) {
-                    let arr = newVal.split(":");
-                    this.selectEntryType = arr[0];
-                    this.selectEntryId = arr[1];
+        methods: {
+            resetAnalysisEntries(){
+                this.tabKeys.forEach(key => this.analysisEntries.set(key, [] as Record<string, string>[]));
+            },
+            loadAnalysis() {
+                this.resetAnalysisEntries();
+                if (+this.store.dblClickedPositionId > 0) {
+                    this.selectEntryType = 'Position';
+                    this.selectEntryId = this.store.dblClickedPositionId;
+                    api.getAnalysisForPosition(this.selectEntryId).then(entries => {
+                        entries.forEach(entry => {
+                            this.analysisEntries.get(entry.analysisScenario)?.push(Common.convertToAnalysisRecord(entry));
+                        });
+                    });
                 } else {
                     this.selectEntryType = "";
                     this.selectEntryId = "";
                 }
-                api.getAnalysisForPosition(this.selectEntryId).then(entries => {
-                    this.analysisEntries = [];
-                    entries.forEach(entry => this.analysisEntries.push(Common.convertToAnalysisRecord(entry)));
-                    console.log(this.analysisEntries);
+            },
+            selectTab(selected: string) {
+                this.selectedTab = selected;
+                this.displayedEntries = this.analysisEntries.get(selected)?? [];
+            },
+            displayDialog() {
+                this.showDialog = true;
+            },
+            handleDialogResult(result: string) {
+                this.showDialog = false;
+                if (result == "Add") {
+                    this.createEntry(result, this.selectedTab);
+                }
+                this.newEntryType = "";
+            },
+            createEntry(entryType : string, scenario: string) {
+                let entries = this.analysisEntries.get(scenario);
+                entries?.forEach((val) => {
+                    if (val['analysisScenario'] == scenario && val['analyzedAspect'] == entryType) {
+                        alert("Error: Entry type " + entryType + " already exists in " + scenario);
+                        return;
+                    }
                 });
             }
+        },
+        beforeMount() {
+            this.resetAnalysisEntries();
+        },
+        mounted() {
+            this.store.$subscribe(this.loadAnalysis);
+            this.loadAnalysis();
         }
     }
+
 </script>
 
 <template>
-    <TabControl id="parentTab">
+    <Card id="analysisCard">
         <template #default>
-            <Tab :title="'Actual'" :is-active="true">
-                <DataMatrix id="actualEntries" :data-source="analysisEntries" :col-header-key="'analyzedAspect'" :row-defs="rowDefs"/>
-            </Tab>
-            <Tab :title="'Ideal'"/>
-            <Tab :title="'What-If'"/>
+            <TabControl id="parentTab" @selection-changed="selectTab">
+                <template #default>
+                    <Tab :title="tabKeys[0]" :is-active="selectedTab == tabKeys[0]" :key="tabKeys[0]">
+                        <DataMatrix class="analysisEntry" :row-defs="rowDefs" :col-header-key="'analyzedAspect'" :data-source="displayedEntries"/>
+                    </Tab>
+                    <Tab :title="tabKeys[1]" :is-active="selectedTab == tabKeys[1]" :key="tabKeys[1]">
+                        <DataMatrix class="analysisEntry" :row-defs="rowDefs" :col-header-key="'analyzedAspect'" :data-source="displayedEntries"/>
+                    </Tab>
+                    <Tab :title="tabKeys[2]" :is-active="selectedTab == tabKeys[2]" :key="tabKeys[2]">
+                        <DataMatrix class="analysisEntry" :row-defs="rowDefs" :col-header-key="'analyzedAspect'" :data-source="displayedEntries"/>
+                    </Tab>
+                </template>
+            </TabControl>
         </template>
-    </TabControl>
+        <template #footerSlot>
+            <div class="flow-row">
+                <button @click="displayDialog">Add New</button>
+            </div>
+        </template>
+    </Card>
+    <ModalDialog :show-buttons="['Add', 'Cancel']" :show-dialog="showDialog" :title="'New entry type for scenario : ' + selectedTab" @button-clicked="handleDialogResult">
+        <template #dialogContent>
+            <div class="inputRow">
+                <label class="labels" for="entry_type">Entry Type</label>
+                <select class="inputControls" id="entry_type" v-model="newEntryType" >
+                    <option v-for="aspect in aspects" :value="aspect">{{ aspect }}</option>
+                </select>
+            </div>
+        </template>
+    </ModalDialog>
 </template>
 
 <style scoped>
-    #parentTab {
+    #analysisCard {
         height: 100%;
     }
-    #actualEntries {
+    #parentTab {
+        flex-grow: 1;
+    }
+    .analysisEntry {
         display: block;
         height: 100%;
     }

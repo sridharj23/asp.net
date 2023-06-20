@@ -38,11 +38,9 @@
                     <TradeChart id="tradeChartView" ref="tradeChart"/>
                 </template>
             </Card>
-            <Card id="MiddleRight">
-                <template #default>
-                    <AnalysisView :analysis-entry="selectedEntry"/>
-                </template>
-            </Card>
+            <div id="MiddleRight">
+                <AnalysisView/>
+            </div>
         </div>
     </div>
 </template>

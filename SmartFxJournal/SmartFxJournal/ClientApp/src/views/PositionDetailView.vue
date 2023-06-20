@@ -21,6 +21,7 @@
             };
         },
         mounted() {
+            this.store.$subscribe(this.loadPosition);
             this.loadPosition();
         },
         methods: {

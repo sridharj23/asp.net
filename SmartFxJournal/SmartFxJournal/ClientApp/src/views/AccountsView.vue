@@ -117,56 +117,58 @@ export default {
 <template>
     <section id="avContainer">
         <form id="accountForm" class="container" v-on:submit="saveAccount">
-            <div class="inputRow">
-                <label class="labels" for="account_no">Account Number</label>
-                <select :class="createMode ? 'hidden' : 'inputControls visible' " id="account_no" v-model="selectedAcNo" @change="setSelected()" :disabled="editMode">
-                    <option v-for="account in theAccounts" :value="account.accountNo">
-                    {{ account.accountNo }}
-                    </option>
-                </select>
-                <input id="acc_no" :class="createMode ? 'inputControls visible' : 'hidden'" v-model="selectedAccount.accountNo" type="text" :required="createMode" autocomplete="off">
-            </div>
-            <div class="inputRow">
-                <label class="labels" for="is_live">Is Live Account</label>
-                <input id="is_live" class="inputControls" type="checkbox" v-model="selectedAccount.isLive" :disabled="isReadOnly">
-            </div>
-            <div class="inputRow">
-                <label class="labels" for="is_default">Is Default</label>
-                <input id="is_default" class="inputControls" type="checkbox" v-model="selectedAccount.isDefault" :disabled="isReadOnly">
-            </div>
-            <div class="inputRow">
-                <label class="labels" for="broker_name">Broker Name</label>
-                <input id="broker_name" class="inputControls" type="text" v-model="selectedAccount.broker"  :readonly="isReadOnly" required autocomplete="off">
-            </div>
-            <div class="inputRow">
-                <label class="labels" for="currency_type">Account Currency</label>
-                <select class="inputControls" id="currency_type" v-model="selectedAccount.accountCurrency" :disabled="editMode" required>
-                    <option value="EUR">EUR</option>
-                    <option value="USD">USD</option>
-                </select>
-            </div>
-            <div class="inputRow">
-                <label class="labels" for="start_bal">Starting Balance</label>
-                <input id="start_bal" class="inputControls" type="text" v-model="selectedAccount.startBalance" :readonly="isReadOnly" required autocomplete="off">
-            </div>
-            <div class="inputRow">
-                <label class="labels" for="cur_bal">Current Balance</label>
-                <input id="cur_bal" class="inputControls" type="text" v-model="selectedAccount.currentBalance" :readonly="isReadOnly" required autocomplete="off">
-            </div>
-            <div class="inputRow">
-                <label class="labels" for="opened_on">Opened On</label>
-                <input id="opened_on" class="inputControls" type="date" v-model="selectedAccount.openedOn" :readonly="isReadOnly" required autocomplete="off">
-            </div>
-            <div class="inputRow">
-                <label class="labels">Import Mode</label>
-                <input class="inputControls" id="ctrader" name="import_mode" type="radio" :disabled="isReadOnly" v-model="selectedAccount.importMode" value="cTrader"/>
-                <label class="labels" for="ctrader" style="width: auto;">cTrader</label>
-                <input class="inputControls" id="csv" name="import_mode" type="radio" :disabled="isReadOnly" v-model="selectedAccount.importMode" value="CSV" style="margin-left: 20px;"/>
-                <label class="labels" for="csv" style="width: auto;">CSV</label>
-            </div>
-            <div class="inputRow">
-                <label class="labels" for="last_imported_on">Last Import on</label>
-                <input id="last_imported_on" class="inputControls" type="text" v-model="selectedAccount.lastImportedOn" readonly autocomplete="off" style="border: 0px;">
+            <div id="justWapper" style="margin: 10px;">
+                <div class="inputRow">
+                    <label class="labels" for="account_no">Account Number</label>
+                    <select :class="createMode ? 'hidden' : 'inputControls visible' " id="account_no" v-model="selectedAcNo" @change="setSelected()" :disabled="editMode">
+                        <option v-for="account in theAccounts" :value="account.accountNo">
+                        {{ account.accountNo }}
+                        </option>
+                    </select>
+                    <input id="acc_no" :class="createMode ? 'inputControls visible' : 'hidden'" v-model="selectedAccount.accountNo" type="text" :required="createMode" autocomplete="off">
+                </div>
+                <div class="inputRow">
+                    <label class="labels" for="is_live">Is Live Account</label>
+                    <input id="is_live" class="inputControls" type="checkbox" v-model="selectedAccount.isLive" :disabled="isReadOnly">
+                </div>
+                <div class="inputRow">
+                    <label class="labels" for="is_default">Is Default</label>
+                    <input id="is_default" class="inputControls" type="checkbox" v-model="selectedAccount.isDefault" :disabled="isReadOnly">
+                </div>
+                <div class="inputRow">
+                    <label class="labels" for="broker_name">Broker Name</label>
+                    <input id="broker_name" class="inputControls" type="text" v-model="selectedAccount.broker"  :readonly="isReadOnly" required autocomplete="off">
+                </div>
+                <div class="inputRow">
+                    <label class="labels" for="currency_type">Account Currency</label>
+                    <select class="inputControls" id="currency_type" v-model="selectedAccount.accountCurrency" :disabled="editMode" required>
+                        <option value="EUR">EUR</option>
+                        <option value="USD">USD</option>
+                    </select>
+                </div>
+                <div class="inputRow">
+                    <label class="labels" for="start_bal">Starting Balance</label>
+                    <input id="start_bal" class="inputControls" type="text" v-model="selectedAccount.startBalance" :readonly="isReadOnly" required autocomplete="off">
+                </div>
+                <div class="inputRow">
+                    <label class="labels" for="cur_bal">Current Balance</label>
+                    <input id="cur_bal" class="inputControls" type="text" v-model="selectedAccount.currentBalance" :readonly="isReadOnly" required autocomplete="off">
+                </div>
+                <div class="inputRow">
+                    <label class="labels" for="opened_on">Opened On</label>
+                    <input id="opened_on" class="inputControls" type="date" v-model="selectedAccount.openedOn" :readonly="isReadOnly" required autocomplete="off">
+                </div>
+                <div class="inputRow">
+                    <label class="labels">Import Mode</label>
+                    <input class="inputControls" id="ctrader" name="import_mode" type="radio" :disabled="isReadOnly" v-model="selectedAccount.importMode" value="cTrader"/>
+                    <label class="labels" for="ctrader" style="width: auto;">cTrader</label>
+                    <input class="inputControls" id="csv" name="import_mode" type="radio" :disabled="isReadOnly" v-model="selectedAccount.importMode" value="CSV" style="margin-left: 20px;"/>
+                    <label class="labels" for="csv" style="width: auto;">CSV</label>
+                </div>
+                <div class="inputRow">
+                    <label class="labels" for="last_imported_on">Last Import on</label>
+                    <input id="last_imported_on" class="inputControls" type="text" v-model="selectedAccount.lastImportedOn" readonly autocomplete="off" style="border: 0px;">
+                </div>
             </div>
             <div id="spacer"/>
             <div id="footer" class="flow-row">
@@ -189,13 +191,13 @@ export default {
 }
 #accountForm {
     flex-grow: 1;
-    height: calc(100% - 25px);
-    margin: 10px;
+    height: 100%;
 }
 #spacer {
     flex-grow: 1;
 }
 #footer {
+    border-top: 2px solid #ccc;
     bottom: 0%;
 }
 .visible {

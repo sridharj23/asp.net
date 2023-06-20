@@ -1,13 +1,29 @@
+<script lang="ts">
+
+  export default {
+    name: "Card",
+    computed: {
+      hasFooter() {
+        return !!this.$slots.footerSlot;
+      },
+      hasHeader() {
+        return !!this.$slots.headerSlot;
+      }
+    }
+  }
+
+</script>
+
 <template>
   <div class="container card">
-    <header>
-      <slot name="header"></slot>
+    <header v-show="hasHeader">
+      <slot name="headerSlot"/>
     </header>
     <main class="mainSlot">
-      <slot></slot>
+      <slot/>
     </main>
-    <footer>
-      <slot name="footer"></slot>
+    <footer v-show="hasFooter">
+      <slot name="footerSlot"/>
     </footer>
   </div>
 </template>

@@ -3,6 +3,7 @@ using System;
 using System.Collections.Generic;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 using SmartFxJournal.JournalDB.model;
@@ -12,9 +13,11 @@ using SmartFxJournal.JournalDB.model;
 namespace SmartFxJournal.JournalDB.migrations
 {
     [DbContext(typeof(JournalDbContext))]
-    partial class JournalDbContextModelSnapshot : ModelSnapshot
+    [Migration("20230619122821_InitDB")]
+    partial class InitDB
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -90,10 +93,10 @@ namespace SmartFxJournal.JournalDB.migrations
                         .HasColumnType("decimal(10,2)")
                         .HasColumnName("profit_loss");
 
-                    b.Property<string>("UsedIndicator")
+                    b.Property<string>("UsedInidicator")
                         .IsRequired()
                         .HasColumnType("character varying(100)")
-                        .HasColumnName("used_indicator");
+                        .HasColumnName("used_inidicator");
 
                     b.Property<List<string>>("UsedStrategy")
                         .IsRequired()

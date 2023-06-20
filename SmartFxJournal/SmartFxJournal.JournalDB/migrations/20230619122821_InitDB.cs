@@ -14,6 +14,35 @@ namespace SmartFxJournal.JournalDB.migrations
         protected override void Up(MigrationBuilder migrationBuilder)
         {
             migrationBuilder.CreateTable(
+                name: "analysis_entries",
+                columns: table => new
+                {
+                    entry_id = table.Column<long>(type: "bigint", nullable: false)
+                        .Annotation("Npgsql:ValueGenerationStrategy", NpgsqlValueGenerationStrategy.IdentityByDefaultColumn),
+                    parent_id = table.Column<long>(type: "bigint", nullable: false),
+                    parent_type = table.Column<string>(type: "character varying(50)", nullable: false),
+                    analyzed_aspect = table.Column<string>(type: "character varying(50)", nullable: false),
+                    analysis_scenario = table.Column<string>(type: "character varying(50)", nullable: false),
+                    is_valid = table.Column<bool>(type: "boolean", nullable: false),
+                    invalidity_reason = table.Column<List<string>>(type: "text[]", nullable: false),
+                    used_system = table.Column<string>(type: "character varying(100)", nullable: false),
+                    used_strategy = table.Column<List<string>>(type: "text[]", nullable: false),
+                    used_inidicator = table.Column<string>(type: "character varying(100)", nullable: false),
+                    indicator_status = table.Column<List<string>>(type: "text[]", nullable: false),
+                    execution_accuracy = table.Column<List<string>>(type: "text[]", nullable: false),
+                    execution_price = table.Column<decimal>(type: "numeric(10,5)", nullable: false),
+                    execution_time = table.Column<DateTimeOffset>(type: "timestamp with time zone", nullable: false),
+                    volume = table.Column<long>(type: "bigint", nullable: false),
+                    profit_loss = table.Column<decimal>(type: "numeric(10,2)", nullable: false),
+                    profit_in_percent = table.Column<decimal>(type: "numeric(5,2)", nullable: false),
+                    profit_in_pips = table.Column<decimal>(type: "numeric(6,2)", nullable: false)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("pk_analysis_entries", x => x.entry_id);
+                });
+
+            migrationBuilder.CreateTable(
                 name: "ctrader_master",
                 columns: table => new
                 {
@@ -135,52 +164,6 @@ namespace SmartFxJournal.JournalDB.migrations
                         principalColumn: "account_no",
                         onDelete: ReferentialAction.Cascade);
                 });
-
-            migrationBuilder.CreateTable(
-                name: "analysis_entries",
-                columns: table => new
-                {
-                    entry_id = table.Column<long>(type: "bigint", nullable: false)
-                        .Annotation("Npgsql:ValueGenerationStrategy", NpgsqlValueGenerationStrategy.IdentityByDefaultColumn),
-                    parent_id = table.Column<long>(type: "bigint", nullable: false),
-                    parent_type = table.Column<string>(type: "character varying(50)", nullable: false),
-                    analyzed_aspect = table.Column<string>(type: "character varying(50)", nullable: false),
-                    analysis_scenario = table.Column<string>(type: "character varying(50)", nullable: false),
-                    is_valid = table.Column<bool>(type: "boolean", nullable: false),
-                    invalidity_reason = table.Column<List<string>>(type: "text[]", nullable: false),
-                    used_system = table.Column<string>(type: "character varying(100)", nullable: false),
-                    used_strategy = table.Column<List<string>>(type: "text[]", nullable: false),
-                    used_inidicator = table.Column<string>(type: "character varying(100)", nullable: false),
-                    indicator_status = table.Column<List<string>>(type: "text[]", nullable: false),
-                    execution_accuracy = table.Column<List<string>>(type: "text[]", nullable: false),
-                    execution_price = table.Column<decimal>(type: "numeric(10,5)", nullable: false),
-                    execution_time = table.Column<DateTimeOffset>(type: "timestamp with time zone", nullable: false),
-                    volume = table.Column<long>(type: "bigint", nullable: false),
-                    profit_loss = table.Column<decimal>(type: "numeric(10,2)", nullable: false),
-                    profit_in_percent = table.Column<decimal>(type: "numeric(5,2)", nullable: false),
-                    profit_in_pips = table.Column<decimal>(type: "numeric(6,2)", nullable: false),
-                },
-                constraints: table =>
-                {
-                    table.PrimaryKey("pk_analysis_entries", x => x.entry_id);
-                    table.ForeignKey(
-                        name: "fk_Analysis_For_Orders",
-                        column: x => x.parent_id,
-                        principalTable: "executed_orders",
-                        principalColumn: "order_id",
-                        onDelete: ReferentialAction.Cascade);
-                    table.ForeignKey(
-                        name: "fk_Analysis_For_Positions",
-                        column: x => x.parent_id,
-                        principalTable: "traded_positions",
-                        principalColumn: "position_id",
-                        onDelete: ReferentialAction.Cascade);
-                });
-
-            migrationBuilder.CreateIndex(
-                name: "ix_analysis_entries_parent_id",
-                table: "analysis_entries",
-                column: "parent_id");
 
             migrationBuilder.CreateIndex(
                 name: "ix_ctrader_master_client_id",

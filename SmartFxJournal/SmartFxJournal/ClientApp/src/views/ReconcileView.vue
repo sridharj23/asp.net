@@ -1,6 +1,6 @@
 <script lang="ts">
     import {ReconcileApi} from '@/api/ReconcileApi';
-    import { type ReconcileEntry, type ExecutedOrder, Common, type DataColumn } from '@/types/CommonTypes';
+    import { type ReconcileEntry, Common } from '@/types/CommonTypes';
     import DataTable from '@/components/DataTable.vue';
     import { useAccountStore } from '@/stores/accountstore';
 

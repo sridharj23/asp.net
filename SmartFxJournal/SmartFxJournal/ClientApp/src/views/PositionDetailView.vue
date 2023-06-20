@@ -1,16 +1,17 @@
 <script lang="ts">
     import { PostionsAPI } from '@/api/PositionsApi';
-    import {Common, type ExecutedOrder, type DataColumn } from '@/types/CommonTypes';
+    import {Common, type ExecutedOrder, type ColumDef } from '@/types/CommonTypes';
     import { usePositionStore } from '@/stores/positionstore';
     import DataTable from '@/components/DataTable.vue';
     
     const api = new PostionsAPI()
-    const cols : DataColumn[] = [{property: "type", title: "Type", propType: "default"}];
+    const cols : ColumDef[] = [{property: "type", title: "Type", propType: "default"}];
     export default {
         setup() {
             const store = usePositionStore();
             return {store};
         },
+        emits: ['detailEntrySelected'],
         data() {
             return {
                 positions: [] as Record<string, string>[],
@@ -63,7 +64,7 @@
             handleRowSelect(pos : string) {
                 this.positions.forEach (entry => {
                     if(entry.positionId == pos) {
-                        console.log(entry['type'] + " : " + entry['positionId']);
+                        this.$emit('detailEntrySelected', entry);
                     }
                 })
             }

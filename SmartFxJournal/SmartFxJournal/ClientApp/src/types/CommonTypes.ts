@@ -62,6 +62,27 @@ export interface ExecutedOrder {
     orderExecutedAt: string
 }
 
+export interface AnalysisEntry {
+    entryId: number,
+    parentId: number,
+    parentType: string,
+    analysisScenario: string,
+    analyzedAspect: string,
+    executionPrice: number,
+    executionTime: string,
+    volume: number,
+    profitLoss: number,
+    profitInPips: number,
+    profitInPercent: number,
+    usedIndicator: string,
+    indicatorStatus: string[],
+    usedSystem: string,
+    usedStrategy: string[],
+    executionAccuracy: string[],
+    isValid: boolean,
+    invalidityReason: string[],
+}
+
 export interface ReconcileEntry {
     positionId: number,
     orders: number[]
@@ -97,15 +118,22 @@ export interface TrendBars {
     trendBars: number[][];
 }
 
-export interface DataColumn {
+export interface ColumDef {
     property : string;
     title : string;
     propType: string;
 }
 
+export interface RowDef {
+    property : string,
+    title : string,
+    dataType : string,
+    editable: boolean
+}
+
 export class Common {
-    static getPositionColumns(prepend? : DataColumn[]) : DataColumn[] {
-        let cols : DataColumn[] = [];
+    static getPositionColumns(prepend? : ColumDef[]) : ColumDef[] {
+        let cols : ColumDef[] = [];
         if (prepend != undefined) {
             prepend.forEach(col => cols.push(col));
         }
@@ -127,8 +155,8 @@ export class Common {
         return cols;
     }
 
-    static getExcecutedOrderColumns(prepend? : DataColumn[]) : DataColumn[] {
-        let cols : DataColumn[] = [];
+    static getExcecutedOrderColumns(prepend? : ColumDef[]) : ColumDef[] {
+        let cols : ColumDef[] = [];
         if (prepend != undefined) {
             prepend.forEach(col => cols.push(col));
         }
@@ -148,7 +176,45 @@ export class Common {
         
         return cols;
     }
-    
+
+    static getAnalysisEntryRowDefs() {
+        return [
+            {property: "analyzedAspect", title: "Type", dataType: "text", editable: false},
+            {property: "volume", title: "Traded Volume", dataType: "text", editable: false},
+            {property: "executionPrice", title: "Execution Price", dataType: "text", editable: true},
+            {property: "executionTime", title: "Execution Time", dataType: "text", editable: false},
+            {property: "profitLoss", title: "Gross Profit", dataType: "text", editable: false},
+            {property: "profitInPips", title: "PIPs Earned", dataType: "text", editable: false},
+            {property: "profitInPercent", title: "Gain as %", dataType: "text", editable: false},
+            {property: "usedIndicator", title: "Indicator", dataType: "text", editable: false},
+            {property: "indicatorStatus", title: "Ind. Confirmation", dataType: "text", editable: false},
+            {property: "usedSystem", title: "System Used", dataType: "text", editable: true},
+            {property: "usedStrategy", title: "Entry/Exit Strategy", dataType: "text", editable: false},
+            {property: "executionAccuracy", title: "Accuracy", dataType: "text", editable: false},
+            {property: "isValid", title: "Valid Trade?", dataType: "text", editable: false},
+            {property: "invalidityReason", title: "Why Valid?", dataType: "text", editable: false},
+         ] as RowDef[];
+    }
+
+    static convertToAnalysisRecord(entry: AnalysisEntry) : Record<string, string> {
+        return {
+            analyzedAspect: entry.analyzedAspect,
+            volume: (entry.volume / 10000000).toFixed(2),
+            executionPrice: entry.executionPrice.toFixed(5),
+            executionTime: new Date(entry.executionTime).toLocaleString(),
+            profitLoss: entry.profitLoss.toFixed(2),
+            profitInPips: entry.profitInPips.toFixed(1),
+            profitInPercent: entry.profitInPercent.toFixed(2),
+            usedIndicator: entry.usedIndicator,
+            indicatorStatus: entry.indicatorStatus.toString(),
+            usedSystem: entry.usedSystem,
+            usedStrategy: entry.usedStrategy.toString(),
+            executionAccuracy: entry.executionAccuracy.toString(),
+            isValid: entry.isValid ? 'Yes' : 'No',
+            invalidityReason: entry.invalidityReason.toString(),
+        } as Record<string, string>;
+    }
+
     static convertPositionToRecord(pos : Position, prepend? : Record<string, string>) : Record<string, string> {
         let rec : Record<string,string> = {
             positionId: pos.positionId,

@@ -13,8 +13,8 @@ using SmartFxJournal.JournalDB.model;
 namespace SmartFxJournal.JournalDB.migrations
 {
     [DbContext(typeof(JournalDbContext))]
-    [Migration("20230616162031_InitDB")]
-    partial class InitDB
+    [Migration("20230619131900_AlterAnalysisEntry")]
+    partial class AlterAnalysisEntry
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -44,14 +44,6 @@ namespace SmartFxJournal.JournalDB.migrations
                         .IsRequired()
                         .HasColumnType("character varying(50)")
                         .HasColumnName("analyzed_aspect");
-
-                    b.Property<long?>("ClosedPositionPositionId")
-                        .HasColumnType("bigint")
-                        .HasColumnName("closed_position_position_id");
-
-                    b.Property<long?>("ExecutedOrderDealId")
-                        .HasColumnType("bigint")
-                        .HasColumnName("executed_order_deal_id");
 
                     b.Property<List<string>>("ExecutionAccuracy")
                         .IsRequired()
@@ -101,10 +93,10 @@ namespace SmartFxJournal.JournalDB.migrations
                         .HasColumnType("decimal(10,2)")
                         .HasColumnName("profit_loss");
 
-                    b.Property<string>("UsedInidicator")
+                    b.Property<string>("UsedIndicator")
                         .IsRequired()
                         .HasColumnType("character varying(100)")
-                        .HasColumnName("used_inidicator");
+                        .HasColumnName("used_indicator");
 
                     b.Property<List<string>>("UsedStrategy")
                         .IsRequired()
@@ -122,15 +114,6 @@ namespace SmartFxJournal.JournalDB.migrations
 
                     b.HasKey("EntryId")
                         .HasName("pk_analysis_entries");
-
-                    b.HasIndex("ClosedPositionPositionId")
-                        .HasDatabaseName("ix_analysis_entries_closed_position_position_id");
-
-                    b.HasIndex("ExecutedOrderDealId")
-                        .HasDatabaseName("ix_analysis_entries_executed_order_deal_id");
-
-                    b.HasIndex("ParentId")
-                        .HasDatabaseName("ix_analysis_entries_parent_id");
 
                     b.ToTable("analysis_entries", (string)null);
                 });
@@ -445,34 +428,6 @@ namespace SmartFxJournal.JournalDB.migrations
                         });
                 });
 
-            modelBuilder.Entity("SmartFxJournal.JournalDB.model.AnalysisEntry", b =>
-                {
-                    b.HasOne("SmartFxJournal.JournalDB.model.ClosedPosition", null)
-                        .WithMany("AnalysisEntries")
-                        .HasForeignKey("ClosedPositionPositionId")
-                        .HasConstraintName("fk_analysis_entries_traded_positions_closed_position_position_");
-
-                    b.HasOne("SmartFxJournal.JournalDB.model.ExecutedOrder", null)
-                        .WithMany("AnalysisEntries")
-                        .HasForeignKey("ExecutedOrderDealId")
-                        .HasConstraintName("fk_analysis_entries_executed_orders_executed_order_deal_id");
-
-                    b.HasOne("SmartFxJournal.JournalDB.model.ExecutedOrder", null)
-                        .WithMany()
-                        .HasForeignKey("ParentId")
-                        .HasPrincipalKey("OrderId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired()
-                        .HasConstraintName("fk_Analysis_For_Orders");
-
-                    b.HasOne("SmartFxJournal.JournalDB.model.ClosedPosition", null)
-                        .WithMany()
-                        .HasForeignKey("ParentId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired()
-                        .HasConstraintName("fk_Analysis_For_Positions");
-                });
-
             modelBuilder.Entity("SmartFxJournal.JournalDB.model.ClosedPosition", b =>
                 {
                     b.HasOne("SmartFxJournal.JournalDB.model.TradingAccount", "TradingAccount")
@@ -523,14 +478,7 @@ namespace SmartFxJournal.JournalDB.migrations
 
             modelBuilder.Entity("SmartFxJournal.JournalDB.model.ClosedPosition", b =>
                 {
-                    b.Navigation("AnalysisEntries");
-
                     b.Navigation("ExecutedOrders");
-                });
-
-            modelBuilder.Entity("SmartFxJournal.JournalDB.model.ExecutedOrder", b =>
-                {
-                    b.Navigation("AnalysisEntries");
                 });
 
             modelBuilder.Entity("SmartFxJournal.JournalDB.model.TradingAccount", b =>

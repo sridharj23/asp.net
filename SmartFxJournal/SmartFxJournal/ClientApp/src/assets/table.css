@@ -1,0 +1,53 @@
+.tableContainer {
+    display: block;
+    overflow-y: scroll;
+}
+.dataTable {
+    width: 100%;
+    border-collapse: collapse;
+}
+
+.tableHeaderCell {
+    color: white;
+    background-color: rgb(117, 183, 250);
+    border: 2px solid white;
+    font-weight: bold;
+    font-size: large;
+    text-align: center;
+    padding-top: .3em;
+    padding-bottom: .3em;
+}
+
+.rowHeaderCell {
+    text-align: right;
+}
+
+.tableDataCell {
+    padding-top: 4px;
+    text-align: center;
+    font-size: medium;
+    padding-bottom: 4px;
+    padding-left: 15px;
+    padding-right: 15px;
+    border-bottom: 1px solid gainsboro;
+    border-left: 1px solid gainsboro;
+    border-right: 1px solid gainsboro;
+    cursor: move;
+    user-select: none;
+}
+
+.tableRow:not(.selectedRow):hover {
+    background: #efefef;
+    cursor: pointer;
+}
+.selectedRow {
+    background: lightsteelblue ;
+    font-weight: bold;
+}
+.positiveValue {
+    color: green;
+    font-weight: 550;
+}
+.negativeValue {
+    color: red;
+}

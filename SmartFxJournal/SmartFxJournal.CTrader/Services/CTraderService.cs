@@ -298,12 +298,13 @@ namespace SmartFxJournal.CTrader.Services
                 var response = await sharedClient.PostAsync(url, default);
                 var tokenString = await response.Content.ReadAsStringAsync();
 
-                if (tokenString.Contains("errorCode"))
-                {
-                    throw new Exception("Unable to refresh token for Ctrader account " +  ctraderId + ", " + tokenString);
-                }
-
                 Token token = TokenFactory.DeserializeToken(tokenString);
+
+                if (! string.IsNullOrWhiteSpace(token.ErrorCode) )
+                {
+                    throw new Exception("Unable to refresh token for Ctrader account " + ctraderId + ", " + token.ErrorDescription);
+                }
+                
                 acc.LastFetchedOn = DateTimeOffset.Now;
                 acc.AuthToken = tokenString;
                 acc.RefreshToken = token.RefreshToken;

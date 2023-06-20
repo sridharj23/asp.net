@@ -1,5 +1,6 @@
 @import './button.css';
 @import './controls.css';
+@import './table.css';
 
 .card {
   border: 1px solid darkgray;

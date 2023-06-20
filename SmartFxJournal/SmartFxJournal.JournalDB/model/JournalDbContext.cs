@@ -13,6 +13,7 @@ namespace SmartFxJournal.JournalDB.model
         public DbSet<TradingAccount> TradingAccounts { get; set; }
         public DbSet<ClosedPosition> ClosedPositions { get; set; }
         public DbSet<ExecutedOrder> ExecutedOrders { get; set; }
+        public DbSet<AnalysisEntry> AnalysisEntries { get; set; }
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
@@ -20,6 +21,7 @@ namespace SmartFxJournal.JournalDB.model
             TradingAccount.OnModelCreate(modelBuilder);
             ClosedPosition.OnModelCreate(modelBuilder);
             ExecutedOrder.OnModelCreate(modelBuilder);
+            AnalysisEntry.OnModelCreate(modelBuilder);
         }
     }
 }

@@ -1,6 +1,6 @@
 <script lang="ts">
     import { PostionsAPI } from '@/api/PositionsApi';
-    import { Common, type Position, type DataColumn } from '@/types/CommonTypes';
+    import { Common } from '@/types/CommonTypes';
     import { usePositionStore } from '@/stores/positionstore';
     import { useAccountStore } from '@/stores/accountstore';
     import DataTable from '@/components/DataTable.vue';

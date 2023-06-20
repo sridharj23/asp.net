@@ -1,10 +1,10 @@
 <script lang="ts">
-import { type DataColumn } from '@/types/CommonTypes';
+import { type ColumDef } from '@/types/CommonTypes';
 
 export default {
         emits: ['rowSelected', 'rowDoubleClicked'],
         props : {
-            columns: {type: Array<DataColumn>, required: true},
+            columns: {type: Array<ColumDef>, required: true},
             dataSource : {type: Array<Record<string, string>>, required: true},
             rowIdProperty: {type: String, required: true},
             multiSelect: {type: Boolean},
@@ -48,7 +48,7 @@ export default {
             dragEventHandler(event: DragEvent) {
                 console.log(this.rowIdProperty + " : " + this.draggedObject[this.rowIdProperty]);
             },
-            getFormat(col : DataColumn, rec: Record<string, string>): string {
+            getFormat(col : ColumDef, rec: Record<string, string>): string {
                 let cellClass = 'tableDataCell';
                 if (col.propType == 'Currency') {
                     let val = Number(rec[col.property]);
@@ -85,53 +85,3 @@ export default {
         </table>
     </div>
 </template>
-
-<style scoped>
-.tableContainer {
-    display: block;
-    overflow-y: scroll;
-}
-.dataTable {
-    width: 100%;
-    border-collapse: collapse;
-}
-
-.tableHeaderCell {
-    color: dodgerblue;
-    background-color: lavender;
-    border: 2px solid dodgerblue;
-    font-weight: bold;
-    font-size: large;
-    text-align: center;
-    padding-top: .3em;
-    padding-bottom: .3em;
-}
-
-.tableDataCell {
-    padding-top: 4px;
-    text-align: center;
-    font-size: medium;
-    padding-bottom: 4px;
-    border-bottom: 1px solid gainsboro;
-    border-left: 1px solid gainsboro;
-    border-right: 1px solid gainsboro;
-    cursor: move;
-    user-select: none;
-}
-
-.tableRow:not(.selectedRow):hover {
-    background: #efefef;
-    cursor: pointer;
-}
-.selectedRow {
-    background: lightsteelblue ;
-    font-weight: bold;
-}
-.positiveValue {
-    color: green;
-    font-weight: 550;
-}
-.negativeValue {
-    color: red;
-}
-</style>

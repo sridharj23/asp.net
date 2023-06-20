@@ -36,7 +36,7 @@ namespace SmartFxJournal.JournalDB.model
         [JsonConverter(typeof(JsonStringEnumConverter))]
         public AnalysisScenario AnalysisScenario { get; set; }
 
-        public bool IsValid { get; set; }
+        public bool IsValid { get; set; } = true;
 
         public List<string> InvalidityReason { get; set; } = new List<string>();
 
@@ -49,7 +49,7 @@ namespace SmartFxJournal.JournalDB.model
 
         [Required]
         [Column(TypeName = "character varying(100)")]
-        public string UsedInidicator { get; set; } = null!;
+        public string UsedIndicator { get; set; } = null!;
 
         [Required]
         public List<string> IndicatorStatus { get; set; } = new List<string>();
@@ -65,15 +65,15 @@ namespace SmartFxJournal.JournalDB.model
 
         [Required]
         [Column(TypeName = "decimal(10,2)")]
-        public decimal ProfitLoss { get; set; }
+        public decimal ProfitLoss { get; set; } = decimal.Zero;
 
         [Required]
         [Column(TypeName = "decimal(5,2)")]
-        public decimal ProfitInPercent { get; set; }
+        public decimal ProfitInPercent { get; set; } = decimal.Zero;
 
         [Required]
         [Column(TypeName = "decimal(6,2)")]
-        public decimal ProfitInPips { get; set; }
+        public decimal ProfitInPips { get; set; } = Decimal.Zero;
 
         internal static void OnModelCreate(ModelBuilder builder)
         {

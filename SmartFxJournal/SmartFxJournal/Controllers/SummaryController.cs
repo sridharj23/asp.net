@@ -9,9 +9,9 @@ namespace SmartFxJournal.Controllers
     [ApiController]
     public class SummaryController : ControllerBase
     {
-        private readonly AccountPositionsService _service;
+        private readonly AccountSummaryService _service;
 
-        public SummaryController(AccountPositionsService service)
+        public SummaryController(AccountSummaryService service)
         {
             _service = service;
         }

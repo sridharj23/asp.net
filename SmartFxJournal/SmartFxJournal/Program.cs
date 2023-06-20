@@ -11,6 +11,8 @@ builder.Services.AddDbContext<JournalDbContext>(options => options.UseNpgsql(bui
 builder.Services.AddSingleton<CTraderService, CTraderService>();
 builder.Services.AddScoped<AccountPositionsService>();
 builder.Services.AddScoped<OrderReconciliationService>();
+builder.Services.AddScoped<AccountSummaryService>();
+builder.Services.AddScoped<AnalysisEntryService>();
 
 builder.Services.AddControllersWithViews();
 

@@ -1,14 +1,34 @@
-<script setup>
+<script lang="ts">
     import Card from '@/components/Card.vue';
     import TradeChart from '@/views/TradeChart.vue';
-    import PositionDetailView from '@/views/PositionDetailView.vue'
+    import PositionDetailView from '@/views/PositionDetailView.vue';
+    import AnalysisView from '@/views/AnalysisView.vue';
+
+    export default {
+        components: {
+            Card,
+            TradeChart,
+            PositionDetailView,
+            AnalysisView
+        },
+        data() {
+            return {
+                selectedEntry : "" as string
+            }
+        },
+        methods: {
+            handleEntrySelected(entry : Record<string, string>) {
+                this.selectedEntry = entry['type'] + " : " + entry['positionId'];
+            }
+        }
+    }
 </script>
 
 <template>
     <div id="AnalysisPage">
         <Card id="PositionCard">
             <template #default>
-                <PositionDetailView id="positionDetails"/>
+                <PositionDetailView id="positionDetails" @detail-entry-selected="handleEntrySelected"/>
             </template>
         </Card>
 
@@ -20,8 +40,7 @@
             </Card>
             <Card id="MiddleRight">
                 <template #default>
-                    <p>A paragraph for the main content.</p>
-                    <p>And another one.</p>
+                    <AnalysisView :analysis-entry="selectedEntry"/>
                 </template>
             </Card>
         </div>

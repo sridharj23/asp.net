@@ -5,7 +5,7 @@
     import Tab from '@/components/Tab.vue';
     import DataMatrix from '@/components/DataMatrix.vue';
     import ModalDialog from '@/components/ModalDialog.vue';
-    import { Common } from '@/types/CommonTypes';
+    import { Analysis } from '@/helpers/AnalysisHelper';
     import { usePositionStore } from '@/stores/positionstore';
 
     const api = new AnalysisApi();
@@ -22,13 +22,14 @@
             return {
                 tabKeys: ["Actual", "Ideal", "WhatIf"],
                 aspects: ["Entry", "Exit", "StopLoss", "TakeProfit"],
-                selectedTab: "Actual",
+                selectedTab: "",
                 showDialog: false,
                 selectEntryType: "",
                 selectEntryId: "",
                 analysisEntries: new Map<string, Record<string,string>[]>(),
                 displayedEntries: [] as Record<string,string>[],
-                rowDefs: Common.getAnalysisEntryRowDefs(),
+                createdEntries: [] as Record<string,string>[],
+                rowDefs: Analysis.getAnalysisEntryRowDefs(),
                 newEntryType: ""
             }
         },
@@ -43,7 +44,7 @@
                     this.selectEntryId = this.store.dblClickedPositionId;
                     api.getAnalysisForPosition(this.selectEntryId).then(entries => {
                         entries.forEach(entry => {
-                            this.analysisEntries.get(entry.analysisScenario)?.push(Common.convertToAnalysisRecord(entry));
+                            this.analysisEntries.get(entry.analysisScenario)?.push(Analysis.convertToAnalysisRecord(entry));
                         });
                     });
                 } else {
@@ -59,20 +60,33 @@
                 this.showDialog = true;
             },
             handleDialogResult(result: string) {
-                this.showDialog = false;
                 if (result == "Add") {
-                    this.createEntry(result, this.selectedTab);
+                    if (! this.createEntry(this.newEntryType, this.selectedTab)) {
+                        return;
+                    }
                 }
+                this.showDialog = false;
                 this.newEntryType = "";
             },
-            createEntry(entryType : string, scenario: string) {
+            createEntry(entryType : string, scenario: string) : boolean {
                 let entries = this.analysisEntries.get(scenario);
+                let valid = true;
                 entries?.forEach((val) => {
                     if (val['analysisScenario'] == scenario && val['analyzedAspect'] == entryType) {
                         alert("Error: Entry type " + entryType + " already exists in " + scenario);
-                        return;
+                        valid = false;
                     }
                 });
+
+                if (valid) {
+                    let newRec = Analysis.createAnalysisEntry(scenario, entryType);
+                    newRec['parentId'] = this.selectEntryId;
+                    newRec['parentType'] = this.selectEntryType;
+                    this.analysisEntries.get(scenario)?.push(newRec);
+                    this.createdEntries.push(newRec);
+                };
+
+                return valid;
             }
         },
         beforeMount() {
@@ -81,6 +95,7 @@
         mounted() {
             this.store.$subscribe(this.loadAnalysis);
             this.loadAnalysis();
+            this.selectTab("Actual");
         }
     }
 

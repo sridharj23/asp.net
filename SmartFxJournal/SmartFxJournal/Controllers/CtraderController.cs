@@ -62,9 +62,9 @@ namespace SmartFxJournal.Controllers
         }
 
         [HttpPost("api/ctrader/import/{ctraderid}")]
-        public async Task<ActionResult<string>> ImportAccounts(string ctraderid)
+        public async Task<ActionResult<string>> ImportAccounts(string ctraderid, long accountNo)
         {
-            return await _service.ImportAccounts(ctraderid);
+            return await _service.ImportAccounts(ctraderid, accountNo);
         }
 
         [HttpGet("api/ctrader/trendbars/{positionid}")]

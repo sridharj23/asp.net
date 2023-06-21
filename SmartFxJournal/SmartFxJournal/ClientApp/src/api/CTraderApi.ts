@@ -13,8 +13,12 @@ export class CTraderAPI extends RestApi {
         return await super.single<string>(url);
     }
 
-    public async importAccounts(cTraderId : string) : Promise<string> {
-        let res = await super.post<string>(this.resource + '/import/' + cTraderId, cTraderId);
+    public async importAccounts(cTraderId : string, accountNo?: string ) : Promise<string> {
+        let url = this.resource + '/import/' + cTraderId;
+        if (accountNo != undefined) {
+            url=url + "?accountNo=" + accountNo?? "";
+        }
+        let res = await super.post<string>(url, cTraderId);
         return res;
     }
 

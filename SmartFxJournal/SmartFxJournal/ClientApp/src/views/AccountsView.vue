@@ -2,15 +2,17 @@
 
 import { useAccountStore } from '@/stores/accountstore';
 import {AccountsAPI} from '@/api/AccountsApi';
+import { CTraderAPI } from '@/api/CTraderApi';
 import type { Account } from '@/types/CommonTypes';
 
 export default {
     name: "AccountsView",
     setup() {
         const api = new AccountsAPI();
+        const ctApi = new CTraderAPI();
         const store = useAccountStore();
 
-        return {api, store};
+        return {api, ctApi, store};
     },
     data() {
         return {
@@ -102,8 +104,8 @@ export default {
                 this.api.delete(this.selectedAccount).then(() => this.loadAccounts());
             }
         },
-        importTrades() {
-
+        importAccount() {
+            this.ctApi.importAccounts(this.selectedAccount.cTraderId, this.selectedAccount.accountNo);
         }
     },
     mounted() {
@@ -172,7 +174,7 @@ export default {
             </div>
             <div id="spacer"/>
             <div id="footer" class="flow-row">
-                <button type="button" @click="importTrades()" :disabled="!isEditable">Import Trades</button>
+                <button type="button" @click="importAccount()" :disabled="!isEditable">Import Trades</button>
                 <button type="button" @click="loadAccounts()" :disabled="!isReadOnly">Refresh</button>
                 <button type="button" @click="enableEditing()" :disabled="!isEditable">Edit</button>
                 <button type="button" @click="enableCreate()" :disabled="!isReadOnly">Add</button>

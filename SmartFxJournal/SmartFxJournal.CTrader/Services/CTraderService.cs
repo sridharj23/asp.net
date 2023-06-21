@@ -147,13 +147,13 @@ namespace SmartFxJournal.CTrader.Services
             
         }
 
-        public async Task<string> ImportAccounts(string cTraderId)
+        public async Task<string> ImportAccounts(string cTraderId, long AccountNo = default)
         {
-            int p = await ProcessAccountsDelta(cTraderId);
+            int p = await ProcessAccountsDelta(cTraderId, AccountNo);
             return (p.ToString() + " accounts have been imported / updated.");
         }
 
-        private async Task<int> ProcessAccountsDelta(string cTraderId)
+        private async Task<int> ProcessAccountsDelta(string cTraderId, long AccountNo = default)
         {
             if (!this._loginContexts.ContainsKey(cTraderId))
             {
@@ -180,6 +180,10 @@ namespace SmartFxJournal.CTrader.Services
                     {
                         await ctx.AuthorizeAccount(Convert.ToInt64(act.CtidTraderAccountId), act.IsLive);
                         TradingAccount account = await OpenApiImporter.ImportAccountAsync(act, ctx.OpenApiService, cta);
+                        if (AccountNo != default && account.AccountNo != AccountNo)
+                        {
+                            continue;
+                        }
                         var accounts = dbContext.TradingAccounts.ToList();
                         if (accounts.FirstOrDefault(a => a.AccountNo == account.AccountNo) == null)
                         {

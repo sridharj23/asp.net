@@ -1,6 +1,7 @@
 <script lang="ts">
     import { PostionsAPI } from '@/api/PositionsApi';
-    import {Common, type ExecutedOrder, type ColumDef } from '@/types/CommonTypes';
+    import { Common } from '@/helpers/Common';
+    import {type ExecutedOrder, type ColumDef } from '@/types/CommonTypes';
     import { usePositionStore } from '@/stores/positionstore';
     import DataTable from '@/components/DataTable.vue';
     

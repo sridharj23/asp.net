@@ -1,3 +1,4 @@
+
 export interface Account {
     accountNo : string,
     isLive: boolean,
@@ -108,6 +109,8 @@ export interface SummaryAggregate {
 
 
 // UI specific types
+
+export type TableRow = Record<string, string | boolean>;
 
 export interface TrendBars {
     timePeriod: string;

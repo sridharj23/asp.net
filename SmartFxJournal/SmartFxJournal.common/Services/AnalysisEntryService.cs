@@ -72,5 +72,23 @@ namespace SmartFxJournal.Common.Services
         {
             return await GenerateDefaultAnalysis(PositionId);
         }
+
+        public bool SaveAnalysisEntries(List<AnalysisEntry> entries, bool isNew)
+        {
+            using (var serviceScope = _scopeFactory.CreateScope())
+            {
+                JournalDbContext _context = serviceScope.ServiceProvider.GetService<JournalDbContext>() ?? throw new ArgumentNullException(nameof(serviceScope));
+                if (isNew)
+                {
+                    _context.AnalysisEntries.AddRange(entries);
+                }
+                else
+                {
+                    _context.AnalysisEntries.UpdateRange(entries);
+                }
+
+            }
+            return true;
+        }
     }
 }

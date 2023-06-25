@@ -119,7 +119,7 @@ export default {
 <template>
     <section id="avContainer">
         <form id="accountForm" class="container" v-on:submit="saveAccount">
-            <div id="justWapper" style="margin: 10px;">
+            <div id="justWapper" class="container" style="margin: 10px;">
                 <div class="inputRow">
                     <label class="labels" for="account_no">Account Number</label>
                     <select :class="createMode ? 'hidden' : 'inputControls visible' " id="account_no" v-model="selectedAcNo" @change="setSelected()" :disabled="editMode">

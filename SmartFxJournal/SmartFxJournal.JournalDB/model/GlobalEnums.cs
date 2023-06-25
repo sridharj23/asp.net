@@ -74,7 +74,8 @@ namespace SmartFxJournal.JournalDB.model
             Entry = 101,
             Exit = 102,
             StopLoss = 103,
-            TakeProfit = 104
+            TakeProfit = 104,
+            MaxProfit = 105
         }
 
         public enum AnalysisScenario

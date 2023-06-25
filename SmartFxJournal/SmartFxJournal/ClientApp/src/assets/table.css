@@ -20,8 +20,6 @@
 
 .rowHeaderCell {
     text-align: right;
-    max-width: 150px;
-    min-width: 100px;
 }
 
 .tableDataCell {
@@ -36,6 +34,10 @@
     border-right: 1px solid gainsboro;
     cursor: move;
     user-select: none;
+}
+
+.minWidthCell {
+    min-width: 150px;
 }
 
 .tableRow:not(.selectedRow):hover {

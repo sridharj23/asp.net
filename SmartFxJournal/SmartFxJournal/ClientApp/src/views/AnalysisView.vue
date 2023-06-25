@@ -7,6 +7,8 @@
     import ModalDialog from '@/components/ModalDialog.vue';
     import { Analysis } from '@/helpers/AnalysisHelper';
     import { usePositionStore } from '@/stores/positionstore';
+    import type { TableRow } from '@/types/CommonTypes';
+import { Common } from '@/helpers/Common';
 
     const api = new AnalysisApi();
 
@@ -21,35 +23,35 @@
         data() {
             return {
                 tabKeys: ["Actual", "Ideal", "WhatIf"],
-                aspects: ["Entry", "Exit", "StopLoss", "TakeProfit"],
+                aspects: ["Entry", "Exit", "StopLoss", "TakeProfit", "MaxProfit"],
                 selectedTab: "",
                 showDialog: false,
-                selectEntryType: "",
-                selectEntryId: "",
-                analysisEntries: new Map<string, Record<string,string>[]>(),
-                displayedEntries: [] as Record<string,string>[],
-                createdEntries: [] as Record<string,string>[],
+                analysisTargetType: "",
+                analysisTargetId: "",
+                analysisEntries: new Map<string, TableRow[]>(),
+                displayedEntries: [] as TableRow[],
+                createdEntries: [] as TableRow[],
                 rowDefs: Analysis.getAnalysisEntryRowDefs(),
                 newEntryType: ""
             }
         },
         methods: {
             resetAnalysisEntries(){
-                this.tabKeys.forEach(key => this.analysisEntries.set(key, [] as Record<string, string>[]));
+                this.tabKeys.forEach(key => this.analysisEntries.set(key, [] as TableRow[]));
             },
             loadAnalysis() {
                 this.resetAnalysisEntries();
                 if (+this.store.dblClickedPositionId > 0) {
-                    this.selectEntryType = 'Position';
-                    this.selectEntryId = this.store.dblClickedPositionId;
-                    api.getAnalysisForPosition(this.selectEntryId).then(entries => {
+                    this.analysisTargetType = 'Position';
+                    this.analysisTargetId = this.store.dblClickedPositionId;
+                    api.getAnalysisForPosition(this.analysisTargetId).then(entries => {
                         entries.forEach(entry => {
-                            this.analysisEntries.get(entry.analysisScenario)?.push(Analysis.convertToAnalysisRecord(entry));
+                            this.analysisEntries.get(entry.analysisScenario)?.push(Analysis.convertToAnalysisRecord(entry, true));
                         });
                     });
                 } else {
-                    this.selectEntryType = "";
-                    this.selectEntryId = "";
+                    this.analysisTargetType = "";
+                    this.analysisTargetId = "";
                 }
             },
             selectTab(selected: string) {
@@ -77,16 +79,17 @@
                         valid = false;
                     }
                 });
-
                 if (valid) {
                     let newRec = Analysis.createAnalysisEntry(scenario, entryType);
-                    newRec['parentId'] = this.selectEntryId;
-                    newRec['parentType'] = this.selectEntryType;
+                    newRec['parentId'] = this.analysisTargetId;
+                    newRec['parentType'] = this.analysisTargetType;
                     this.analysisEntries.get(scenario)?.push(newRec);
                     this.createdEntries.push(newRec);
                 };
-
                 return valid;
+            },
+            saveEntry(data: TableRow) {
+                console.log(Analysis.convertToAnalysisObject(data));
             }
         },
         beforeMount() {
@@ -107,13 +110,13 @@
             <TabControl id="parentTab" @selection-changed="selectTab">
                 <template #default>
                     <Tab :title="tabKeys[0]" :is-active="selectedTab == tabKeys[0]" :key="tabKeys[0]">
-                        <DataMatrix class="analysisEntry" :row-defs="rowDefs" :col-header-key="'analyzedAspect'" :data-source="displayedEntries"/>
+                        <DataMatrix class="analysisEntry" :row-defs="rowDefs" :col-header-key="'analyzedAspect'" :data-source="displayedEntries" :editAllowed='true' @data-save-requested="saveEntry"/>
                     </Tab>
                     <Tab :title="tabKeys[1]" :is-active="selectedTab == tabKeys[1]" :key="tabKeys[1]">
-                        <DataMatrix class="analysisEntry" :row-defs="rowDefs" :col-header-key="'analyzedAspect'" :data-source="displayedEntries"/>
+                        <DataMatrix class="analysisEntry" :row-defs="rowDefs" :col-header-key="'analyzedAspect'" :data-source="displayedEntries" :editAllowed="true"/>
                     </Tab>
                     <Tab :title="tabKeys[2]" :is-active="selectedTab == tabKeys[2]" :key="tabKeys[2]">
-                        <DataMatrix class="analysisEntry" :row-defs="rowDefs" :col-header-key="'analyzedAspect'" :data-source="displayedEntries"/>
+                        <DataMatrix class="analysisEntry" :row-defs="rowDefs" :col-header-key="'analyzedAspect'" :data-source="displayedEntries" :editAllowed="true"/>
                     </Tab>
                 </template>
             </TabControl>

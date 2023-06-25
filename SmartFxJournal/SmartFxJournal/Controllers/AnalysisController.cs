@@ -18,5 +18,19 @@ namespace SmartFxJournal.Controllers
         {
             return await _service.GetAnalysisEntriesAsync(positionId);
         }
+
+        [HttpPost("api/analysis/")]
+        public ActionResult<bool> CreateAnalysisEntries(List<AnalysisEntry> entries)
+        {
+            return _service.SaveAnalysisEntries(entries, true);
+        }
+
+        [HttpPut("api/analysis/{entryId}")]
+        public ActionResult<bool> UpdateAnalysisEntries(long entryId, AnalysisEntry entry)
+        {
+            var list = new List<AnalysisEntry>();
+            list.Add(entry);
+            return _service.SaveAnalysisEntries(list, false);
+        }
     }
 }

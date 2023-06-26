@@ -53,6 +53,15 @@
                         <td v-else-if="row.editable && row.dataType=='checkbox'" class="tableDataCell minWidthCell">
                             <input type="checkbox" v-model="data[row.property]" @change="valueChanged(data, row.property)"/>
                         </td>
+                        <td v-else-if="row.editable && row.dataType=='select'" class="tableDataCell minWidthCell">
+                            <select v-model="data[row.property]">
+                                <option value="unknown">Unknown</option>
+                            </select>
+                        </td>
+                        <td v-else-if="row.editable && row.dataType=='multiselect'" class="tableDataCell minWidthCell">
+                            <input type="text" v-model="data[row.property]" disabled="true"/>
+                            <input type="button" value="V"/>
+                        </td>
                         <td v-else-if="row.editable" class="tableDataCell minWidthCell">
                             <input :type="row.dataType" v-model="data[row.property]" @change="valueChanged(data, row.property)"/>
                         </td>

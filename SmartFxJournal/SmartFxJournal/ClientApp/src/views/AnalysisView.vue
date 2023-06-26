@@ -89,7 +89,8 @@ import { Common } from '@/helpers/Common';
                 return valid;
             },
             saveEntry(data: TableRow) {
-                console.log(Analysis.convertToAnalysisObject(data));
+                console.log(data);
+                //console.log(Analysis.convertToAnalysisObject(data));
             }
         },
         beforeMount() {

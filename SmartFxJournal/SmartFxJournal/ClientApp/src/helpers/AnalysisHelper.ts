@@ -6,6 +6,7 @@ export class Analysis {
         return {
             isReadOnly: false,
             isInEdit: false,
+            isNew: true,
             entryId: "",
             parentId: "",
             parentType: "Position",
@@ -22,7 +23,7 @@ export class Analysis {
             usedSystem: "Unknown",
             usedStrategy: "Unknown",
             executionAccuracy: "",
-            isValid: 'true',
+            isValid: true,
             invalidityReason: "",
         } as TableRow;
     }
@@ -31,6 +32,7 @@ export class Analysis {
         return {
             isReadOnly: editable,
             isInEdit: false,
+            isNew: false,
             entryId: entry.entryId.toString(),
             parentId: entry.parentId.toString(),
             parentType: entry.parentType,
@@ -47,7 +49,7 @@ export class Analysis {
             usedSystem: entry.usedSystem,
             usedStrategy: entry.usedStrategy.toString(),
             executionAccuracy: entry.executionAccuracy.toString(),
-            isValid: entry.isValid ? 'true' : 'false',
+            isValid: entry.isValid ,
             invalidityReason: entry.invalidityReason.toString(),
         } as TableRow;
     }
@@ -84,13 +86,13 @@ export class Analysis {
             {property: "profitLoss", title: "Gross Profit", dataType: "text", editable: false},
             {property: "profitInPips", title: "PIPs Earned", dataType: "text", editable: false},
             {property: "profitInPercent", title: "Gain as %", dataType: "text", editable: false},
-            {property: "usedIndicator", title: "Indicator", dataType: "text", editable: true},
+            {property: "usedIndicator", title: "Indicator", dataType: "select", editable: true},
             {property: "indicatorStatus", title: "Ind. Confirmation []", dataType: "text", editable: true},
             {property: "usedSystem", title: "System Used", dataType: "text", editable: true},
             {property: "usedStrategy", title: "Entry/Exit Strategy []", dataType: "text", editable: true},
             {property: "executionAccuracy", title: "Accuracy []", dataType: "text", editable: true},
             {property: "isValid", title: "Valid Trade?", dataType: "checkbox", editable: true},
-            {property: "invalidityReason", title: "Why Valid ? []", dataType: "text", editable: true},
+            {property: "invalidityReason", title: "Why Valid ? []", dataType: "multiselect", editable: true},
          ] as RowDef[];
     }
 }

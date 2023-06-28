@@ -7,7 +7,7 @@
     import ModalDialog from '@/components/ModalDialog.vue';
     import { Analysis } from '@/helpers/AnalysisHelper';
     import { usePositionStore } from '@/stores/positionstore';
-    import type { TableRow } from '@/types/CommonTypes';
+    import { type AnalysisEntry, type TableRow } from '@/types/CommonTypes';
 
     const api = new AnalysisApi();
 
@@ -68,13 +68,13 @@
                 }
             },
             selectTab(selected: string) {
+                this.cancelEditing();
                 this.selectedTab = selected;
                 this.displayedEntries = this.analysisEntries.get(selected)?? [];
+                this.selectedEntry = {} as TableRow;
             },
             setSelectedData(data : TableRow) {
-                if ( this.isEditing ) {
-                    this.cancelEditing();
-                }
+                this.cancelEditing();
                 this.selectedEntry = data;
             },
             editData() {
@@ -82,8 +82,18 @@
                 this.selectedEntry['isInEdit'] = true;
             },
             cancelEditing() {
+                if(! this.isEditing) return;
+
                 Object.keys(this.backupEntry).forEach(k => this.selectedEntry[k] = this.backupEntry[k]);
                 this.backupEntry = {} as TableRow;
+            },
+            onValueChange(data: TableRow, key: string) {
+                if (key == "executionPrice") {
+                    this.recalculate();
+                }
+            },
+            recalculate() {
+                let res = Analysis.CalculateRiskReward(this.selectedEntry, this.displayedEntries);
             },
             handleDialogResult(result: string) {
                 if (result == "Add") {
@@ -111,7 +121,14 @@
                 return valid;
             },
             saveEntry() {
-                console.log(this.selectedEntry);
+                let obj = Analysis.convertToAnalysisObject(this.selectedEntry);
+                if (this.selectedEntry['isNew'] == true) {
+                    api.post<AnalysisEntry>(api.resource, obj).then(e =>{
+                        this.selectedEntry['entryId'] = e.entryId.toString();
+                    });
+                } else {
+                    api.put<AnalysisEntry>(api.resource + "/" + obj.entryId.toString(), obj);
+                }
                 this.selectedEntry['isInEdit'] = false;
                 this.backupEntry = {} as TableRow;
             }
@@ -134,13 +151,15 @@
             <TabControl id="parentTab" @selection-changed="selectTab">
                 <template #default>
                     <Tab :title="tabKeys[0]" :is-active="selectedTab == tabKeys[0]" :key="tabKeys[0]">
-                        <DataMatrix class="analysisEntry" :row-defs="rowDefs" :dataKey="'analyzedAspect'" :data-source="displayedEntries" @data-selected="setSelectedData"/>
+                        <DataMatrix class="analysisEntry" :row-defs="rowDefs" :dataKey="'analyzedAspect'" :data-source="displayedEntries" 
+                                    @dataSelected="setSelectedData" @valueChanged="onValueChange" :reset-selection="selectedTab == tabKeys[0]"/>
                     </Tab>
                     <Tab :title="tabKeys[1]" :is-active="selectedTab == tabKeys[1]" :key="tabKeys[1]">
-                        <DataMatrix class="analysisEntry" :row-defs="rowDefs" dataKey="analyzedAspect" :data-source="displayedEntries"/>
+                        <DataMatrix class="analysisEntry" :row-defs="rowDefs" dataKey="analyzedAspect" :data-source="displayedEntries" 
+                                    @data-selected="setSelectedData" @valueChanged="onValueChange" :reset-selection="selectedTab == tabKeys[1]"/>
                     </Tab>
                     <Tab :title="tabKeys[2]" :is-active="selectedTab == tabKeys[2]" :key="tabKeys[2]">
-                        <DataMatrix class="analysisEntry" :row-defs="rowDefs" dataKey="analyzedAspect" :data-source="displayedEntries"/>
+                        <DataMatrix class="analysisEntry" :row-defs="rowDefs" dataKey="analyzedAspect" :data-source="displayedEntries" :reset-selection="selectedTab == tabKeys[2]"/>
                     </Tab>
                 </template>
             </TabControl>
@@ -149,6 +168,7 @@
             <div class="flow-row">
                 <button @click="showDialog = true">Add</button>
                 <button :disabled="!isEditable" @click="editData">Edit</button>
+                <button :disabled="!isEditing" @click="recalculate">Calc</button>
                 <button :disabled="!isEditing" @click="saveEntry">Save</button>
                 <button :disabled="!isEditing" @click="cancelEditing">Cancel</button>
             </div>

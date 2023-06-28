@@ -6,8 +6,16 @@
             dataKey: {type: String, required: true},
             rowDefs: {type: Array<RowDef>, required: true},
             dataSource: {type: Array<TableRow>, required: true},
+            resetSelection: {type: Boolean, required: true},
         },
         emits: [ 'valueChanged', 'dataSelected'],
+        watch: {
+            resetSelection(newVal : Boolean, oldVal: Boolean) {
+                if (newVal) {
+                    this.selectedCol = "";
+                }
+            }
+        },
         data() {
             return {
                 selectedCol: ""
@@ -48,7 +56,7 @@
                             <input type="checkbox" v-model="data[row.property]" @change="valueChanged(data, row.property)"/>
                         </td>
                         <td v-else-if="row.dataType=='select'" class="tableDataCell minWidthCell">
-                            <select v-model="data[row.property]">
+                            <select v-model="data[row.property]" @change="valueChanged(data, row.property)">
                                 <option value="unknown">Unknown</option>
                             </select>
                         </td>

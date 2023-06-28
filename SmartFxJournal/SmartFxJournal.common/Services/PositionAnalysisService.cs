@@ -71,7 +71,26 @@ namespace SmartFxJournal.Common.Services
             return await GenerateDefaultAnalysis(PositionId);
         }
 
-        public bool SaveAnalysisEntries(List<PositionAnalysisEntry> entries, bool isNew)
+        public PositionAnalysisEntry SaveAnalysisEntry(PositionAnalysisEntry entry, bool isNew) {
+            using (var serviceScope = _scopeFactory.CreateScope())
+            {
+                JournalDbContext _context = serviceScope.ServiceProvider.GetService<JournalDbContext>() ?? throw new ArgumentNullException(nameof(serviceScope));
+                if (isNew)
+                {
+                    _context.PositionAnalysisEntries.Add(entry);
+                } else
+                {
+                    _context.PositionAnalysisEntries.Update(entry);
+                }
+                _context.SaveChanges();
+
+
+            }
+
+            return entry;
+        }
+
+            public bool SaveAnalysisEntries(List<PositionAnalysisEntry> entries, bool isNew)
         {
             using (var serviceScope = _scopeFactory.CreateScope())
             {

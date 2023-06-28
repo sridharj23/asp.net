@@ -1,4 +1,4 @@
-import axios, { type AxiosResponse } from 'axios';
+import axios from 'axios';
 import { useStatusStore } from '@/stores/statusstore';
 
 export abstract class RestApi {

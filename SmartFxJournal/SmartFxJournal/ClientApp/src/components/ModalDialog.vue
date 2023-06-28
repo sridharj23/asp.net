@@ -41,7 +41,7 @@
     .modal-dialog {
         color: #008cff;
         background-color: rgba(169, 169, 169, 0.427);
-        width: 99vw;
+        width: 99.5vw;
         height: 99vh;
         left: 5px;
         top: 5px;

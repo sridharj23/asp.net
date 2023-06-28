@@ -12,7 +12,7 @@ builder.Services.AddSingleton<CTraderService, CTraderService>();
 builder.Services.AddScoped<AccountPositionsService>();
 builder.Services.AddScoped<OrderReconciliationService>();
 builder.Services.AddScoped<AccountSummaryService>();
-builder.Services.AddScoped<AnalysisEntryService>();
+builder.Services.AddScoped<PositionAnalysisService>();
 
 builder.Services.AddControllersWithViews();
 

@@ -9,7 +9,7 @@ using SmartFxJournal.JournalDB.model;
 
 #nullable disable
 
-namespace SmartFxJournal.JournalDB.migrations
+namespace SmartFxJournal.JournalDB.Migrations
 {
     [DbContext(typeof(JournalDbContext))]
     partial class JournalDbContextModelSnapshot : ModelSnapshot
@@ -23,96 +23,44 @@ namespace SmartFxJournal.JournalDB.migrations
 
             NpgsqlModelBuilderExtensions.UseIdentityByDefaultColumns(modelBuilder);
 
-            modelBuilder.Entity("SmartFxJournal.JournalDB.model.AnalysisEntry", b =>
+            modelBuilder.Entity("SmartFxJournal.JournalDB.model.AnalysisJournalEntry", b =>
                 {
-                    b.Property<long>("EntryId")
+                    b.Property<long>("JournalId")
                         .ValueGeneratedOnAdd()
                         .HasColumnType("bigint")
-                        .HasColumnName("entry_id");
+                        .HasColumnName("journal_id");
 
-                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<long>("EntryId"));
+                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<long>("JournalId"));
 
-                    b.Property<string>("AnalysisScenario")
-                        .IsRequired()
-                        .HasColumnType("character varying(50)")
-                        .HasColumnName("analysis_scenario");
-
-                    b.Property<string>("AnalyzedAspect")
-                        .IsRequired()
-                        .HasColumnType("character varying(50)")
-                        .HasColumnName("analyzed_aspect");
-
-                    b.Property<List<string>>("ExecutionAccuracy")
-                        .IsRequired()
-                        .HasColumnType("text[]")
-                        .HasColumnName("execution_accuracy");
-
-                    b.Property<decimal>("ExecutionPrice")
-                        .HasColumnType("decimal(10,5)")
-                        .HasColumnName("execution_price");
-
-                    b.Property<DateTimeOffset>("ExecutionTime")
+                    b.Property<DateTime>("CreatedOn")
                         .HasColumnType("timestamp with time zone")
-                        .HasColumnName("execution_time");
+                        .HasColumnName("created_on");
 
-                    b.Property<List<string>>("IndicatorStatus")
-                        .IsRequired()
-                        .HasColumnType("text[]")
-                        .HasColumnName("indicator_status");
-
-                    b.Property<List<string>>("InvalidityReason")
-                        .IsRequired()
-                        .HasColumnType("text[]")
-                        .HasColumnName("invalidity_reason");
-
-                    b.Property<bool>("IsValid")
+                    b.Property<bool>("IsComplete")
                         .HasColumnType("boolean")
-                        .HasColumnName("is_valid");
+                        .HasColumnName("is_complete");
+
+                    b.Property<string>("JournalText")
+                        .IsRequired()
+                        .HasColumnType("text")
+                        .HasColumnName("journal_text");
+
+                    b.Property<DateTime>("LastModifiedOn")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("last_modified_on");
 
                     b.Property<long>("ParentId")
                         .HasColumnType("bigint")
                         .HasColumnName("parent_id");
 
-                    b.Property<string>("ParentType")
-                        .IsRequired()
-                        .HasColumnType("character varying(50)")
-                        .HasColumnName("parent_type");
+                    b.HasKey("JournalId")
+                        .HasName("pk_journals_for_analysis");
 
-                    b.Property<decimal>("ProfitInPercent")
-                        .HasColumnType("decimal(5,2)")
-                        .HasColumnName("profit_in_percent");
+                    b.HasIndex("ParentId")
+                        .IsUnique()
+                        .HasDatabaseName("ix_journals_for_analysis_parent_id");
 
-                    b.Property<decimal>("ProfitInPips")
-                        .HasColumnType("decimal(6,2)")
-                        .HasColumnName("profit_in_pips");
-
-                    b.Property<decimal>("ProfitLoss")
-                        .HasColumnType("decimal(10,2)")
-                        .HasColumnName("profit_loss");
-
-                    b.Property<string>("UsedIndicator")
-                        .IsRequired()
-                        .HasColumnType("character varying(100)")
-                        .HasColumnName("used_indicator");
-
-                    b.Property<List<string>>("UsedStrategy")
-                        .IsRequired()
-                        .HasColumnType("text[]")
-                        .HasColumnName("used_strategy");
-
-                    b.Property<string>("UsedSystem")
-                        .IsRequired()
-                        .HasColumnType("character varying(100)")
-                        .HasColumnName("used_system");
-
-                    b.Property<long>("Volume")
-                        .HasColumnType("bigint")
-                        .HasColumnName("volume");
-
-                    b.HasKey("EntryId")
-                        .HasName("pk_analysis_entries");
-
-                    b.ToTable("analysis_entries", (string)null);
+                    b.ToTable("journals_for_analysis", (string)null);
                 });
 
             modelBuilder.Entity("SmartFxJournal.JournalDB.model.CTraderAccount", b =>
@@ -343,6 +291,140 @@ namespace SmartFxJournal.JournalDB.migrations
                     b.ToTable("executed_orders", (string)null);
                 });
 
+            modelBuilder.Entity("SmartFxJournal.JournalDB.model.PositionAnalysisEntry", b =>
+                {
+                    b.Property<long>("EntryId")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("bigint")
+                        .HasColumnName("entry_id");
+
+                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<long>("EntryId"));
+
+                    b.Property<string>("AnalysisScenario")
+                        .IsRequired()
+                        .HasColumnType("character varying(50)")
+                        .HasColumnName("analysis_scenario");
+
+                    b.Property<string>("AnalyzedAspect")
+                        .IsRequired()
+                        .HasColumnType("character varying(50)")
+                        .HasColumnName("analyzed_aspect");
+
+                    b.Property<List<string>>("ExecutionAccuracy")
+                        .IsRequired()
+                        .HasColumnType("text[]")
+                        .HasColumnName("execution_accuracy");
+
+                    b.Property<decimal>("ExecutionPrice")
+                        .HasColumnType("decimal(10,5)")
+                        .HasColumnName("execution_price");
+
+                    b.Property<DateTimeOffset>("ExecutionTime")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("execution_time");
+
+                    b.Property<List<string>>("IndicatorStatus")
+                        .IsRequired()
+                        .HasColumnType("text[]")
+                        .HasColumnName("indicator_status");
+
+                    b.Property<List<string>>("InvalidityReason")
+                        .IsRequired()
+                        .HasColumnType("text[]")
+                        .HasColumnName("invalidity_reason");
+
+                    b.Property<bool>("IsValid")
+                        .HasColumnType("boolean")
+                        .HasColumnName("is_valid");
+
+                    b.Property<long>("PositionId")
+                        .HasColumnType("bigint")
+                        .HasColumnName("position_id");
+
+                    b.Property<decimal>("ProfitInPercent")
+                        .HasColumnType("decimal(5,2)")
+                        .HasColumnName("profit_in_percent");
+
+                    b.Property<decimal>("ProfitInPips")
+                        .HasColumnType("decimal(6,2)")
+                        .HasColumnName("profit_in_pips");
+
+                    b.Property<decimal>("ProfitLoss")
+                        .HasColumnType("decimal(10,2)")
+                        .HasColumnName("profit_loss");
+
+                    b.Property<string>("UsedIndicator")
+                        .IsRequired()
+                        .HasColumnType("character varying(100)")
+                        .HasColumnName("used_indicator");
+
+                    b.Property<List<string>>("UsedStrategy")
+                        .IsRequired()
+                        .HasColumnType("text[]")
+                        .HasColumnName("used_strategy");
+
+                    b.Property<string>("UsedSystem")
+                        .IsRequired()
+                        .HasColumnType("character varying(100)")
+                        .HasColumnName("used_system");
+
+                    b.Property<long>("Volume")
+                        .HasColumnType("bigint")
+                        .HasColumnName("volume");
+
+                    b.HasKey("EntryId")
+                        .HasName("pk_analysis_for_positions");
+
+                    b.HasIndex("PositionId")
+                        .HasDatabaseName("ix_analysis_for_positions_position_id");
+
+                    b.ToTable("analysis_for_positions", (string)null);
+                });
+
+            modelBuilder.Entity("SmartFxJournal.JournalDB.model.PositionJournalEntry", b =>
+                {
+                    b.Property<long>("JournalId")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("bigint")
+                        .HasColumnName("journal_id");
+
+                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<long>("JournalId"));
+
+                    b.Property<DateTime>("CreatedOn")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("timestamp without time zone")
+                        .HasColumnName("created_on")
+                        .HasDefaultValueSql("now()");
+
+                    b.Property<bool>("IsComplete")
+                        .HasColumnType("boolean")
+                        .HasColumnName("is_complete");
+
+                    b.Property<string>("JournalText")
+                        .IsRequired()
+                        .HasColumnType("text")
+                        .HasColumnName("journal_text");
+
+                    b.Property<DateTime>("LastModifiedOn")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("timestamp without time zone")
+                        .HasColumnName("last_modified_on")
+                        .HasDefaultValueSql("now()");
+
+                    b.Property<long>("ParentId")
+                        .HasColumnType("bigint")
+                        .HasColumnName("parent_id");
+
+                    b.HasKey("JournalId")
+                        .HasName("pk_journals_for_positions");
+
+                    b.HasIndex("ParentId")
+                        .IsUnique()
+                        .HasDatabaseName("ix_journals_for_positions_parent_id");
+
+                    b.ToTable("journals_for_positions", (string)null);
+                });
+
             modelBuilder.Entity("SmartFxJournal.JournalDB.model.TradingAccount", b =>
                 {
                     b.Property<long>("AccountNo")
@@ -425,6 +507,18 @@ namespace SmartFxJournal.JournalDB.migrations
                         });
                 });
 
+            modelBuilder.Entity("SmartFxJournal.JournalDB.model.AnalysisJournalEntry", b =>
+                {
+                    b.HasOne("SmartFxJournal.JournalDB.model.PositionAnalysisEntry", "AnalysisEntry")
+                        .WithOne("Notes")
+                        .HasForeignKey("SmartFxJournal.JournalDB.model.AnalysisJournalEntry", "ParentId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired()
+                        .HasConstraintName("FK_analysis_journal");
+
+                    b.Navigation("AnalysisEntry");
+                });
+
             modelBuilder.Entity("SmartFxJournal.JournalDB.model.ClosedPosition", b =>
                 {
                     b.HasOne("SmartFxJournal.JournalDB.model.TradingAccount", "TradingAccount")
@@ -432,7 +526,7 @@ namespace SmartFxJournal.JournalDB.migrations
                         .HasForeignKey("AccountNo")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired()
-                        .HasConstraintName("fk_traded_positions_trading_accounts_trading_account_account_no");
+                        .HasConstraintName("FK_parent_account");
 
                     b.Navigation("TradingAccount");
                 });
@@ -444,18 +538,42 @@ namespace SmartFxJournal.JournalDB.migrations
                         .HasForeignKey("AccountNo")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired()
-                        .HasConstraintName("fk_executed_orders_trading_accounts_trading_account_account_no");
+                        .HasConstraintName("FK_parent_account");
 
                     b.HasOne("SmartFxJournal.JournalDB.model.ClosedPosition", "Position")
                         .WithMany("ExecutedOrders")
                         .HasForeignKey("PositionId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired()
-                        .HasConstraintName("fk_executed_orders_traded_positions_position_id");
+                        .HasConstraintName("FK_parent_position");
 
                     b.Navigation("Position");
 
                     b.Navigation("TradingAccount");
+                });
+
+            modelBuilder.Entity("SmartFxJournal.JournalDB.model.PositionAnalysisEntry", b =>
+                {
+                    b.HasOne("SmartFxJournal.JournalDB.model.ClosedPosition", "Position")
+                        .WithMany("AnalysisEntries")
+                        .HasForeignKey("PositionId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired()
+                        .HasConstraintName("FK_analyzed_position");
+
+                    b.Navigation("Position");
+                });
+
+            modelBuilder.Entity("SmartFxJournal.JournalDB.model.PositionJournalEntry", b =>
+                {
+                    b.HasOne("SmartFxJournal.JournalDB.model.ClosedPosition", "Position")
+                        .WithOne("Notes")
+                        .HasForeignKey("SmartFxJournal.JournalDB.model.PositionJournalEntry", "ParentId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired()
+                        .HasConstraintName("FK_parent_position");
+
+                    b.Navigation("Position");
                 });
 
             modelBuilder.Entity("SmartFxJournal.JournalDB.model.TradingAccount", b =>
@@ -463,7 +581,7 @@ namespace SmartFxJournal.JournalDB.migrations
                     b.HasOne("SmartFxJournal.JournalDB.model.CTraderAccount", "CTraderAccount")
                         .WithMany("TradingAccounts")
                         .HasForeignKey("CTraderId")
-                        .HasConstraintName("fk_trading_accounts_ctrader_master_c_trader_account_c_trader_id");
+                        .HasConstraintName("FK_ctrader_parent");
 
                     b.Navigation("CTraderAccount");
                 });
@@ -475,7 +593,16 @@ namespace SmartFxJournal.JournalDB.migrations
 
             modelBuilder.Entity("SmartFxJournal.JournalDB.model.ClosedPosition", b =>
                 {
+                    b.Navigation("AnalysisEntries");
+
                     b.Navigation("ExecutedOrders");
+
+                    b.Navigation("Notes");
+                });
+
+            modelBuilder.Entity("SmartFxJournal.JournalDB.model.PositionAnalysisEntry", b =>
+                {
+                    b.Navigation("Notes");
                 });
 
             modelBuilder.Entity("SmartFxJournal.JournalDB.model.TradingAccount", b =>

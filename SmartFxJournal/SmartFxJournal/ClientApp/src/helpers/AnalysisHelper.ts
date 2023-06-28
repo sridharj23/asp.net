@@ -4,11 +4,10 @@ export class Analysis {
     static createAnalysisEntry(scenario: string, aspect: string) : TableRow {
 
         return {
-            isReadOnly: false,
             isInEdit: false,
             isNew: true,
             entryId: "",
-            parentId: "",
+            positionId: "",
             parentType: "Position",
             analysisScenario: scenario,
             analyzedAspect: aspect,
@@ -28,14 +27,12 @@ export class Analysis {
         } as TableRow;
     }
 
-    static convertToAnalysisRecord(entry: AnalysisEntry, editable: boolean = false ) : TableRow {
+    static convertToAnalysisRecord(entry: AnalysisEntry) : TableRow {
         return {
-            isReadOnly: editable,
             isInEdit: false,
             isNew: false,
             entryId: entry.entryId.toString(),
-            parentId: entry.parentId.toString(),
-            parentType: entry.parentType,
+            positionId: entry.positionId.toString(),
             analysisScenario: entry.analysisScenario,
             analyzedAspect: entry.analyzedAspect,
             volume: (entry.volume / 10000000).toFixed(2),
@@ -57,8 +54,7 @@ export class Analysis {
     static convertToAnalysisObject(data: TableRow) : AnalysisEntry {
         return {
             entryId: +data['entryId'],
-            parentId: +data['parentId'],
-            parentType: data['parentType'].toString(),
+            positionId: +data['positionId'],
             analysisScenario: data['analysisScenario'].toString(),
             analyzedAspect: data['analyzedAspect'].toString(),
             executionPrice: +data['executionPrice'],

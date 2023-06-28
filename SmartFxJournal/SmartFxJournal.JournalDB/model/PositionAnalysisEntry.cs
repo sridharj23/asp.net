@@ -10,8 +10,8 @@ using static SmartFxJournal.JournalDB.model.GlobalEnums;
 
 namespace SmartFxJournal.JournalDB.model
 {
-    [Table("analysis_entries")]
-    public class AnalysisEntry
+    [Table("analysis_for_positions")]
+    public class PositionAnalysisEntry
     {
         [Key]
         [DatabaseGenerated(DatabaseGeneratedOption.Identity)]
@@ -19,12 +19,11 @@ namespace SmartFxJournal.JournalDB.model
 
         [Required]
         [DatabaseGenerated(DatabaseGeneratedOption.None)]
-        public long ParentId { get; set; }
+        public long PositionId { get; set; }
 
         [Required]
-        [Column(TypeName = "character varying(50)")]
-        [JsonConverter(typeof(JsonStringEnumConverter))]
-        public ArtifactType ParentType { get; set; }
+        [JsonIgnore]
+        public ClosedPosition Position { get; set; } = null!;
 
         [Required]
         [Column(TypeName = "character varying(50)")]
@@ -75,13 +74,21 @@ namespace SmartFxJournal.JournalDB.model
         [Column(TypeName = "decimal(6,2)")]
         public decimal ProfitInPips { get; set; } = Decimal.Zero;
 
+        public AnalysisJournalEntry? Notes { get; set; }
+
         internal static void OnModelCreate(ModelBuilder builder)
         {
-            builder.Entity<AnalysisEntry>(e =>
+            builder.Entity<PositionAnalysisEntry>(e =>
             {
-                e.Property(p => p.ParentType).HasConversion<string>(new EnumToStringConverter<ArtifactType>());
                 e.Property(p => p.AnalysisScenario).HasConversion<string>(new EnumToStringConverter<AnalysisScenario>());
                 e.Property(p => p.AnalyzedAspect).HasConversion<string>(new EnumToStringConverter<AnalyzedAspect>());
+
+                builder.Entity<PositionAnalysisEntry>()
+                       .HasOne(p => p.Notes)
+                       .WithOne(j => j.AnalysisEntry)
+                       .HasForeignKey<AnalysisJournalEntry>(j => j.ParentId)
+                       .HasConstraintName("FK_analysis_journal")
+                       .IsRequired();
             });
         }
     }

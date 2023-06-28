@@ -92,8 +92,32 @@ namespace SmartFxJournal.JournalDB.model
 
         public DateTimeOffset OrderClosedAt { get; set; }
 
+        public List<PositionAnalysisEntry> AnalysisEntries { get; set; } = new List<PositionAnalysisEntry>();
+
+        public PositionJournalEntry? Notes { get; set; }
+
         internal static void OnModelCreate(ModelBuilder builder)
         {
+            builder.Entity<ClosedPosition>(entity =>
+            {
+                entity.HasMany(p => p.ExecutedOrders)
+                      .WithOne(e => e.Position)
+                      .HasForeignKey(e => e.PositionId)
+                      .HasConstraintName("FK_parent_position")
+                      .IsRequired();
+
+                entity.HasMany(p => p.AnalysisEntries)
+                      .WithOne(e => e.Position)
+                      .HasForeignKey(e => e.PositionId)
+                      .HasConstraintName("FK_analyzed_position")
+                      .IsRequired();
+
+                entity.HasOne(p => p.Notes)
+                      .WithOne(j => j.Position)
+                      .HasForeignKey<PositionJournalEntry>(j => j.ParentId)
+                      .HasConstraintName("FK_parent_position")
+                      .IsRequired();
+            });
         }
     }
 }

@@ -105,7 +105,9 @@ export default {
             }
         },
         importAccount() {
-            this.ctApi.importAccounts(this.selectedAccount.cTraderId, this.selectedAccount.accountNo);
+            this.ctApi.importAccounts(this.selectedAccount.cTraderId, this.selectedAccount.accountNo).then (msg => {
+                this.ctApi.displayInfo(msg + " Please refresh your accounts page to see the changes.");
+            });
         }
     },
     mounted() {

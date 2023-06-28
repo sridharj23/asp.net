@@ -66,8 +66,7 @@ export interface ExecutedOrder {
 
 export interface AnalysisEntry {
     entryId: number,
-    parentId: number,
-    parentType: string,
+    positionId: number,
     analysisScenario: string,
     analyzedAspect: string,
     executionPrice: number,

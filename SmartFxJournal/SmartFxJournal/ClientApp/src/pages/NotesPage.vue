@@ -52,7 +52,7 @@
     }
     #PositionCard {
         width: 100%;
-        height: 30%;
+        height: 20%;
     }
     #positionDetails {
         display: block;
@@ -64,7 +64,7 @@
         flex-direction: row;
         flex-grow: 1;
         width: 100%;
-        height: 69%;
+        height: 79%;
         margin-top: 10px;
     }
     #MiddleLeft {

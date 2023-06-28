@@ -65,8 +65,17 @@ namespace SmartFxJournal.JournalDB.model
 
             builder.Entity<TradingAccount>(entity =>
             {
-                entity.HasMany(a => a.Positions).WithOne(p => p.TradingAccount).HasForeignKey(p => p.AccountNo).IsRequired();
-                entity.HasMany(a => a.ExecutedOrders).WithOne(p => p.TradingAccount).HasForeignKey(p => p.AccountNo).IsRequired();
+                entity.HasMany(a => a.Positions)
+                      .WithOne(p => p.TradingAccount)
+                      .HasForeignKey(p => p.AccountNo)
+                      .HasConstraintName("FK_parent_account")
+                      .IsRequired();
+
+                entity.HasMany(a => a.ExecutedOrders)
+                      .WithOne(p => p.TradingAccount)
+                      .HasForeignKey(p => p.AccountNo)
+                      .HasConstraintName("FK_parent_account")
+                      .IsRequired();
 
                 entity.Property(e => e.AccountNo)
                 .ValueGeneratedNever();

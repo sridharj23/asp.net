@@ -8,7 +8,6 @@
     import { Analysis } from '@/helpers/AnalysisHelper';
     import { usePositionStore } from '@/stores/positionstore';
     import type { TableRow } from '@/types/CommonTypes';
-import { Common } from '@/helpers/Common';
 
     const api = new AnalysisApi();
 
@@ -22,17 +21,33 @@ import { Common } from '@/helpers/Common';
         },
         data() {
             return {
+                //Tab control properties
                 tabKeys: ["Actual", "Ideal", "WhatIf"],
+                selectedTab: "Actual",
+
+                // Table properties
                 aspects: ["Entry", "Exit", "StopLoss", "TakeProfit", "MaxProfit"],
-                selectedTab: "",
-                showDialog: false,
-                analysisTargetType: "",
-                analysisTargetId: "",
+                analyzedPositionId: "",
+                selectedEntry: {} as TableRow,
+                backupEntry: {} as TableRow,
                 analysisEntries: new Map<string, TableRow[]>(),
                 displayedEntries: [] as TableRow[],
-                createdEntries: [] as TableRow[],
                 rowDefs: Analysis.getAnalysisEntryRowDefs(),
+
+                // Dialog properties
+                showDialog: false,
                 newEntryType: ""
+            }
+        },
+        computed: {
+            hasSelectedEntry() {
+                return this.selectedEntry != undefined && Object.keys(this.selectedEntry).length > 0;
+            },
+            isEditable() {
+                return this.hasSelectedEntry && this.selectedEntry['isInEdit'] == false;
+            },
+            isEditing() {
+                return this.hasSelectedEntry && this.selectedEntry['isInEdit'] == true;
             }
         },
         methods: {
@@ -42,24 +57,33 @@ import { Common } from '@/helpers/Common';
             loadAnalysis() {
                 this.resetAnalysisEntries();
                 if (+this.store.dblClickedPositionId > 0) {
-                    this.analysisTargetType = 'Position';
-                    this.analysisTargetId = this.store.dblClickedPositionId;
-                    api.getAnalysisForPosition(this.analysisTargetId).then(entries => {
+                    this.analyzedPositionId = this.store.dblClickedPositionId;
+                    api.getAnalysisForPosition(this.analyzedPositionId).then(entries => {
                         entries.forEach(entry => {
-                            this.analysisEntries.get(entry.analysisScenario)?.push(Analysis.convertToAnalysisRecord(entry, true));
+                            this.analysisEntries.get(entry.analysisScenario)?.push(Analysis.convertToAnalysisRecord(entry));
                         });
                     });
                 } else {
-                    this.analysisTargetType = "";
-                    this.analysisTargetId = "";
+                    this.analyzedPositionId = "";
                 }
             },
             selectTab(selected: string) {
                 this.selectedTab = selected;
                 this.displayedEntries = this.analysisEntries.get(selected)?? [];
             },
-            displayDialog() {
-                this.showDialog = true;
+            setSelectedData(data : TableRow) {
+                if ( this.isEditing ) {
+                    this.cancelEditing();
+                }
+                this.selectedEntry = data;
+            },
+            editData() {
+                Object.keys(this.selectedEntry).forEach(k => this.backupEntry[k] = this.selectedEntry[k]);
+                this.selectedEntry['isInEdit'] = true;
+            },
+            cancelEditing() {
+                Object.keys(this.backupEntry).forEach(k => this.selectedEntry[k] = this.backupEntry[k]);
+                this.backupEntry = {} as TableRow;
             },
             handleDialogResult(result: string) {
                 if (result == "Add") {
@@ -81,16 +105,15 @@ import { Common } from '@/helpers/Common';
                 });
                 if (valid) {
                     let newRec = Analysis.createAnalysisEntry(scenario, entryType);
-                    newRec['parentId'] = this.analysisTargetId;
-                    newRec['parentType'] = this.analysisTargetType;
+                    newRec['positionId'] = this.analyzedPositionId;
                     this.analysisEntries.get(scenario)?.push(newRec);
-                    this.createdEntries.push(newRec);
                 };
                 return valid;
             },
-            saveEntry(data: TableRow) {
-                console.log(data);
-                //console.log(Analysis.convertToAnalysisObject(data));
+            saveEntry() {
+                console.log(this.selectedEntry);
+                this.selectedEntry['isInEdit'] = false;
+                this.backupEntry = {} as TableRow;
             }
         },
         beforeMount() {
@@ -111,24 +134,27 @@ import { Common } from '@/helpers/Common';
             <TabControl id="parentTab" @selection-changed="selectTab">
                 <template #default>
                     <Tab :title="tabKeys[0]" :is-active="selectedTab == tabKeys[0]" :key="tabKeys[0]">
-                        <DataMatrix class="analysisEntry" :row-defs="rowDefs" :col-header-key="'analyzedAspect'" :data-source="displayedEntries" :editAllowed='true' @data-save-requested="saveEntry"/>
+                        <DataMatrix class="analysisEntry" :row-defs="rowDefs" :dataKey="'analyzedAspect'" :data-source="displayedEntries" @data-selected="setSelectedData"/>
                     </Tab>
                     <Tab :title="tabKeys[1]" :is-active="selectedTab == tabKeys[1]" :key="tabKeys[1]">
-                        <DataMatrix class="analysisEntry" :row-defs="rowDefs" :col-header-key="'analyzedAspect'" :data-source="displayedEntries" :editAllowed="true"/>
+                        <DataMatrix class="analysisEntry" :row-defs="rowDefs" dataKey="analyzedAspect" :data-source="displayedEntries"/>
                     </Tab>
                     <Tab :title="tabKeys[2]" :is-active="selectedTab == tabKeys[2]" :key="tabKeys[2]">
-                        <DataMatrix class="analysisEntry" :row-defs="rowDefs" :col-header-key="'analyzedAspect'" :data-source="displayedEntries" :editAllowed="true"/>
+                        <DataMatrix class="analysisEntry" :row-defs="rowDefs" dataKey="analyzedAspect" :data-source="displayedEntries"/>
                     </Tab>
                 </template>
             </TabControl>
         </template>
         <template #footerSlot>
             <div class="flow-row">
-                <button @click="displayDialog">Add New</button>
+                <button @click="showDialog = true">Add</button>
+                <button :disabled="!isEditable" @click="editData">Edit</button>
+                <button :disabled="!isEditing" @click="saveEntry">Save</button>
+                <button :disabled="!isEditing" @click="cancelEditing">Cancel</button>
             </div>
         </template>
     </Card>
-    <ModalDialog :show-buttons="['Add', 'Cancel']" :show-dialog="showDialog" :title="'New entry type for scenario : ' + selectedTab" @button-clicked="handleDialogResult">
+    <ModalDialog :show-buttons="['Add', 'Cancel']" :show-dialog="showDialog" :title="'New ' + selectedTab + ' entry : '" @button-clicked="handleDialogResult">
         <template #dialogContent>
             <div class="inputRow">
                 <label class="labels" for="entry_type">Entry Type</label>

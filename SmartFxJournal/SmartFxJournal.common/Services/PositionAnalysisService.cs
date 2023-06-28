@@ -9,30 +9,29 @@ using System.Threading.Tasks;
 
 namespace SmartFxJournal.Common.Services
 {
-    public class AnalysisEntryService
+    public class PositionAnalysisService
     {
         private readonly IServiceScopeFactory _scopeFactory;
         private readonly long Factor = 10000;
 
-        public AnalysisEntryService(IServiceScopeFactory scopeFactory)
+        public PositionAnalysisService(IServiceScopeFactory scopeFactory)
         {
             _scopeFactory = scopeFactory;
         }
 
-        public async Task<List<AnalysisEntry>> GenerateDefaultAnalysis(long PositionId)
+        public async Task<List<PositionAnalysisEntry>> GenerateDefaultAnalysis(long PositionId)
         {
             using (var serviceScope = _scopeFactory.CreateScope())
             {
                 JournalDbContext _context = serviceScope.ServiceProvider.GetService<JournalDbContext>() ?? throw new ArgumentNullException(nameof(serviceScope));
-                var pos = await _context.ClosedPositions.Where(p => p.PositionId == PositionId).FirstAsync();
-                var entries = await _context.AnalysisEntries.Where(a => a.ParentId == PositionId && a.ParentType == GlobalEnums.ArtifactType.ClosedPosition).ToListAsync();
+                var pos = await _context.ClosedPositions.Include(p => p.AnalysisEntries).FirstAsync(p => p.PositionId == PositionId);
+                var entries = pos.AnalysisEntries.ToList();
                 if (entries.Count == 0)
                 {
                     decimal pl = Math.Abs(pos.EntryPrice - pos.ExitPrice) * Factor;
-                    AnalysisEntry EntryAnalysis = new()
+                    PositionAnalysisEntry EntryAnalysis = new()
                     {
-                        ParentId = PositionId,
-                        ParentType = GlobalEnums.ArtifactType.ClosedPosition,
+                        PositionId = PositionId,
                         AnalysisScenario = GlobalEnums.AnalysisScenario.Actual,
                         AnalyzedAspect = GlobalEnums.AnalyzedAspect.Entry,
                         ExecutionPrice = pos.EntryPrice,
@@ -41,10 +40,9 @@ namespace SmartFxJournal.Common.Services
                         UsedIndicator = "Unknown",
                         UsedSystem = "Unknown"
                     };
-                    AnalysisEntry ExitAnalysis = new()
+                    PositionAnalysisEntry ExitAnalysis = new()
                     {
-                        ParentId = PositionId,
-                        ParentType = GlobalEnums.ArtifactType.ClosedPosition,
+                        PositionId = PositionId,
                         AnalysisScenario = GlobalEnums.AnalysisScenario.Actual,
                         AnalyzedAspect = GlobalEnums.AnalyzedAspect.Exit,
                         ExecutionPrice = pos.ExitPrice,
@@ -57,8 +55,8 @@ namespace SmartFxJournal.Common.Services
                         UsedSystem = "Unknown"
                     };
 
-                    _context.AnalysisEntries.Add(EntryAnalysis);
-                    _context.AnalysisEntries.Add(ExitAnalysis);
+                    pos.AnalysisEntries.Add(EntryAnalysis);
+                    pos.AnalysisEntries.Add(ExitAnalysis);
                     _context.SaveChanges();
 
                     entries.Add(EntryAnalysis);
@@ -68,25 +66,25 @@ namespace SmartFxJournal.Common.Services
             }
         }
 
-        public async Task<List<AnalysisEntry>> GetAnalysisEntriesAsync(long PositionId)
+        public async Task<List<PositionAnalysisEntry>> GetAnalysisEntriesAsync(long PositionId)
         {
             return await GenerateDefaultAnalysis(PositionId);
         }
 
-        public bool SaveAnalysisEntries(List<AnalysisEntry> entries, bool isNew)
+        public bool SaveAnalysisEntries(List<PositionAnalysisEntry> entries, bool isNew)
         {
             using (var serviceScope = _scopeFactory.CreateScope())
             {
                 JournalDbContext _context = serviceScope.ServiceProvider.GetService<JournalDbContext>() ?? throw new ArgumentNullException(nameof(serviceScope));
+
                 if (isNew)
                 {
-                    _context.AnalysisEntries.AddRange(entries);
+                    _context.PositionAnalysisEntries.AddRange(entries);
                 }
                 else
                 {
-                    _context.AnalysisEntries.UpdateRange(entries);
+                    _context.PositionAnalysisEntries.UpdateRange(entries);
                 }
-
             }
             return true;
         }

@@ -55,7 +55,12 @@ namespace SmartFxJournal.JournalDB.model
             builder.Entity<CTraderAccount>(entity =>
             {
                 entity.HasIndex(x => x.ClientId).IsUnique();
-                entity.HasMany(x => x.TradingAccounts).WithOne(a => a.CTraderAccount).HasForeignKey(a => a.CTraderId);
+
+                entity.HasMany(x => x.TradingAccounts)
+                      .WithOne(a => a.CTraderAccount)
+                      .HasForeignKey(a => a.CTraderId)
+                      .HasConstraintName("FK_ctrader_parent");
+
                 entity.Property(x => x.LastFetchedOn).HasConversion(new DateTimeOffsetToLongConverter());
                 entity.Property(x => x.ExpiresOn).HasConversion(new DateTimeOffsetToLongConverter());
 

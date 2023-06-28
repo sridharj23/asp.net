@@ -150,7 +150,7 @@ namespace SmartFxJournal.CTrader.Services
         public async Task<string> ImportAccounts(string cTraderId, long AccountNo = default)
         {
             int p = await ProcessAccountsDelta(cTraderId, AccountNo);
-            return (p.ToString() + " accounts have been imported / updated.");
+            return (p.ToString() + " account(s) have been imported / updated.");
         }
 
         private async Task<int> ProcessAccountsDelta(string cTraderId, long AccountNo = default)

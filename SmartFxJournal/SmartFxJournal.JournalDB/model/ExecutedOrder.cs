@@ -38,7 +38,7 @@ namespace SmartFxJournal.JournalDB.model
         public long PositionId { get; set; }
 
         [JsonIgnore]
-        public ClosedPosition? Position { get; set; }
+        public ClosedPosition Position { get; set; }
 
         [Required]
         [Column(TypeName = "smallint")]

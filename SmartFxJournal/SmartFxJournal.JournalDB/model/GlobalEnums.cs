@@ -52,14 +52,12 @@ namespace SmartFxJournal.JournalDB.model
             ERROR = 6,
             MISSED = 7
         }
-
         public enum ChartPeriod
         {
             H1 = 60,
             H4 = 240,
             D1 = 1440
         }
-
         public enum ArtifactType 
         {
             CTraderAccount = 1001,
@@ -68,7 +66,6 @@ namespace SmartFxJournal.JournalDB.model
             ExecutedOrder = 1004,
             NotesEntry = 1005
         }
-
         public enum AnalyzedAspect
         {
             Entry = 101,
@@ -77,12 +74,17 @@ namespace SmartFxJournal.JournalDB.model
             TakeProfit = 104,
             MaxProfit = 105
         }
-
         public enum AnalysisScenario
         {
             Actual = 201,
             Ideal = 202,
             WhatIf = 203
+        }
+        public enum AnalysisStatus
+        {
+            Pending = 51,
+            Partial = 52,
+            Complete = 53
         }
     }
 }

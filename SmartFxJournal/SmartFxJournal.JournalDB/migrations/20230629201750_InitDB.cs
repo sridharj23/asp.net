@@ -83,7 +83,8 @@ namespace SmartFxJournal.JournalDB.Migrations
                     balance_after = table.Column<decimal>(type: "numeric(10,2)", nullable: false),
                     last_updated_at = table.Column<DateTimeOffset>(type: "timestamp with time zone", nullable: false),
                     order_opened_at = table.Column<DateTimeOffset>(type: "timestamp with time zone", nullable: false),
-                    order_closed_at = table.Column<DateTimeOffset>(type: "timestamp with time zone", nullable: false)
+                    order_closed_at = table.Column<DateTimeOffset>(type: "timestamp with time zone", nullable: false),
+                    analysis_status = table.Column<short>(type: "smallint", nullable: false)
                 },
                 constraints: table =>
                 {
@@ -105,8 +106,10 @@ namespace SmartFxJournal.JournalDB.Migrations
                     position_id = table.Column<long>(type: "bigint", nullable: false),
                     analyzed_aspect = table.Column<string>(type: "character varying(50)", nullable: false),
                     analysis_scenario = table.Column<string>(type: "character varying(50)", nullable: false),
-                    is_valid = table.Column<bool>(type: "boolean", nullable: false),
-                    invalidity_reason = table.Column<List<string>>(type: "text[]", nullable: false),
+                    valid_trade = table.Column<bool>(type: "boolean", nullable: false),
+                    reason_to_trade = table.Column<List<string>>(type: "text[]", nullable: false),
+                    bettter_avoided = table.Column<bool>(type: "boolean", nullable: false),
+                    reason_to_avoid = table.Column<List<string>>(type: "text[]", nullable: false),
                     used_system = table.Column<string>(type: "character varying(100)", nullable: false),
                     used_strategy = table.Column<List<string>>(type: "text[]", nullable: false),
                     used_indicator = table.Column<string>(type: "character varying(100)", nullable: false),

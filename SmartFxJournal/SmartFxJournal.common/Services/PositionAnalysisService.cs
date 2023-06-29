@@ -6,6 +6,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using static SmartFxJournal.JournalDB.model.GlobalEnums;
 
 namespace SmartFxJournal.Common.Services
 {
@@ -57,6 +58,7 @@ namespace SmartFxJournal.Common.Services
 
                     pos.AnalysisEntries.Add(EntryAnalysis);
                     pos.AnalysisEntries.Add(ExitAnalysis);
+                    pos.AnalysisStatus = AnalysisStatus.Partial;
                     _context.SaveChanges();
 
                     entries.Add(EntryAnalysis);

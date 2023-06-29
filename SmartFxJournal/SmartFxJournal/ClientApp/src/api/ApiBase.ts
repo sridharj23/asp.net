@@ -28,8 +28,10 @@ export abstract class RestApi {
     }
 
     public handleError(e: unknown, method : string) {
+        console.log(e);
         let store = useStatusStore();
-        store.setError("Error in " + method + " : " + e)
+        store.setError("Error executing " + method + " : " + e)
+        throw e;
     }
 
     public displayInfo(msg : string) {
@@ -39,42 +41,26 @@ export abstract class RestApi {
 
     public async index<T>(path : string) : Promise<T[]> {
         let result : T[] = new Array<T>;
-        try {
-            return await this.connection.get(path).then(response => response.data as T[]);
-        } catch (error) {
-            this.handleError(error, "INDEX");
-        }
+        await this.connection.get(path).then(response => result = response.data as T[]).catch(err => this.handleError(err, "INDEX"));
         return result;
     }
 
     public async single<T>(path: string) : Promise<T> {
-        let result : T[] = new Array<T>;
-        try {
-            return await this.connection.get(path).then(response => response.data as T);
-        } catch (error) {
-            this.handleError(error, "GET");
-        }
-        return null as T;
+        let result : T = null as T;
+        await this.connection.get(path).then(response => result = response.data as T).catch(err => this.handleError(err, "GET"));
+        return result;
     }
 
     public async post<T>(path : string, input : T) : Promise<T> {
-        try {
-            console.log(input);
-            return await this.connection.post(path, input).then(response => response.data as T);
-        } catch (error) {
-            this.handleError(error, "POST");
-        }
-        return input;
+        let result : T = input;
+        await this.connection.post(path, input).then(response => result = response.data as T).catch(err => this.handleError(err, "POST"));
+        return result;
     }
 
     public async put<T>(path : string, input : T) : Promise<T> {
-        try {
-            console.log(input);
-            return await this.connection.put(path , input).then(response => response.data as T);
-        } catch (error) {
-            this.handleError(error, "PUT");
-        }
-        return input;
+        let result : T = input;
+        await this.connection.put(path , input).then(response => result = response.data as T).catch(err => this.handleError(err, "PUT"));
+        return result;
     }
 
     public async delete<T>(path : string) : Promise<boolean> {

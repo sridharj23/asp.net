@@ -17,8 +17,8 @@ export class Common {
         cols.push({ property: "grossProfit", title: "Gross P/L", propType: "Currency" });
         cols.push({ property: "netProfit", title: "Net P/L", propType: "Currency" });
         cols.push({ property: "balanceAfter", title: "Balance", propType: "Currency" });
-        cols.push({ property: "orderOpenedAt", title: "Opened At", propType: "default" });
         cols.push({ property: "orderClosedAt", title: "Closed At", propType: "default" });
+        cols.push({ property: "analysisStatus", title: "Analysis", propType: "default" });
 
         return cols;
     }
@@ -60,6 +60,7 @@ export class Common {
             balanceAfter: pos.balanceAfter.toFixed(2),
             orderOpenedAt: new Date(pos.orderOpenedAt).toLocaleString(),
             orderClosedAt: new Date(pos.orderClosedAt).toLocaleString(),
+            analysisStatus: pos.analysisStatus
         };
         if (prepend != undefined) {
             let keys = Object.keys(prepend);

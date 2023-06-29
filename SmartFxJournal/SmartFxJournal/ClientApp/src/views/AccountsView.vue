@@ -42,10 +42,14 @@ export default {
                 this.activeAccount = ac;
                 this.selectedAccount = ac;
                 this.selectedAcNo = ac.accountNo;
-                this.store.selectedAccount = ac.accountNo;
+                this.store.$patch({
+                    selectedAccount: this.selectedAcNo,
+                    theSelectedAccount: this.selectedAccount
+                });
             }
         },
         loadAccounts() {
+            console.log("Accounts loading...");
             if (this.theAccounts.length > 0) {
                 this.theAccounts.length = 0;
                 this.selectedAccount = {} as Account;
@@ -68,8 +72,10 @@ export default {
                     this.selectedAccount = ac;
                 }
             }
-            this.store.selectedAccount = this.selectedAcNo;
-            console.log("Selected account : " + this.store.selectedAccount);
+            this.store.$patch({
+                selectedAccount: this.selectedAcNo,
+                theSelectedAccount: this.selectedAccount
+            });
         },
         enableEditing() {
             this.editMode = true;

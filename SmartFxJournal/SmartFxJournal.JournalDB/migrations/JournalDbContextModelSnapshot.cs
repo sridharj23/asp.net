@@ -137,6 +137,10 @@ namespace SmartFxJournal.JournalDB.Migrations
                         .HasColumnType("bigint")
                         .HasColumnName("account_no");
 
+                    b.Property<short>("AnalysisStatus")
+                        .HasColumnType("smallint")
+                        .HasColumnName("analysis_status");
+
                     b.Property<decimal>("BalanceAfter")
                         .HasColumnType("decimal(10,2)")
                         .HasColumnName("balance_after");
@@ -310,6 +314,10 @@ namespace SmartFxJournal.JournalDB.Migrations
                         .HasColumnType("character varying(50)")
                         .HasColumnName("analyzed_aspect");
 
+                    b.Property<bool>("BettterAvoided")
+                        .HasColumnType("boolean")
+                        .HasColumnName("bettter_avoided");
+
                     b.Property<List<string>>("ExecutionAccuracy")
                         .IsRequired()
                         .HasColumnType("text[]")
@@ -328,15 +336,6 @@ namespace SmartFxJournal.JournalDB.Migrations
                         .HasColumnType("text[]")
                         .HasColumnName("indicator_status");
 
-                    b.Property<List<string>>("InvalidityReason")
-                        .IsRequired()
-                        .HasColumnType("text[]")
-                        .HasColumnName("invalidity_reason");
-
-                    b.Property<bool>("IsValid")
-                        .HasColumnType("boolean")
-                        .HasColumnName("is_valid");
-
                     b.Property<long>("PositionId")
                         .HasColumnType("bigint")
                         .HasColumnName("position_id");
@@ -353,6 +352,16 @@ namespace SmartFxJournal.JournalDB.Migrations
                         .HasColumnType("decimal(10,2)")
                         .HasColumnName("profit_loss");
 
+                    b.Property<List<string>>("ReasonToAvoid")
+                        .IsRequired()
+                        .HasColumnType("text[]")
+                        .HasColumnName("reason_to_avoid");
+
+                    b.Property<List<string>>("ReasonToTrade")
+                        .IsRequired()
+                        .HasColumnType("text[]")
+                        .HasColumnName("reason_to_trade");
+
                     b.Property<string>("UsedIndicator")
                         .IsRequired()
                         .HasColumnType("character varying(100)")
@@ -367,6 +376,10 @@ namespace SmartFxJournal.JournalDB.Migrations
                         .IsRequired()
                         .HasColumnType("character varying(100)")
                         .HasColumnName("used_system");
+
+                    b.Property<bool>("ValidTrade")
+                        .HasColumnType("boolean")
+                        .HasColumnName("valid_trade");
 
                     b.Property<long>("Volume")
                         .HasColumnType("bigint")

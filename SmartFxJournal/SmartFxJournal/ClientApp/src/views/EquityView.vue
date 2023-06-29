@@ -30,6 +30,7 @@
                         })
                     });
                 });
+                this.chartOptions.yAxis.plotLines[0].value = this.store.theSelectedAccount.startBalance;
             }
         },
         data() {

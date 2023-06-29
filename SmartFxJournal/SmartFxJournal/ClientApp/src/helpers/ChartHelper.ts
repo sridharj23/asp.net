@@ -35,7 +35,20 @@ export class ChartHelper {
             xAxis: { type: 'datetime' },
             yAxis: {
                 title: { text: 'Euro - €' },
-                type: 'linear'
+                type: 'linear',
+                plotLines: [{
+                    color: 'purple',
+                    width: 3,
+                    value: 0,
+                    dashStyle: 'solid',
+                    label: {
+                        text: 'Start Balance',
+                        style: {
+                            color: 'purple',
+                            fontWeight: 'bold'
+                        }
+                    }
+                }]
             },
             series:[{
                 name: '€ ',

@@ -107,10 +107,10 @@ namespace SmartFxJournal.CTrader.Helpers
                 toImport.LastUpdatedAt = tr.LastUpdateTime;
                 if (tr.IsClosing)
                 {
-                    toImport.ClosedVolume = (long)tr.ClosedVolume;
+                    toImport.ClosedVolume = (long)tr.ClosedVolume / 100; // OpenApi sends volume in cents.
                 } else
                 {
-                    toImport.FilledVolume = (long)tr.FilledVolume;
+                    toImport.FilledVolume = (long)tr.FilledVolume / 100; // OpenApi sends volume in cents.
                 }
 
                 toImport.BalanceAfter = (decimal) (tr.ClosedBalance / 100);

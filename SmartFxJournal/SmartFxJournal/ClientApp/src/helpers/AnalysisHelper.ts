@@ -15,11 +15,13 @@ export class Analysis {
     static readonly STOP = "StopLoss";
     static readonly TPROFIT = "TakeProfit";
     static readonly PIP_F4 = 0.0001;
-    static readonly LOT_SIZE = 10000000;
+    static readonly LOT_SIZE = 100000;
 
     static GetPips = (from: number, to: number) => (from - to) / this.PIP_F4;
     static PipValue = (price: number, lot: number) => (this.PIP_F4 / price) * lot;
     static Percent = (value: number, base: number) => (100 * value) / base;
+
+    static TagList = new Map<string, Array<string>>();
 
     static CalculateRiskReward(data : TableRow, context : TableRow[]): TableRow {
         let aspect = data[this.ASPECT];
@@ -34,12 +36,12 @@ export class Analysis {
 
         if (entry == undefined) {
             this.status.setInfo(data['analysisScenario'] +  " Entry details are missing. Using actual values !");
-            entry = this.createAnalysisEntry('Actual', 'Entry');
+            entry = this.CreateAnalysisEntry('Actual', 'Entry');
             entry['volume'] = position['volume'];
             entry['executionPrice'] = position['entryPrice'];
         }
         let dataPrice = +data['executionPrice'];
-        let lots = +entry['volume'] * (this.LOT_SIZE/100);
+        let lots = +entry['volume'] * this.LOT_SIZE;
 
         if (dataPrice == 0 || lots == 0) {
             this.status.setError(" Execution Price & Lot Size are mandatory but missing !");
@@ -62,7 +64,7 @@ export class Analysis {
         return data;
     }
 
-    static createAnalysisEntry(scenario: string, aspect: string) : TableRow {
+    static CreateAnalysisEntry(scenario: string, aspect: string) : TableRow {
 
         return {
             isInEdit: false,
@@ -83,12 +85,14 @@ export class Analysis {
             usedSystem: "Unknown",
             usedStrategy: "Unknown",
             executionAccuracy: "",
-            isValid: true,
-            invalidityReason: "",
+            validTrade: true,
+            reasonToTrade: "",
+            betterAvoided: false,
+            reasonToAvoid: ""
         } as TableRow;
     }
 
-    static convertToAnalysisRecord(entry: AnalysisEntry) : TableRow {
+    static ConvertToAnalysisRecord(entry: AnalysisEntry) : TableRow {
         return {
             isInEdit: false,
             isNew: false,
@@ -107,19 +111,21 @@ export class Analysis {
             usedSystem: entry.usedSystem,
             usedStrategy: entry.usedStrategy.toString(),
             executionAccuracy: entry.executionAccuracy.toString(),
-            isValid: entry.isValid ,
-            invalidityReason: entry.invalidityReason.toString(),
+            validTrade: entry.validTrade,
+            reasonToTrade: entry.reasonToTrade.toString(),
+            betterAvoided: entry.betterAvoided,
+            reasonToAvoid: entry.reasonToAvoid.toString(),
         } as TableRow;
     }
 
-    static convertToAnalysisObject(data: TableRow) : AnalysisEntry {
+    static ConvertToAnalysisObject(data: TableRow) : AnalysisEntry {
         return {
             entryId: +data['entryId'],
             positionId: +data['positionId'],
             analysisScenario: data['analysisScenario'].toString(),
             analyzedAspect: data['analyzedAspect'].toString(),
             executionPrice: +data['executionPrice'],
-            executionTime: new Date(data['executionTime'].toString()).toUTCString(),
+            executionTime: new Date(data['executionTime'].toString()).toISOString(),
             volume: +data['volume'] * this.LOT_SIZE,
             profitLoss: +data['profitLoss'],
             profitInPips: +data['profitInPips'],
@@ -129,12 +135,15 @@ export class Analysis {
             usedSystem: data['usedSystem'].toString(),
             usedStrategy: data['usedStrategy'].toString().split(','),
             executionAccuracy: data['executionAccuracy'].toString().split(','),
-            isValid: data['isValid'] == 'true' ? true : false,
-            invalidityReason: data['invalidityReason'].toString().split(','),
+            validTrade: Boolean(data['validTrade']),
+            reasonToTrade: data['reasonToTrade'].toString().split(','),
+            betterAvoided: Boolean(data['betterAvoided']),
+            reasonToAvoid: data['reasonToAvoid'].toString().split(',')
         };
     }
     
-    static getAnalysisEntryRowDefs() {
+    static GetAnalysisEntryRowDefs() {
+        this.InitializeTags();
         return [
             {property: "analyzedAspect", title: "Type", dataType: "text", editable: false},
             {property: "volume", title: "Traded Volume", dataType: "text", editable: true},
@@ -143,13 +152,26 @@ export class Analysis {
             {property: "profitLoss", title: "Gross Profit", dataType: "text", editable: false},
             {property: "profitInPips", title: "PIPs Earned", dataType: "text", editable: false},
             {property: "profitInPercent", title: "Gain as %", dataType: "text", editable: false},
-            {property: "usedIndicator", title: "Indicator", dataType: "select", editable: true},
-            {property: "indicatorStatus", title: "Ind. Confirmation []", dataType: "text", editable: true},
-            {property: "usedSystem", title: "System Used", dataType: "text", editable: true},
-            {property: "usedStrategy", title: "Entry/Exit Strategy []", dataType: "text", editable: true},
-            {property: "executionAccuracy", title: "Accuracy []", dataType: "text", editable: true},
-            {property: "isValid", title: "Valid Trade?", dataType: "checkbox", editable: true},
-            {property: "invalidityReason", title: "Why Valid ? []", dataType: "multiselect", editable: true},
+            {property: "usedIndicator", title: "Indicator", dataType: "select", editable: true, inputHelp: this.TagList.get('usedIndicator')},
+            {property: "indicatorStatus", title: "Ind. Confirmation []", dataType: "select", editable: true, inputHelp: this.TagList.get('indicatorStatus')},
+            {property: "usedSystem", title: "System Used", dataType: "select", editable: true, inputHelp: this.TagList.get('usedSystem')},
+            {property: "usedStrategy", title: "Entry/Exit Strategy []", dataType: "select", editable: true, inputHelp: this.TagList.get('entryExitStrategy')},
+            {property: "executionAccuracy", title: "Accuracy []", dataType: "select", editable: true, inputHelp: this.TagList.get('accuracy')},
+            {property: "validTrade", title: "Valid Trade?", dataType: "checkbox", editable: true},
+            {property: "reasonToTrade", title: "Reasons to Trade []", dataType: "multiselect", editable: true, inputHelp: this.TagList.get('reasons')},
+            {property: "betterAvoided", title: "Better Avoided?", dataType: "checkbox", editable: true},
+            {property: "reasonToAvoid", title: "Reasons to Avoid []", dataType: "multiselect", editable: true, inputHelp: this.TagList.get('reasons')},
          ] as RowDef[];
+    }
+
+    static InitializeTags() {
+        if (this.TagList.size > 0) return;
+
+        this.TagList.set('usedIndicator', new Array("MFI_MA", "PriceAction"));
+        this.TagList.set('indicatorStatus', new Array("FullConfirmation", "SoftConfirmation", "ContraIndicating", "DivergenceFor", "DivergenceAgainst"));
+        this.TagList.set('usedSystem', new Array("TrendRSIMomentum", "V-Strategy", "CounterPullBack", "None"));
+        this.TagList.set('entryExitStrategy', new Array("PreviousBarHighLow", "PreviousSwingHighLow", "Impulsive", "DontRemember"));
+        this.TagList.set('accuracy', new Array("Impulsive", "Wrong", "TryingOut", "TooEarly", "TooLate", "BeforeBarClose", "OnBarClose"));
+        this.TagList.set('reasons', new Array("AgainstIndicator", "DontRemember", "NotOnBarClose"));
     }
 }

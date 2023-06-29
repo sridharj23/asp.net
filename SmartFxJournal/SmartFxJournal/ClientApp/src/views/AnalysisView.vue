@@ -32,7 +32,7 @@
                 backupEntry: {} as TableRow,
                 analysisEntries: new Map<string, TableRow[]>(),
                 displayedEntries: [] as TableRow[],
-                rowDefs: Analysis.getAnalysisEntryRowDefs(),
+                rowDefs: Analysis.GetAnalysisEntryRowDefs(),
 
                 // Dialog properties
                 showDialog: false,
@@ -60,7 +60,7 @@
                     this.analyzedPositionId = this.store.dblClickedPositionId;
                     api.getAnalysisForPosition(this.analyzedPositionId).then(entries => {
                         entries.forEach(entry => {
-                            this.analysisEntries.get(entry.analysisScenario)?.push(Analysis.convertToAnalysisRecord(entry));
+                            this.analysisEntries.get(entry.analysisScenario)?.push(Analysis.ConvertToAnalysisRecord(entry));
                         });
                     });
                 } else {
@@ -114,17 +114,18 @@
                     }
                 });
                 if (valid) {
-                    let newRec = Analysis.createAnalysisEntry(scenario, entryType);
+                    let newRec = Analysis.CreateAnalysisEntry(scenario, entryType);
                     newRec['positionId'] = this.analyzedPositionId;
                     this.analysisEntries.get(scenario)?.push(newRec);
                 };
                 return valid;
             },
             saveEntry() {
-                let obj = Analysis.convertToAnalysisObject(this.selectedEntry);
+                let obj = Analysis.ConvertToAnalysisObject(this.selectedEntry);
                 if (this.selectedEntry['isNew'] == true) {
                     api.post<AnalysisEntry>(api.resource, obj).then(e =>{
                         this.selectedEntry['entryId'] = e.entryId.toString();
+                        this.selectedEntry['isNew'] = false;
                     });
                 } else {
                     api.put<AnalysisEntry>(api.resource + "/" + obj.entryId.toString(), obj);

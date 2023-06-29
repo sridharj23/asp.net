@@ -14,7 +14,7 @@ namespace SmartFxJournal.JournalDB.model
     [Table("traded_positions")]
     public class ClosedPosition
     {
-        protected readonly decimal _lotSize = 10000000;
+        protected readonly decimal _lotSize = 100000;
 
         [Key]
         [Column(TypeName = "bigint")]
@@ -95,6 +95,11 @@ namespace SmartFxJournal.JournalDB.model
         public List<PositionAnalysisEntry> AnalysisEntries { get; set; } = new List<PositionAnalysisEntry>();
 
         public PositionJournalEntry? Notes { get; set; }
+
+        [Required]
+        [Column(TypeName = "smallint")]
+        [JsonConverter(typeof(JsonStringEnumConverter))]
+        public AnalysisStatus AnalysisStatus { get; set; } = AnalysisStatus.Pending;
 
         internal static void OnModelCreate(ModelBuilder builder)
         {

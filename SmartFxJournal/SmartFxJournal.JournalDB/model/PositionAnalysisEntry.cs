@@ -21,9 +21,8 @@ namespace SmartFxJournal.JournalDB.model
         [DatabaseGenerated(DatabaseGeneratedOption.None)]
         public long PositionId { get; set; }
 
-        [Required]
         [JsonIgnore]
-        public ClosedPosition Position { get; set; } = null!;
+        public ClosedPosition? Position { get; set; }
 
         [Required]
         [Column(TypeName = "character varying(50)")]
@@ -35,9 +34,13 @@ namespace SmartFxJournal.JournalDB.model
         [JsonConverter(typeof(JsonStringEnumConverter))]
         public AnalysisScenario AnalysisScenario { get; set; }
 
-        public bool IsValid { get; set; } = true;
+        public bool ValidTrade { get; set; } = true;
 
-        public List<string> InvalidityReason { get; set; } = new List<string>();
+        public List<string> ReasonToTrade { get; set; } = new List<string>();
+
+        public bool BettterAvoided { get; set; } = false;
+
+        public List<string> ReasonToAvoid { get; set; } = new List<string>();
 
         [Required]
         [Column(TypeName = "character varying(100)")]

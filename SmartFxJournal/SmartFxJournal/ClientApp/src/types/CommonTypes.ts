@@ -44,7 +44,8 @@ export interface Position {
     balanceAfter: number,
     orderOpenedAt: string,
     orderClosedAt: string,
-    executedOrders: ExecutedOrder[]
+    executedOrders: ExecutedOrder[],
+    analysisStatus: string
 }
 
 export interface ExecutedOrder {
@@ -80,8 +81,10 @@ export interface AnalysisEntry {
     usedSystem: string,
     usedStrategy: string[],
     executionAccuracy: string[],
-    isValid: boolean,
-    invalidityReason: string[],
+    validTrade: boolean,
+    reasonToTrade: string[],
+    betterAvoided: boolean,
+    reasonToAvoid: string[]
 }
 
 export interface ReconcileEntry {
@@ -105,7 +108,6 @@ export interface SummaryAggregate {
     plFromShorts : number,
     plFromLongs : number
 }
-
 
 // UI specific types
 
@@ -131,5 +133,6 @@ export interface RowDef {
     property : string,
     title : string,
     dataType : string,
-    editable: boolean
+    editable: boolean,
+    inputHelp: Array<string> | undefined
 }

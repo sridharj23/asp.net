@@ -4,14 +4,18 @@
     import {type ExecutedOrder, type ColumDef } from '@/types/CommonTypes';
     import { usePositionStore } from '@/stores/positionstore';
     import DataTable from '@/components/DataTable.vue';
+    import Card from '@/components/Card.vue';
     
     const api = new PostionsAPI()
-    const cols : ColumDef[] = [{property: "type", title: "Type", propType: "default"}];
+    const cols : ColumDef[] = [
+        {property: "type", title: "Type", propType: "default"}
+    ];
     export default {
         setup() {
             const store = usePositionStore();
             return {store};
         },
+        components: {DataTable, Card},
         emits: ['detailEntrySelected'],
         data() {
             return {
@@ -70,19 +74,33 @@
                     }
                 })
             }
-        },
-        components: {DataTable}
+        }
     }
 </script>
 
 <template>
-    <div>
-        <DataTable class="dataTable" :columns="columns" :dataSource="positions" :rowIdProperty="'positionId'" @rowSelected="handleRowSelect"/>
-    </div>
+    <Card id="positionDetailCard">
+        <template #default>
+            <div id="tableContainer">
+                <DataTable class="dataTable" :columns="columns" :dataSource="positions" :rowIdProperty="'positionId'" @rowSelected="handleRowSelect"/>
+            </div>
+        </template>
+        <template #footerSlot>
+            <div id="buttonRow" class="flow-row">
+                <button>Mark Analysis Complete</button>
+            </div>
+        </template>
+    </Card>
 </template>
 
 <style scoped>
+    #positionDetailCard{
+        height: 100%;
+    }
     .dataTable {
         max-height: 40vh;
+    }
+    #tableContainer {
+        flex-grow: 1;
     }
 </style>

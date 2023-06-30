@@ -1,6 +1,6 @@
 import type { ColumDef, RowDef, Position, ExecutedOrder } from "@/types/CommonTypes";
 export class Common {
-    static getPositionColumns(prepend? : ColumDef[]) : ColumDef[] {
+    static getPositionColumns(prepend? : ColumDef[], exclude?: Array<string>) : ColumDef[] {
         let cols : ColumDef[] = [];
         if (prepend != undefined) {
             prepend.forEach(col => cols.push(col));
@@ -17,8 +17,17 @@ export class Common {
         cols.push({ property: "grossProfit", title: "Gross P/L", propType: "Currency" });
         cols.push({ property: "netProfit", title: "Net P/L", propType: "Currency" });
         cols.push({ property: "balanceAfter", title: "Balance", propType: "Currency" });
+        cols.push({ property: "orderOpenedAt", title: "Opened At", propType: "default" });
         cols.push({ property: "orderClosedAt", title: "Closed At", propType: "default" });
-        cols.push({ property: "analysisStatus", title: "Analysis", propType: "default" });
+        cols.push({ property: "analysisStatus", title: "Analysis", propType: "trafficlight", options: ["Pending", "Partial", "Complete"] });
+
+        if (exclude != undefined) {
+            for (let i = cols.length - 1; i >= 0; i--) {
+                if (exclude.includes(cols[i].property)) {
+                    cols.splice(i, 1);
+                }
+            }
+        }
 
         return cols;
     }

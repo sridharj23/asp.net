@@ -26,11 +26,9 @@
 
 <template>
     <div id="AnalysisPage">
-        <Card id="PositionCard">
-            <template #default>
-                <PositionDetailView id="positionDetails" @detail-entry-selected="handleEntrySelected"/>
-            </template>
-        </Card>
+        <div id="PositionCard">
+            <PositionDetailView id="positionDetails" @detail-entry-selected="handleEntrySelected"/>
+        </div>
 
         <div id="MiddleContainer">
             <Card id="MiddleLeft">

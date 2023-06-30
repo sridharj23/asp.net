@@ -127,6 +127,7 @@ export interface ColumDef {
     property : string;
     title : string;
     propType: string;
+    options?: Array<string> | undefined;
 }
 
 export interface RowDef {

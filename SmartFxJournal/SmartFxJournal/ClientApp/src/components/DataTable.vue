@@ -1,7 +1,9 @@
 <script lang="ts">
 import { type ColumDef } from '@/types/CommonTypes';
+import TrafficLight from './TrafficLight.vue';
 
 export default {
+        components: {TrafficLight},
         emits: ['rowSelected', 'rowDoubleClicked'],
         props : {
             columns: {type: Array<ColumDef>, required: true},
@@ -78,8 +80,13 @@ export default {
                     @click="setSelected(rec)" @dblclick="doubleClicked(rec)">
                     <td v-if="multiSelect" :class="'tableDataCell'">
                         <input type="checkbox" :disabled="rec['isSelected'] == 'disabled'" v-model="rec['isSelected']" true-value="true" false-value="false"/>
-                    </td> 
-                    <td :class="getFormat(col, rec)" v-for="col in columns">{{ rec[col.property] }}</td>
+                    </td>
+                    <template v-for="col in columns">
+                        <td v-if="col.propType == 'trafficlight'" class="tableDataCell">
+                            <TrafficLight :currenValue="rec[col.propType]" :lightValues="col.options??[]"/>
+                        </td>
+                        <td v-else :class="getFormat(col, rec)">{{ rec[col.property] }}</td>
+                    </template>
                 </tr>
             </tbody>
         </table>

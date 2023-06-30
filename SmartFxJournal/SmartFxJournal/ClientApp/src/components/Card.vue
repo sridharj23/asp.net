@@ -15,7 +15,7 @@
 </script>
 
 <template>
-  <div class="container card">
+  <div id="cardBase" class="container card">
     <header v-show="hasHeader">
       <slot name="headerSlot"/>
     </header>
@@ -29,6 +29,9 @@
 </template>
 
 <style>
+  header {
+    max-height: 50px;
+  }
   main {
     margin: 4px;
     flex-grow: 1;
@@ -37,5 +40,6 @@
     border-top: 2px solid #ccc;
     color: #666;
     font-size: 0.8em;
+    max-height: 50px
   }
 </style>

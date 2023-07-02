@@ -67,7 +67,7 @@ export default {
 </script>
 
 <template>
-    <div class="tableContainer">
+    <div id="dataTableWrapper" class="tableContainer">
         <table class="dataTable" id="theTable">
             <thead>
                 <tr class="tableHeaderRow">
@@ -82,8 +82,8 @@ export default {
                         <input type="checkbox" :disabled="rec['isSelected'] == 'disabled'" v-model="rec['isSelected']" true-value="true" false-value="false"/>
                     </td>
                     <template v-for="col in columns">
-                        <td v-if="col.propType == 'trafficlight'" class="tableDataCell">
-                            <TrafficLight :currenValue="rec[col.propType]" :lightValues="col.options??[]"/>
+                        <td v-if="col.propType == 'trafficlight' && rec[col.property] != undefined" class="tableDataCell contentCell">
+                            <TrafficLight :currenValue="rec[col.property]" :lightValues="col.options??[]"/>
                         </td>
                         <td v-else :class="getFormat(col, rec)">{{ rec[col.property] }}</td>
                     </template>
@@ -92,3 +92,10 @@ export default {
         </table>
     </div>
 </template>
+
+<style scoped>
+    #dataTableWrapper {
+        height: 100%;
+        flex-grow: 1;
+    }
+</style>

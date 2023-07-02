@@ -55,7 +55,4 @@
     #positionsTable {
         flex-grow: 1;
     }
-    .dataTable {
-        max-height: 88vh;
-    }
 </style>

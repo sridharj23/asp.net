@@ -29,8 +29,18 @@
             this.store.$subscribe(this.loadPosition);
             this.loadPosition();
         },
+        computed: {
+            isAnalysisComplete() {
+                if (this.positions.length > 0) {
+                    return this.positions[0]['analysisStatus'] == "Complete";
+                }
+                return true;
+            }
+        },
         methods: {
             loadPosition() {
+                this.positions = [];
+                
                 let pos = this.store.dblClickedPositionId;
                 if (pos != "0") {
                     api.get(this.store.dblClickedPositionId).then(pos => {
@@ -73,6 +83,13 @@
                         this.$emit('detailEntrySelected', entry);
                     }
                 })
+            },
+            markAnalysisComplete() {
+                api.get(this.store.dblClickedPositionId).then(pos => {
+                    pos.analysisStatus = "Complete";
+                    pos.executedOrders = [];
+                    api.update(pos).then(p => this.loadPosition());
+                });
             }
         }
     }
@@ -81,13 +98,13 @@
 <template>
     <Card id="positionDetailCard">
         <template #default>
-            <div id="tableContainer">
+            <div id="tableWrapper">
                 <DataTable class="dataTable" :columns="columns" :dataSource="positions" :rowIdProperty="'positionId'" @rowSelected="handleRowSelect"/>
             </div>
         </template>
         <template #footerSlot>
             <div id="buttonRow" class="flow-row">
-                <button>Mark Analysis Complete</button>
+                <button @click="markAnalysisComplete" :disabled="isAnalysisComplete">Mark Analysis Complete</button>
             </div>
         </template>
     </Card>
@@ -100,7 +117,8 @@
     .dataTable {
         max-height: 40vh;
     }
-    #tableContainer {
+    #tableWrapper {
         flex-grow: 1;
+        height: 100%;
     }
 </style>

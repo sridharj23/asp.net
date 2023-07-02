@@ -12,6 +12,8 @@ namespace SmartFxJournal.Common.Model
 
         public long AccountNumber { get; private set; }
 
+        public string EquityName { get; set; } = "Actual";
+
         public List<EquityDataPoint> DataPoints { get; private set; } = new ();
     }
 

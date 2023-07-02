@@ -1,10 +1,12 @@
 .tableContainer {
     display: block;
     overflow-y: scroll;
+    flex-grow: 1;
 }
 .dataTable {
     width: 100%;
     border-collapse: collapse;
+    max-height: 88vh;
 }
 
 .tableHeaderCell {
@@ -43,6 +45,11 @@
     user-select: none;
 }
 
+.contentCell {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
 .minWidthCell {
     min-width: 150px;
 }

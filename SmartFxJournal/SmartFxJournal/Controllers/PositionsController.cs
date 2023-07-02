@@ -29,5 +29,11 @@ namespace SmartFxJournal.Controllers
             return await _service.GetPositionAsync(id);
         }
 
+        [HttpPut("{id}")]
+        public async Task<ActionResult<ClosedPosition>> SavePositionAsync(long id, ClosedPosition position)
+        {
+            return await _service.SavePosition(position);
+        }
+
     }
 }

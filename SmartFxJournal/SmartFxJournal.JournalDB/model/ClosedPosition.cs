@@ -29,9 +29,8 @@ namespace SmartFxJournal.JournalDB.model
         [Required]
         public long AccountNo { get; set; }
 
-        [Required]
         [JsonIgnore]
-        public TradingAccount TradingAccount { get; set; } = null!;
+        public TradingAccount? TradingAccount { get; set; } = null!;
 
         public List<ExecutedOrder> ExecutedOrders { get; set; } = new List<ExecutedOrder>();
 

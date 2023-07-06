@@ -105,6 +105,10 @@
                 this.newEntryType = "";
             },
             createEntry(entryType : string, scenario: string) : boolean {
+                if (! entryType) {
+                    alert("Please select a valid entry type.");
+                    return false;
+                }
                 let entries = this.analysisEntries.get(scenario);
                 let valid = true;
                 entries?.forEach((val) => {
@@ -177,7 +181,7 @@
     </Card>
     <ModalDialog :show-buttons="['Add', 'Cancel']" :show-dialog="showDialog" :title="'New ' + selectedTab + ' entry : '" @button-clicked="handleDialogResult">
         <template #dialogContent>
-            <div class="inputRow">
+            <div id="dialogInput" class="inputRow">
                 <label class="labels" for="entry_type">Entry Type</label>
                 <select class="inputControls" id="entry_type" v-model="newEntryType" >
                     <option v-for="aspect in aspects" :value="aspect">{{ aspect }}</option>
@@ -197,5 +201,8 @@
     .analysisEntry {
         display: block;
         height: 100%;
+    }
+    #dialogInput {
+        margin: 20px;
     }
 </style>

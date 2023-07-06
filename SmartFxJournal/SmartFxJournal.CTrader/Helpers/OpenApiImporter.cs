@@ -88,37 +88,67 @@ namespace SmartFxJournal.CTrader.Helpers
                 ExecutedOrder? toImport = parent.ExecutedOrders.Find(a => a.OrderId == tr.OrderId);
                 if (toImport == null)
                 {
-                    toImport = new()
-                    {
-                        DealId = tr.Id,
-                        OrderId = tr.OrderId,
-                        PositionId = -1 * parent.AccountNo, // orders are added to reconcile position first
-                        AccountNo = parent.AccountNo,
-                        Symbol = (Symbol) tr.SymbolId,
-                        ExecutionPrice = (decimal)tr.ExecutionPrice,
-                        Direction = EnumUtil.ToEnum<TradeDirection>(tr.Direction),
-                        OrderExecutedAt = tr.ExecutionTime,
-                    };
+                    toImport = CopyOrder(tr, parent.AccountNo);
+                    parent.ExecutedOrders.Add(toImport);
+                } else
+                {
+                    toImport = CopyOrder(tr, parent.AccountNo, false, toImport);
+                }
+
+                if (tr.ClosedVolume > 0 && tr.FilledVolume > tr.ClosedVolume)
+                {
+                    toImport = CopyOrder(tr, parent.AccountNo, true);
                     parent.ExecutedOrders.Add(toImport);
                 }
-                toImport.Commission = (decimal)(tr.Commission / 100);
-                toImport.DealStatus = EnumUtil.ToEnum<DealStatus>(tr.Status);
-                toImport.Swap = (decimal)(tr.Swap / 100);
-                toImport.LastUpdatedAt = tr.LastUpdateTime;
+            }
+
+            return parent;
+        }
+
+        private static ExecutedOrder CopyOrder(HistoricalTrade tr, long accountNo, bool isReversal = false, ExecutedOrder? toImport = default)
+        {
+            if (toImport == default)
+            {
+                toImport = new()
+                {
+                    DealId = isReversal ? tr.PositionId : tr.Id, // In case of reversal cTrader Orders, the order Id is the same. 
+                    OrderId = isReversal ? tr.PositionId : tr.OrderId,
+                    PositionId = -1 * accountNo, // orders are added to reconcile position first
+                    AccountNo = accountNo,
+                    Symbol = (Symbol)tr.SymbolId,
+                    ExecutionPrice = (decimal)tr.ExecutionPrice,
+                    Direction = EnumUtil.ToEnum<TradeDirection>(tr.Direction),
+                    OrderExecutedAt = tr.ExecutionTime,
+                };
+            }
+
+            toImport.Commission = (decimal)(tr.Commission / 100);
+            toImport.DealStatus = EnumUtil.ToEnum<DealStatus>(tr.Status);
+            toImport.Swap = (decimal)(tr.Swap / 100);
+            toImport.LastUpdatedAt = tr.LastUpdateTime;
+
+            if (isReversal)
+            {
+                toImport.FilledVolume = (long)(tr.FilledVolume - tr.ClosedVolume) / 100;
+                toImport.BalanceAfter = 0;
+                toImport.GrossProfit = 0;
+                toImport.IsClosing = false;
+            } else
+            {
                 if (tr.IsClosing)
                 {
                     toImport.ClosedVolume = (long)tr.ClosedVolume / 100; // OpenApi sends volume in cents.
-                } else
+                }
+                else
                 {
                     toImport.FilledVolume = (long)tr.FilledVolume / 100; // OpenApi sends volume in cents.
                 }
 
-                toImport.BalanceAfter = (decimal) (tr.ClosedBalance / 100);
+                toImport.BalanceAfter = (decimal)(tr.ClosedBalance / 100);
                 toImport.GrossProfit = (decimal)(tr.GrossProfit / 100);
                 toImport.IsClosing = tr.IsClosing;
             }
-
-            return parent;
+            return toImport;
         }
     }
 }

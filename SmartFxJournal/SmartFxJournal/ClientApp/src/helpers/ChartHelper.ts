@@ -88,7 +88,26 @@ export class ChartHelper {
                     formatter: function() {
                         return this.value.toFixed(5);
                     }
-                }
+                },
+                plotLines: [{
+                    id: "takeprofit",
+                    value: 0,
+                    color: 'green',
+                    dashStyle: 'shortdash',
+                    width: 2,
+                    label: {
+                        text: 'Take profit'
+                    }
+                }, {
+                    id: "stoploss",
+                    value: 1.08780,
+                    color: 'red',
+                    dashStyle: 'shortdash',
+                    width: 2,
+                    label: {
+                        text: 'Stop Loss'
+                    }
+                }]
             },
             series:[{
                 type: 'candlestick',
@@ -96,7 +115,15 @@ export class ChartHelper {
                 data: [] as any[]
             },{
                 type: 'line',
-                name: 'trade',
+                name: 'Actual',
+                marker: {symbol: 'cross'},
+                data: []
+            },{
+                type: 'line',
+                name: 'Ideal',
+                color: 'green',
+                lineWidth: 4,
+                dashStyle : 'shortdash',
                 marker: {symbol: 'cross'},
                 data: []
             }], 

@@ -92,9 +92,6 @@ namespace SmartFxJournal.Common.Services
                 DateOnly cur = DateOnly.MinValue;
                 long datePoint = DateOnlyToMs(at);
 
-                // Add account start balance first
-                //curve.DataPoints.Add(new(lastBal, datePoint));
-
                 foreach (ClosedPosition tra in trades)
                 {
                     if (tra.PositionId < 0)

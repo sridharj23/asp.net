@@ -136,6 +136,9 @@
                 }
                 this.selectedEntry['isInEdit'] = false;
                 this.backupEntry = {} as TableRow;
+                this.store.$patch({
+                    lastUpdated: Date.now
+                });
             }
         },
         beforeMount() {

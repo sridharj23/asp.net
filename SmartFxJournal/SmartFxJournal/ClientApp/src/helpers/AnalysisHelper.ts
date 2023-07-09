@@ -127,7 +127,7 @@ export class Analysis {
             analyzedAspect: data['analyzedAspect'].toString(),
             executionPrice: +data['executionPrice'],
             executionTime: new Date(data['executionTime'].toString()).toISOString(),
-            volume: +data['volume'] * this.LOT_SIZE,
+            volume: Math.trunc(+data['volume'] * this.LOT_SIZE),
             profitLoss: +data['profitLoss'],
             profitInPips: +data['profitInPips'],
             profitInPercent: +data['profitInPercent'],

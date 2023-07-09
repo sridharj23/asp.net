@@ -7,7 +7,10 @@ export class SummaryAPI extends RestApi {
     }
 
     public async getSummary(accountNo : string) : Promise<SummaryAggregate[]> {
-        let res = super.single('Summary/' + accountNo +'/aggregates');
-        return super.single('Summary/' + accountNo +'/aggregates');;
+        return super.single('Summary/' + accountNo +'/overview');
+    }
+
+    public async getAggregates(accountNo : string) : Promise<Map<string,Array<string[]>>> {
+        return super.single('Summary/' + accountNo +'/aggregates');
     }
 }

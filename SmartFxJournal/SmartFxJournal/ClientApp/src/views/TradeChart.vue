@@ -20,6 +20,7 @@
         props: ['positionId'],
         methods: {
             loadChartForPosition() {
+                console.log("Chart loading...");
                 this.chartOptions.yAxis.plotLines[0].value = 0; // takeprofit
                 this.chartOptions.yAxis.plotLines[1].value = 0; // stoploss
                 this.chartOptions.series[2].data = []; // ideal exit

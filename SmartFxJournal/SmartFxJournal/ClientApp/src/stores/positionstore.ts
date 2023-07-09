@@ -4,6 +4,7 @@ export const usePositionStore = defineStore('selectedposition', {
     state: () => ({ 
         lastSelectedPositionId: "0",
         dblClickedPositionId: "0",
-        dblClickedPosition: {} as Record<string, string>
+        dblClickedPosition: {} as Record<string, string>,
+        lastUpdated: Date.now
     })  
   })

@@ -1,14 +1,15 @@
 <script setup>
     import SettingsPage from '@/pages/SettingsPage.vue'
     import Card from '@/components/Card.vue';
-    import AggregateSummaryView from '@/views/AggregateSummaryView.vue';
+    import SummaryOverview from '@/views/SummaryOverview.vue';
+    import AggregatesView from '@/views/AggregatesView.vue';
     import EquityView from '@/views/EquityView.vue'
 </script>
 <template>
     <div id="SummaryPage">
         <div id="SummaryTop">
             <Card id="TopLeft">
-                <AggregateSummaryView id="SummaryView"/>
+                <SummaryOverview id="SummaryView"/>
             </Card>
             <Card id="TopRight">
                 <template #default>
@@ -20,8 +21,7 @@
         <div id="MiddleContainer">
             <Card id="MiddleLeft">
                 <template #default>
-                    <p>A paragraph for the main content.</p>
-                    <p>And another one.</p>
+                    <AggregatesView/>
                 </template>
             </Card>
             <Card id="MiddleRight">

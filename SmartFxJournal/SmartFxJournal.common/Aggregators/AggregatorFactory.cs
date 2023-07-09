@@ -8,11 +8,29 @@ namespace SmartFxJournal.Common.Aggregators
 {
     internal class AggregatorFactory
     {
-        public static List<IAggregator> Aggregators { get; } = new List<IAggregator>();
+        private static Dictionary<string, Func<IAggregator>> aggregators = new();
+        public static Dictionary<string, IAggregator> GetAllAggregators ()
+        {
+            Dictionary<string, IAggregator> agg = new();
+            aggregators.Keys.ToList().ForEach(k => agg.Add(k, aggregators[k]() ));
+            return agg;
+        }
+
+        public static List<IAggregator> GetAggregators(string analysisType)
+        {
+            return new List<IAggregator> ()
+            {
+                aggregators[analysisType]()
+            };
+        }
 
         static AggregatorFactory()
         {
+            aggregators.Add("Totals", TotalsAggregator.Create);
+            aggregators.Add("Averages", AveragesAggregator.Create);
+            aggregators.Add("Totals (Significant)", TotalsAggregator.Create2);
+            aggregators.Add("Averages (Significant)", AveragesAggregator.Create2);
 
-        } 
+        }
     }
 }

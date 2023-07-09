@@ -1,5 +1,6 @@
-﻿using SmartFxJournal.JournalDB.model;
-using System;
+﻿using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
+using SmartFxJournal.JournalDB.model;
+using System.Globalization;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -11,6 +12,6 @@ namespace SmartFxJournal.Common.Aggregators
     {
         public void Aggregate(ClosedPosition position);
 
-        public List<AggregateItem> AggregateItems { get; }
+        public List<string[]> GetAggregateItems(); 
     }
 }

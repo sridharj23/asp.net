@@ -3,6 +3,8 @@ using SmartFxJournal.Common.Model;
 using SmartFxJournal.JournalDB.model;
 using Microsoft.EntityFrameworkCore;
 using System.Globalization;
+using System.Collections;
+using SmartFxJournal.Common.Aggregators;
 
 namespace SmartFxJournal.Common.Services
 {
@@ -113,6 +115,29 @@ namespace SmartFxJournal.Common.Services
                 curve.DataPoints.Add(new(lastBal, datePoint));
             }
             return curve;
+        }
+
+        public async Task<Dictionary<string, List<string[]>>> GetAccountAnalysis(long AccountNo, string? analysisType)
+        {
+            Dictionary<string, List<string[]>> result = new();
+
+            using (var serviceScope = _scopeFactory.CreateScope())
+            {
+                JournalDbContext _context = serviceScope.ServiceProvider.GetService<JournalDbContext>() ?? throw new ArgumentNullException(nameof(serviceScope));
+
+                TradingAccount acc = await _context.TradingAccounts.Include(a => a.Positions).FirstAsync(a => a.AccountNo == AccountNo);
+                List<ClosedPosition> trades = acc.Positions.OrderBy(o => o.OrderClosedAt).ToList();
+
+                Dictionary<string, IAggregator> aggregators = AggregatorFactory.GetAllAggregators();
+
+                foreach (var tra in trades)
+                {
+                    aggregators.Keys.ToList().ForEach(k => aggregators[k].Aggregate(tra));
+                }
+
+                aggregators.Keys.ToList().ForEach(k => result.Add(k, aggregators[k].GetAggregateItems()) );
+            }
+            return result;
         }
 
         private long DateOnlyToMs(DateOnly date)

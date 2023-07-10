@@ -54,7 +54,8 @@
 <style>
     #aggregateContainer {
         display: grid;
-        grid-template-columns: 50px 200px 50px 200px;
+        grid-auto-flow: column;
+        grid-auto-columns: 1fr;
     }
     #dataTable {
         width: auto;

@@ -67,11 +67,11 @@
                 };
 
                 if (order.isClosing) {
-                    rec['volume'] = (order.closedVolume/10000000).toFixed(2);
+                    rec['volume'] = (order.closedVolume/100000).toFixed(2);
                     rec['exitPrice'] = order.executionPrice.toFixed(5);
                     rec['orderClosedAt'] = new Date(order.orderExecutedAt).toLocaleString();
                 } else {
-                    rec['volume'] = (order.filledVolume/10000000).toFixed(2);
+                    rec['volume'] = (order.filledVolume/100000).toFixed(2);
                     rec['entryPrice'] = order.executionPrice.toFixed(5);
                     rec['orderOpenedAt'] = new Date(order.orderExecutedAt).toLocaleString();
                 }

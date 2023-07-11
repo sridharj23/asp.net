@@ -56,14 +56,21 @@
         display: grid;
         grid-auto-flow: column;
         grid-auto-columns: 1fr;
+        grid-template-rows: auto auto auto auto;        
+        max-width: 100%;
+        max-height: 100%;
     }
     #dataTable {
         width: auto;
         border-collapse: collapse;
+        margin: 3px;
+        box-shadow: 1px 1px 2px 1px silver;
     }
     .title {
         color: dodgerblue;
         font-weight: bold;
         padding: 0.5em;
+        margin: 3px;
+        border-bottom: 5px solid dodgerblue;
     }
 </style>

@@ -19,7 +19,6 @@
                 this.api.getAggregates(this.store.selectedAccount).then(res => {
                     this.aggregates = res;
                     this.titles = Object.keys(res);
-                    console.log(this.aggregates);
                 });
 
             }

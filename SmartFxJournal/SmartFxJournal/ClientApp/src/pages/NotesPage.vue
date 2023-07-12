@@ -13,7 +13,8 @@
         },
         data() {
             return {
-                selectedEntry : "" as string
+                selectedEntry : "" as string,
+                isFullScreen : false
             }
         },
         methods: {

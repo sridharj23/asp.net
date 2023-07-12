@@ -49,7 +49,6 @@ export default {
             }
         },
         loadAccounts() {
-            console.log("Accounts loading...");
             if (this.theAccounts.length > 0) {
                 this.theAccounts.length = 0;
                 this.selectedAccount = {} as Account;

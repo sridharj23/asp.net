@@ -21,6 +21,11 @@ const router = createRouter({
           component: () => import('@/pages/NotesPage.vue')
         },
         {
+          path: '/chart',
+          name: 'tradeChart',
+          component: () => import('@/pages/ChartPage.vue')
+        },
+        {
           path: '/reconcile',
           name: 'orderReconcile',
           component: () => import('@/pages/OrderReconcilePage.vue')

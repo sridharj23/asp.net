@@ -12,6 +12,7 @@
           <RouterLink to="/">Summary</RouterLink>
           <RouterLink to="/history">History</RouterLink>
           <RouterLink to="/notes">Notes</RouterLink>
+          <RouterLink to="/chart">Chart</RouterLink>
           <RouterLink to="/reconcile">Reconcile</RouterLink>
         </nav>
       </div>

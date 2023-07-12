@@ -26,10 +26,10 @@ namespace SmartFxJournal.Common.Aggregators
 
         static AggregatorFactory()
         {
-            aggregators.Add("Totals", TotalsAggregator.Create);
-            aggregators.Add("Averages", AveragesAggregator.Create);
-            aggregators.Add("Totals (Significant)", TotalsAggregator.Create2);
-            aggregators.Add("Averages (Significant)", AveragesAggregator.Create2);
+            aggregators.Add("Totals (All Trades)", TotalsAggregator.Create);
+            aggregators.Add("Averages (All Trades)", AveragesAggregator.Create);
+            aggregators.Add("Totals (Significant Trades)", TotalsAggregator.Create2);
+            aggregators.Add("Averages (Significant Trades)", AveragesAggregator.Create2);
 
         }
     }

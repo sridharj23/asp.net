@@ -226,12 +226,16 @@ namespace SmartFxJournal.CTrader.Services
                 snapshot.PositionClosedAt = position.OrderClosedAt.ToUnixTimeMilliseconds();
                 snapshot.PositionClosePrice = position.ExitPrice;
 
-                DateTimeOffset openedAt = position.OrderOpenedAt.Subtract(TimeSpan.FromDays(1));
-                DateTimeOffset closedAt = position.OrderClosedAt.AddDays(5);
+                DateTimeOffset openedAt = DateTimeOffset.Now;
+                DateTimeOffset closedAt = DateTimeOffset.Now;
+                TimeSpan diff = closedAt - position.OrderClosedAt;
 
-                if (closedAt > DateTimeOffset.Now)
+                if (diff.Days > 3) {
+                    closedAt = position.OrderClosedAt.AddDays(3);
+                    openedAt = position.OrderOpenedAt.Subtract(TimeSpan.FromDays(2));
+                } else
                 {
-                    closedAt = DateTimeOffset.Now;
+                    openedAt = position.OrderOpenedAt.Subtract(TimeSpan.FromDays(5 - diff.Days));
                 }
 
                 TradingAccount acc = position.TradingAccount;

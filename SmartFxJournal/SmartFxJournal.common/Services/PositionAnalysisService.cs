@@ -1,5 +1,6 @@
 ﻿using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
+using SmartFxJournal.Common.Helpers;
 using SmartFxJournal.JournalDB.model;
 using System;
 using System.Collections.Generic;
@@ -13,11 +14,17 @@ namespace SmartFxJournal.Common.Services
     public class PositionAnalysisService
     {
         private readonly IServiceScopeFactory _scopeFactory;
-        private readonly long Factor = 10000;
+
+        private static readonly AnalyzedAspect[] ToGenerate = { AnalyzedAspect.Entry, AnalyzedAspect.Exit, AnalyzedAspect.StopLoss, AnalyzedAspect.TakeProfit };
 
         public PositionAnalysisService(IServiceScopeFactory scopeFactory)
         {
             _scopeFactory = scopeFactory;
+        }
+
+        private bool isActualAspect(PositionAnalysisEntry p, AnalyzedAspect aspect)
+        {
+            return (p.AnalysisScenario == AnalysisScenario.Actual && p.AnalyzedAspect == aspect);
         }
 
         public async Task<List<PositionAnalysisEntry>> GenerateDefaultAnalysis(long PositionId)
@@ -27,44 +34,28 @@ namespace SmartFxJournal.Common.Services
                 JournalDbContext _context = serviceScope.ServiceProvider.GetService<JournalDbContext>() ?? throw new ArgumentNullException(nameof(serviceScope));
                 var pos = await _context.ClosedPositions.Include(p => p.AnalysisEntries).FirstAsync(p => p.PositionId == PositionId);
                 var entries = pos.AnalysisEntries.ToList();
-                if (entries.Count == 0)
+
+                AnalysisEntryGenerator generator = new AnalysisEntryGenerator();
+
+                foreach(AnalyzedAspect aspect in  ToGenerate)
                 {
-                    decimal pl = Math.Abs(pos.EntryPrice - pos.ExitPrice) * Factor;
-                    PositionAnalysisEntry EntryAnalysis = new()
+                    if(entries.FirstOrDefault(e => isActualAspect(e, aspect)) == null)
                     {
-                        PositionId = PositionId,
-                        AnalysisScenario = GlobalEnums.AnalysisScenario.Actual,
-                        AnalyzedAspect = GlobalEnums.AnalyzedAspect.Entry,
-                        ExecutionPrice = pos.EntryPrice,
-                        ExecutionTime = pos.OrderOpenedAt,
-                        Volume = pos.Volume,
-                        UsedIndicator = "Unknown",
-                        UsedSystem = "Unknown"
-                    };
-                    PositionAnalysisEntry ExitAnalysis = new()
-                    {
-                        PositionId = PositionId,
-                        AnalysisScenario = GlobalEnums.AnalysisScenario.Actual,
-                        AnalyzedAspect = GlobalEnums.AnalyzedAspect.Exit,
-                        ExecutionPrice = pos.ExitPrice,
-                        ExecutionTime = pos.OrderClosedAt,
-                        Volume = pos.Volume,
-                        ProfitLoss = pos.GrossProfit,
-                        ProfitInPips = pos.GrossProfit > 0 ? pl : -1 * pl,
-                        ProfitInPercent = (pos.GrossProfit / (pos.BalanceAfter - pos.GrossProfit)) * 100,
-                        UsedIndicator = "Unknown",
-                        UsedSystem = "Unknown"
-                    };
-
-                    pos.AnalysisEntries.Add(EntryAnalysis);
-                    pos.AnalysisEntries.Add(ExitAnalysis);
-                    pos.AnalysisStatus = AnalysisStatus.Partial;
-                    _context.SaveChanges();
-
-                    entries.Add(EntryAnalysis);
-                    entries.Add(ExitAnalysis);
+                        pos.AnalysisEntries.Add(generator.CreateEntry(pos, aspect));
+                    }
                 }
-                return entries;
+
+                if (pos.AnalysisStatus == AnalysisStatus.Pending)
+                {
+                    pos.AnalysisStatus = AnalysisStatus.Partial;
+                }
+
+                if (_context.ChangeTracker.HasChanges())
+                {
+                    _context.SaveChanges();
+                }
+
+                return pos.AnalysisEntries.ToList();
             }
         }
 

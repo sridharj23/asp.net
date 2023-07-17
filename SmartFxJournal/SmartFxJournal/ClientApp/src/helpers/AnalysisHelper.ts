@@ -170,7 +170,7 @@ export class Analysis {
 
         this.TagList.set('usedIndicator', new Array("MFI_MA", "PriceAction"));
         this.TagList.set('indicatorStatus', new Array("FullConfirmation", "SoftConfirmation", "ContraIndicating", "DivergenceFor", "DivergenceAgainst"));
-        this.TagList.set('usedSystem', new Array("TrendRSIMomentum", "V-Strategy", "CounterPullBack", "SupportResistenceReversal", "None"));
+        this.TagList.set('usedSystem', new Array("TrendRSIMomentum", "V-Strategy", "CounterPullBack", "SupportResistenceReversal", "None", "OnePercent", "TwoPercent"));
         this.TagList.set('entryExitStrategy', new Array("IndicatorReversed", "PreviousBarHighLow", "PreviousSwingHighLow", "Impulsive", "DontRemember"));
         this.TagList.set('accuracy', new Array("Impulsive", "Wrong", "Good", "TryingOut", "TooEarly", "TooLate", "BeforeBarClose", "OnBarClose"));
         this.TagList.set('reasons', new Array("AgainstIndicator", "DontRemember", "NotOnBarClose"));

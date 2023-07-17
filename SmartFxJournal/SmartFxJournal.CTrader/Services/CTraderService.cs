@@ -193,9 +193,9 @@ namespace SmartFxJournal.CTrader.Services
                         dbContext.SaveChanges();
 
                         DateTimeOffset to = DateTimeOffset.Now;
-                        TradingAccount parent = dbContext.TradingAccounts.Include(a => a.ExecutedOrders).First(a => a.AccountNo == account.AccountNo);
+                        TradingAccount parent = dbContext.TradingAccounts.First(a => a.AccountNo == account.AccountNo);
                         var history = await ctx.OpenApiService.GetHistoricalTrades((long)act.CtidTraderAccountId, act.IsLive, parent.LastImportedOn, to);
-                        await OpenApiImporter.ImportHistoryAsync(history, ctx.OpenApiService, parent);
+                        await OpenApiImporter.ImportHistoryAsync(history, ctx.OpenApiService, parent, dbContext);
 
                         parent.LastImportedOn = to;
                         

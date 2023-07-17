@@ -79,13 +79,13 @@ namespace SmartFxJournal.CTrader.Helpers
             return toReconcile;
         }
 
-        internal static async Task<TradingAccount> ImportHistoryAsync(HistoricalTrade[] history, OpenApiService openApiService, TradingAccount parent)
+        internal static async Task<TradingAccount> ImportHistoryAsync(HistoricalTrade[] history, OpenApiService openApiService, TradingAccount parent, JournalDbContext dbContext)
         {
             var symbols = await openApiService.GetLightSymbols((long)parent.CTraderAccountId, parent.IsLive);
 
             foreach (HistoricalTrade tr in history)
             {
-                ExecutedOrder? toImport = parent.ExecutedOrders.Find(a => a.OrderId == tr.OrderId);
+                ExecutedOrder? toImport = dbContext.ExecutedOrders.Where(o => o.OrderId == tr.OrderId).FirstOrDefault();
                 if (toImport == null)
                 {
                     toImport = CopyOrder(tr, parent.AccountNo);

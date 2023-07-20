@@ -6,7 +6,7 @@ using SmartFxJournal.JournalDB.model;
 
 var builder = WebApplication.CreateBuilder(args);
 
-builder.Services.AddDbContext<JournalDbContext>(options => options.UseNpgsql(builder.Configuration.GetConnectionString("JournalDB")).UseSnakeCaseNamingConvention());
+builder.Services.AddDbContext<JournalDbContext>(options => options.UseNpgsql(builder.Configuration.GetConnectionString("JournalDB")).UseSnakeCaseNamingConvention().EnableSensitiveDataLogging(true));
 // Add services to the container.
 builder.Services.AddSingleton<CTraderService, CTraderService>();
 builder.Services.AddScoped<AccountPositionsService>();

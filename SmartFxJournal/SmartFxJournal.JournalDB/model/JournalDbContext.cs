@@ -6,7 +6,7 @@ namespace SmartFxJournal.JournalDB.model
     {
         public JournalDbContext(DbContextOptions options) : base(options)
         {
-
+            
         }
 
         public DbSet<CTraderAccount> CTraderAccounts { get; set; }

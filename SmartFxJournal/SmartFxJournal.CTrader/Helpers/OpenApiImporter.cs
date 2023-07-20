@@ -111,8 +111,8 @@ namespace SmartFxJournal.CTrader.Helpers
             {
                 toImport = new()
                 {
-                    DealId = isReversal ? tr.PositionId : tr.Id, // In case of reversal cTrader Orders, the order Id is the same. 
-                    OrderId = isReversal ? tr.PositionId : tr.OrderId,
+                    DealId = isReversal ? tr.OrderId : tr.Id, // In case of reversal cTrader Orders, the order Id is the same. 
+                    OrderId = isReversal ? tr.Id : tr.OrderId,
                     PositionId = -1 * accountNo, // orders are added to reconcile position first
                     AccountNo = accountNo,
                     Symbol = (Symbol)tr.SymbolId,

@@ -1,15 +1,13 @@
 <script lang="ts">
     import HistoryView from '@/views/HistoryView.vue';
     import Card from '@/components/Card.vue';
-    import TabControl from '@/components/TabControl.vue';
-    import Tab from '@/components/Tab.vue';
+    import JournalView from '@/views/JournalView.vue';
 
     export default {
         components: {
             HistoryView,
             Card,
-            TabControl,
-            Tab
+            JournalView
         },
         data() {
             return {
@@ -29,14 +27,9 @@
         <Card id="positionsView">
             <HistoryView @positionSelected="handlePositionSelection"/>
         </Card>
-        <Card id="tradesNotes">
-            <TabControl>
-                <template #default>
-                    <Tab :title="'First'"/>
-                    <Tab :title="'Second'"/>
-                </template>
-            </TabControl>
-        </Card>
+        <div id="tradesNotes">
+            <JournalView id="jView"/>
+        </div>
     </div>
 </template>
 
@@ -58,5 +51,8 @@
         margin-left: 5px;
         flex-grow: 1;
     }
-
+    #jView {
+        width: 100%;
+        height: 100%;
+    }
 </style>

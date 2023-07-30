@@ -109,6 +109,13 @@ export interface SummaryAggregate {
     plFromLongs : number
 }
 
+export interface JournalEntry {
+    journalId: string,
+    parentId : string,
+    isComplete: boolean,
+    journalText: string
+}
+
 // UI specific types
 
 export type TableRow = Record<string, string | boolean>;

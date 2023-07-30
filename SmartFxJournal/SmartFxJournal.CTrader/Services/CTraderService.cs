@@ -160,7 +160,7 @@ namespace SmartFxJournal.CTrader.Services
                 throw new Exception("CTrader ID : " + cTraderId + " is not yet onboarded !. Cannot import information.");
             }
 
-            LoginContext ctx = _loginContexts[cTraderId];
+            LoginContext ctx = await GetLoginContext(cTraderId);
             CTraderAccount ctAccount = ctx.CTraderAccount;
             OpenApiService apiService = await ctx.ConnectAsync();
 
@@ -194,8 +194,8 @@ namespace SmartFxJournal.CTrader.Services
 
                         DateTimeOffset to = DateTimeOffset.Now;
                         TradingAccount parent = dbContext.TradingAccounts.First(a => a.AccountNo == account.AccountNo);
-                        var history = await ctx.OpenApiService.GetHistoricalTrades((long)act.CtidTraderAccountId, act.IsLive, parent.LastImportedOn, to);
-                        await OpenApiImporter.ImportHistoryAsync(history, ctx.OpenApiService, parent, dbContext);
+                        var history = await apiService.GetHistoricalTrades((long)act.CtidTraderAccountId, act.IsLive, parent.LastImportedOn, to);
+                        await OpenApiImporter.ImportHistoryAsync(history, apiService, parent, dbContext);
 
                         parent.LastImportedOn = to;
                         
@@ -266,22 +266,29 @@ namespace SmartFxJournal.CTrader.Services
             return snapshot;
         }
 
-        private async Task<OpenApiService> GetOpenApi(TradingAccount account)
+        private async Task<LoginContext> GetLoginContext(string CTaderId)
         {
-            string ctraderId = account.CTraderId ?? "";
-            LoginContext ctx = _loginContexts[ctraderId];
+            LoginContext ctx = _loginContexts[CTaderId];
 
             if (ctx == null)
             {
-                throw new Exception("CTrader account is not found for " + ctraderId);
+                throw new Exception("CTrader account is not found for " + CTaderId);
             }
 
             if (DateTimeOffset.Now > ctx.CTraderAccount.ExpiresOn)
             {
-                CTraderAccount acc = await RefreshToken(ctraderId);
+                CTraderAccount acc = await RefreshToken(CTaderId);
                 ctx = new LoginContext(acc);
-                _loginContexts[ctraderId] = ctx;
+                _loginContexts[CTaderId] = ctx;
             }
+            await ctx.ConnectAsync();
+            return ctx;
+        }
+
+        private async Task<OpenApiService> GetOpenApi(TradingAccount account)
+        {
+            string ctraderId = account.CTraderId ?? "";
+            LoginContext ctx = await GetLoginContext(ctraderId);
 
             await ctx.AuthorizeAccount(Convert.ToInt64(account.CTraderAccountId), account.IsLive); 
 
@@ -363,6 +370,10 @@ namespace SmartFxJournal.CTrader.Services
             if (! this.isConnected)
             {
                 ApiCredentials creds = new();
+                if (DateTimeOffset.Now > forAccount.ExpiresOn)
+                {
+                    
+                }
                 creds.ClientId = forAccount.ClientId;
                 creds.Secret = forAccount.ClientSecret;
                 OpenApiService = new OpenApiService(LiveClientFactory, DemoClientFactory);

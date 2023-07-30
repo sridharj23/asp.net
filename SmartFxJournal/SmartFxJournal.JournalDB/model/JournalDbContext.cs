@@ -14,6 +14,7 @@ namespace SmartFxJournal.JournalDB.model
         public DbSet<ClosedPosition> ClosedPositions { get; set; }
         public DbSet<ExecutedOrder> ExecutedOrders { get; set; }
         public DbSet<PositionAnalysisEntry> PositionAnalysisEntries { get; set; }
+        public DbSet<PositionJournalEntry> PositionJournalEntries { get; set; }
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {

@@ -13,7 +13,7 @@ namespace SmartFxJournal.JournalDB.model
     public class PositionJournalEntry : JournalEntry
     {
         [JsonIgnore]
-        public ClosedPosition Position { get; set; } = null!;
+        public ClosedPosition? Position { get; set; } = null!;
 
         internal static void OnModelCreate(ModelBuilder builder)
         {
